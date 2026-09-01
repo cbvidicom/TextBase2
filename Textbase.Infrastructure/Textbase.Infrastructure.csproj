@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Uwn.EntityFrameworkCore" Version="10.26.9.109" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Textbase.Domain\Textbase.Domain.csproj" />
+	</ItemGroup>
+
+</Project>

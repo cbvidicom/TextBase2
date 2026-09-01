@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Textbase.Application\Textbase.Application.csproj" />
+	</ItemGroup>
+
+</Project>

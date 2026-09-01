@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Documents/">
+    <File Path="Documents/README.md" />
+    <File Path="Documents/TODO.md" />
+  </Folder>
+  <Folder Name="/SQL/">
+    <File Path="SQL/CREATE [textbase2].sql" />
+  </Folder>
+  <Project Path="Textbase.Application/Textbase.Application.csproj" />
+  <Project Path="Textbase.Contracts/Textbase.Contracts.csproj" />
+  <Project Path="Textbase.Domain/Textbase.Domain.csproj" />
+  <Project Path="Textbase.Host/Textbase.Host.csproj" />
+  <Project Path="Textbase.Infrastructure/Textbase.Infrastructure.csproj" />
+  <Project Path="Textbase.Integration/Textbase.Integration.csproj" />
+</Solution>
