@@ -1,13 +1,13 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
-using Microsoft.AspNetCore.Mvc;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplicationLocales;
 using Textbase.Host.Api.Common.Extensions;
-using Uwn.Common.Querying;
-using Uwn.EntityFrameworkCore.Infrastructure;
 using CM = Textbase.Contracts.Models;
 using DM = Textbase.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Uwn.Common.Querying;
+using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Controllers;
 
@@ -23,7 +23,7 @@ public sealed partial class ClientApplicationLocalesController(
 	public async Task<ActionResult<CM.ClientApplicationLocaleDto>> Create(
 		[FromBody] CM.ClientApplicationLocaleDto dto,
 		CancellationToken cancellationToken)
-	{
+	{	
 		CreateResult<DM.ClientApplicationLocale> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.ClientApplicationLocale, CM.ClientApplicationLocaleDto>(
@@ -79,14 +79,14 @@ public sealed partial class ClientApplicationLocalesController(
 	[HttpDelete("{clientApplicationGuid:Guid}/{localeKey}")]
 	public async Task<IActionResult> Delete(
 		Guid clientApplicationGuid, string localeKey,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken)	
 	{
 		DeleteResult result = await Commands.DeleteAsync(clientApplicationGuid, localeKey, cancellationToken);
 
 		return result.ToActionResult(Ok);
 	}
 
-
+	
 	[HttpGet("ByClientApplicationGuid/{key:Guid}")]
 	public async Task<ActionResult<CM.ClientApplicationLocaleDto>> ReadByClientApplicationGuid(
 		Guid key,
@@ -96,5 +96,5 @@ public sealed partial class ClientApplicationLocalesController(
 
 		return result is null ? NotFound() : Ok(result);
 	}
-
+	
 }

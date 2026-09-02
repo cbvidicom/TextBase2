@@ -1,4 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
+using Textbase.Infrastructure.Persistence.AuthPrincipals;
+using Textbase.Infrastructure.Persistence.AuthPrincipalClientApplications;
+using Textbase.Infrastructure.Persistence.AuthPrincipalLocales;
 using Textbase.Infrastructure.Persistence.ClientApplications;
 using Textbase.Infrastructure.Persistence.ClientApplicationLocales;
 using Textbase.Infrastructure.Persistence.ClientApplicationTextResources;
@@ -15,6 +18,9 @@ namespace Textbase.Infrastructure.Abstractions.Persistence;
 
 public partial interface ITextbaseDbContext
 {
+	DbSet<AuthPrincipalEntity> AuthPrincipals { get; }
+	DbSet<AuthPrincipalClientApplicationEntity> AuthPrincipalClientApplications { get; }
+	DbSet<AuthPrincipalLocaleEntity> AuthPrincipalLocales { get; }
 	DbSet<ClientApplicationEntity> ClientApplications { get; }
 	DbSet<ClientApplicationLocaleEntity> ClientApplicationLocales { get; }
 	DbSet<ClientApplicationTextResourceEntity> ClientApplicationTextResources { get; }

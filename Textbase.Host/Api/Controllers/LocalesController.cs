@@ -1,13 +1,13 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
-using Microsoft.AspNetCore.Mvc;
 using Textbase.Application.Common;
 using Textbase.Application.Features.Locales;
 using Textbase.Host.Api.Common.Extensions;
-using Uwn.Common.Querying;
-using Uwn.EntityFrameworkCore.Infrastructure;
 using CM = Textbase.Contracts.Models;
 using DM = Textbase.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Uwn.Common.Querying;
+using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Controllers;
 
@@ -23,7 +23,7 @@ public sealed partial class LocalesController(
 	public async Task<ActionResult<CM.LocaleDto>> Create(
 		[FromBody] CM.LocaleDto dto,
 		CancellationToken cancellationToken)
-	{
+	{	
 		CreateResult<DM.Locale> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.Locale, CM.LocaleDto>(
@@ -79,12 +79,12 @@ public sealed partial class LocalesController(
 	[HttpDelete("{localeKey}")]
 	public async Task<IActionResult> Delete(
 		string localeKey,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken)	
 	{
 		DeleteResult result = await Commands.DeleteAsync(localeKey, cancellationToken);
 
 		return result.ToActionResult(Ok);
 	}
 
-
+	
 }

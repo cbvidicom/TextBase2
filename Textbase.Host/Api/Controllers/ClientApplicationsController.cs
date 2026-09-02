@@ -1,13 +1,13 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
-using Microsoft.AspNetCore.Mvc;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Host.Api.Common.Extensions;
-using Uwn.Common.Querying;
-using Uwn.EntityFrameworkCore.Infrastructure;
 using CM = Textbase.Contracts.Models;
 using DM = Textbase.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Uwn.Common.Querying;
+using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Controllers;
 
@@ -23,7 +23,7 @@ public sealed partial class ClientApplicationsController(
 	public async Task<ActionResult<CM.ClientApplicationDto>> Create(
 		[FromBody] CM.ClientApplicationDto dto,
 		CancellationToken cancellationToken)
-	{
+	{	
 		CreateResult<DM.ClientApplication> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.ClientApplication, CM.ClientApplicationDto>(
@@ -79,12 +79,12 @@ public sealed partial class ClientApplicationsController(
 	[HttpDelete("{clientApplicationGuid:Guid}")]
 	public async Task<IActionResult> Delete(
 		Guid clientApplicationGuid,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken)	
 	{
 		DeleteResult result = await Commands.DeleteAsync(clientApplicationGuid, cancellationToken);
 
 		return result.ToActionResult(Ok);
 	}
 
-
+	
 }

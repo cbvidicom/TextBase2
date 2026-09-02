@@ -1,6 +1,9 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
 using Textbase.Infrastructure.Abstractions.Persistence;
+using Textbase.Infrastructure.Persistence.AuthPrincipals;
+using Textbase.Infrastructure.Persistence.AuthPrincipalClientApplications;
+using Textbase.Infrastructure.Persistence.AuthPrincipalLocales;
 using Textbase.Infrastructure.Persistence.ClientApplications;
 using Textbase.Infrastructure.Persistence.ClientApplicationLocales;
 using Textbase.Infrastructure.Persistence.ClientApplicationTextResources;
@@ -19,6 +22,9 @@ public sealed partial class TextbaseDbContext(
 	: DbContext(options)
 	, ITextbaseDbContext
 {
+	public DbSet<AuthPrincipalEntity> AuthPrincipals => Set<AuthPrincipalEntity>();
+	public DbSet<AuthPrincipalClientApplicationEntity> AuthPrincipalClientApplications => Set<AuthPrincipalClientApplicationEntity>();
+	public DbSet<AuthPrincipalLocaleEntity> AuthPrincipalLocales => Set<AuthPrincipalLocaleEntity>();
 	public DbSet<ClientApplicationEntity> ClientApplications => Set<ClientApplicationEntity>();
 	public DbSet<ClientApplicationLocaleEntity> ClientApplicationLocales => Set<ClientApplicationLocaleEntity>();
 	public DbSet<ClientApplicationTextResourceEntity> ClientApplicationTextResources => Set<ClientApplicationTextResourceEntity>();
@@ -33,6 +39,9 @@ public sealed partial class TextbaseDbContext(
 	{
 		base.OnModelCreating(modelBuilder);
 		
+		new AuthPrincipalEntityConfiguration().Configure(modelBuilder.Entity<AuthPrincipalEntity>());
+		new AuthPrincipalClientApplicationEntityConfiguration().Configure(modelBuilder.Entity<AuthPrincipalClientApplicationEntity>());
+		new AuthPrincipalLocaleEntityConfiguration().Configure(modelBuilder.Entity<AuthPrincipalLocaleEntity>());
 		new ClientApplicationEntityConfiguration().Configure(modelBuilder.Entity<ClientApplicationEntity>());
 		new ClientApplicationLocaleEntityConfiguration().Configure(modelBuilder.Entity<ClientApplicationLocaleEntity>());
 		new ClientApplicationTextResourceEntityConfiguration().Configure(modelBuilder.Entity<ClientApplicationTextResourceEntity>());

@@ -33,6 +33,10 @@ IF NOT EXISTS (SELECT 1 FROM sys.schemas AS S WHERE S.[name] = N'flat')
 	EXECUTE(N'CREATE SCHEMA [flat]')
 GO
 
+IF NOT EXISTS (SELECT 1 FROM sys.schemas AS S WHERE S.[name] = N'auth')
+	EXECUTE(N'CREATE SCHEMA [auth]')
+GO
+
 IF NOT EXISTS (SELECT 1 FROM sys.schemas AS S WHERE S.[name] = N'log')
 	EXECUTE(N'CREATE SCHEMA [log]')
 GO
@@ -173,6 +177,50 @@ BEGIN
 
 		CONSTRAINT PK_flat_Translation PRIMARY KEY (LocaleKey, TextKey, FormalityKey, PresentationKey)
 	)
+
+	CREATE INDEX IX_flat_Translation_TextKey ON flat.Translation (TextKey, LocaleKey)
+END
+
+IF OBJECT_ID(N'auth.Principal', N'U') IS NULL
+BEGIN
+	CREATE TABLE auth.Principal
+	(
+		EntraObjectId uniqueidentifier NOT NULL,
+		[Role] int NOT NULL,
+		DisplayName nvarchar(128) NULL,
+		EmailAddress nvarchar(256) NULL,
+		IsActive bit NOT NULL,
+
+		CONSTRAINT PK_auth_Principal PRIMARY KEY (EntraObjectId)
+	)
+END
+
+IF OBJECT_ID(N'auth.PrincipalClientApplication', N'U') IS NULL
+BEGIN
+	CREATE TABLE auth.PrincipalClientApplication
+	(
+		EntraObjectId uniqueidentifier NOT NULL,
+		ClientApplicationGuid uniqueidentifier NOT NULL,
+
+		CONSTRAINT PK_auth_PrincipalClientApplication PRIMARY KEY (EntraObjectId, ClientApplicationGuid)
+	)
+
+	CREATE INDEX IX_auth_PrincipalClientApplication_EntraObjectId ON auth.PrincipalClientApplication (EntraObjectId)
+	CREATE INDEX IX_auth_PrincipalClientApplication_ClientApplicationGuid ON auth.PrincipalClientApplication (ClientApplicationGuid)
+END
+
+IF OBJECT_ID(N'auth.PrincipalLocale', N'U') IS NULL
+BEGIN
+	CREATE TABLE auth.PrincipalLocale
+	(
+		EntraObjectId uniqueidentifier NOT NULL,
+		LocaleKey varchar(85) NOT NULL,
+
+		CONSTRAINT PK_auth_PrincipalLocale PRIMARY KEY (EntraObjectId, LocaleKey)
+	)
+
+	CREATE INDEX IX_auth_PrincipalLocale_EntraObjectId ON auth.PrincipalLocale (EntraObjectId)
+	CREATE INDEX IX_auth_PrincipalLocale_LocaleKey ON auth.PrincipalLocale (LocaleKey)
 END
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -209,6 +257,19 @@ IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys AS FK WHERE FK.[name] = 'FK_Transl
 	ALTER TABLE dbo.Translation ADD CONSTRAINT FK_Translation_Presentation FOREIGN KEY (PresentationKey) REFERENCES dbo.Presentation (PresentationKey)
 GO
 
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE [name] = 'FK_auth_PrincipalClientApplication_Principal')
+	ALTER TABLE auth.PrincipalClientApplication ADD CONSTRAINT FK_auth_PrincipalClientApplication_Principal FOREIGN KEY (EntraObjectId) REFERENCES auth.Principal (EntraObjectId)
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE [name] = 'FK_auth_PrincipalClientApplication_ClientApplication')
+	ALTER TABLE auth.PrincipalClientApplication ADD CONSTRAINT FK_auth_PrincipalClientApplication_ClientApplication FOREIGN KEY (ClientApplicationGuid) REFERENCES dbo.ClientApplication (ClientApplicationGuid)
+GO
+
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE [name] = 'FK_auth_PrincipalLocale_Principal')
+	ALTER TABLE auth.PrincipalLocale ADD CONSTRAINT FK_auth_PrincipalLocale_Principal FOREIGN KEY (EntraObjectId) REFERENCES auth.Principal (EntraObjectId)
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE [name] = 'FK_auth_PrincipalLocale_Locale')
+	ALTER TABLE auth.PrincipalLocale ADD CONSTRAINT FK_auth_PrincipalLocale_Locale FOREIGN KEY (LocaleKey) REFERENCES dbo.Locale (LocaleKey)
+GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- PROCEDURES
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -229,7 +290,7 @@ BEGIN
 		PresentationKey varchar(16) NOT NULL,
 		[Value] nvarchar(max) NOT NULL,
 
-		CONSTRAINT PK_TempTranslation PRIMARY KEY (LocaleKey, TextKey, FormalityKey, PresentationKey)
+		PRIMARY KEY (LocaleKey, TextKey, FormalityKey, PresentationKey)
 	);
 
 	;WITH RequiredText AS

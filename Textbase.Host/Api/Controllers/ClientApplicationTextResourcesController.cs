@@ -1,13 +1,13 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
-using Microsoft.AspNetCore.Mvc;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplicationTextResources;
 using Textbase.Host.Api.Common.Extensions;
-using Uwn.Common.Querying;
-using Uwn.EntityFrameworkCore.Infrastructure;
 using CM = Textbase.Contracts.Models;
 using DM = Textbase.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Uwn.Common.Querying;
+using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Controllers;
 
@@ -23,7 +23,7 @@ public sealed partial class ClientApplicationTextResourcesController(
 	public async Task<ActionResult<CM.ClientApplicationTextResourceDto>> Create(
 		[FromBody] CM.ClientApplicationTextResourceDto dto,
 		CancellationToken cancellationToken)
-	{
+	{	
 		CreateResult<DM.ClientApplicationTextResource> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.ClientApplicationTextResource, CM.ClientApplicationTextResourceDto>(
@@ -79,12 +79,12 @@ public sealed partial class ClientApplicationTextResourcesController(
 	[HttpDelete("{clientApplicationGuid:Guid}/{textKey}")]
 	public async Task<IActionResult> Delete(
 		Guid clientApplicationGuid, string textKey,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken)	
 	{
 		DeleteResult result = await Commands.DeleteAsync(clientApplicationGuid, textKey, cancellationToken);
 
 		return result.ToActionResult(Ok);
 	}
 
-
+	
 }

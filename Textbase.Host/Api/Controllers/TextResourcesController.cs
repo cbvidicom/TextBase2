@@ -1,13 +1,13 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
-using Microsoft.AspNetCore.Mvc;
 using Textbase.Application.Common;
 using Textbase.Application.Features.TextResources;
 using Textbase.Host.Api.Common.Extensions;
-using Uwn.Common.Querying;
-using Uwn.EntityFrameworkCore.Infrastructure;
 using CM = Textbase.Contracts.Models;
 using DM = Textbase.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Uwn.Common.Querying;
+using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Controllers;
 
@@ -23,7 +23,7 @@ public sealed partial class TextResourcesController(
 	public async Task<ActionResult<CM.TextResourceDto>> Create(
 		[FromBody] CM.TextResourceDto dto,
 		CancellationToken cancellationToken)
-	{
+	{	
 		CreateResult<DM.TextResource> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.TextResource, CM.TextResourceDto>(
@@ -79,12 +79,12 @@ public sealed partial class TextResourcesController(
 	[HttpDelete("{textKey}")]
 	public async Task<IActionResult> Delete(
 		string textKey,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken)	
 	{
 		DeleteResult result = await Commands.DeleteAsync(textKey, cancellationToken);
 
 		return result.ToActionResult(Ok);
 	}
 
-
+	
 }

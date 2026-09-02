@@ -2,6 +2,9 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Textbase.Application.Features;
+using Textbase.Application.Features.AuthPrincipals;
+using Textbase.Application.Features.AuthPrincipalClientApplications;
+using Textbase.Application.Features.AuthPrincipalLocales;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Application.Features.ClientApplicationLocales;
 using Textbase.Application.Features.ClientApplicationTextResources;
@@ -21,6 +24,9 @@ public static class ServiceCollectionExtensions
 		bool includeServerCommands = false)
 	{
 		
+		services.AddScoped<IAuthPrincipalQueries, AuthPrincipalQueries>();
+		services.AddScoped<IAuthPrincipalClientApplicationQueries, AuthPrincipalClientApplicationQueries>();
+		services.AddScoped<IAuthPrincipalLocaleQueries, AuthPrincipalLocaleQueries>();
 		services.AddScoped<IClientApplicationQueries, ClientApplicationQueries>();
 		services.AddScoped<IClientApplicationLocaleQueries, ClientApplicationLocaleQueries>();
 		services.AddScoped<IClientApplicationTextResourceQueries, ClientApplicationTextResourceQueries>();
@@ -31,6 +37,9 @@ public static class ServiceCollectionExtensions
 		services.AddScoped<ITranslationQueries, TranslationQueries>();
 		services.AddScoped<IFlatTranslationQueries, FlatTranslationQueries>();
 		
+		services.AddScoped<IAuthPrincipalCommands, AuthPrincipalCommands>();
+		services.AddScoped<IAuthPrincipalClientApplicationCommands, AuthPrincipalClientApplicationCommands>();
+		services.AddScoped<IAuthPrincipalLocaleCommands, AuthPrincipalLocaleCommands>();
 		services.AddScoped<IClientApplicationCommands, ClientApplicationCommands>();
 		services.AddScoped<IClientApplicationLocaleCommands, ClientApplicationLocaleCommands>();
 		services.AddScoped<IClientApplicationTextResourceCommands, ClientApplicationTextResourceCommands>();
@@ -54,6 +63,9 @@ public static class ServiceCollectionExtensions
 		this IServiceCollection services)
 	{
 		
+		services.AddScoped<IAuthPrincipalServerCommands, AuthPrincipalCommands>();
+		services.AddScoped<IAuthPrincipalClientApplicationServerCommands, AuthPrincipalClientApplicationCommands>();
+		services.AddScoped<IAuthPrincipalLocaleServerCommands, AuthPrincipalLocaleCommands>();
 		services.AddScoped<IClientApplicationServerCommands, ClientApplicationCommands>();
 		services.AddScoped<IClientApplicationLocaleServerCommands, ClientApplicationLocaleCommands>();
 		services.AddScoped<IClientApplicationTextResourceServerCommands, ClientApplicationTextResourceCommands>();

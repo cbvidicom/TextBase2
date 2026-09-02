@@ -9,6 +9,9 @@ namespace Textbase.Integration.Api.Rest;
 public sealed partial class RestClients
 {
 	public sealed record TextbaseClients(
+		AuthPrincipalsClient AuthPrincipalsClient,
+		AuthPrincipalClientApplicationsClient AuthPrincipalClientApplicationsClient,
+		AuthPrincipalLocalesClient AuthPrincipalLocalesClient,
 		ClientApplicationsClient ClientApplicationsClient,
 		ClientApplicationLocalesClient ClientApplicationLocalesClient,
 		ClientApplicationTextResourcesClient ClientApplicationTextResourcesClient,
@@ -40,6 +43,9 @@ public sealed partial class RestClients
 			new(specificBaseUrl, bearerToken, httpClient),
 			new(specificBaseUrl, bearerToken, httpClient),
 			new(specificBaseUrl, bearerToken, httpClient),
+			new(specificBaseUrl, bearerToken, httpClient),
+			new(specificBaseUrl, bearerToken, httpClient),
+			new(specificBaseUrl, bearerToken, httpClient),
 			new(specificBaseUrl, bearerToken, httpClient)
 		);
 	}
@@ -48,6 +54,9 @@ public sealed partial class RestClients
 	private void SetBearerTokenForTextbase(
 		string? value)
 	{
+		Textbase.AuthPrincipalsClient.BearerToken = value;
+		Textbase.AuthPrincipalClientApplicationsClient.BearerToken = value;
+		Textbase.AuthPrincipalLocalesClient.BearerToken = value;
 		Textbase.ClientApplicationsClient.BearerToken = value;
 		Textbase.ClientApplicationLocalesClient.BearerToken = value;
 		Textbase.ClientApplicationTextResourcesClient.BearerToken = value;
@@ -63,6 +72,9 @@ public sealed partial class RestClients
 	private void SetHttpClientForTextbase(
 		HttpClient value)
 	{
+		Textbase.AuthPrincipalsClient.HttpClient = value;
+		Textbase.AuthPrincipalClientApplicationsClient.HttpClient = value;
+		Textbase.AuthPrincipalLocalesClient.HttpClient = value;
 		Textbase.ClientApplicationsClient.HttpClient = value;
 		Textbase.ClientApplicationLocalesClient.HttpClient = value;
 		Textbase.ClientApplicationTextResourcesClient.HttpClient = value;
@@ -78,6 +90,9 @@ public sealed partial class RestClients
 	private void SetTimeoutForTextbase(
 		TimeSpan value)
 	{
+		Textbase.AuthPrincipalsClient.Timeout = value;
+		Textbase.AuthPrincipalClientApplicationsClient.Timeout = value;
+		Textbase.AuthPrincipalLocalesClient.Timeout = value;
 		Textbase.ClientApplicationsClient.Timeout = value;
 		Textbase.ClientApplicationLocalesClient.Timeout = value;
 		Textbase.ClientApplicationTextResourcesClient.Timeout = value;
@@ -93,6 +108,9 @@ public sealed partial class RestClients
 	private void SetInitialRetryDelayForTextbase(
 		TimeSpan value)
 	{
+		Textbase.AuthPrincipalsClient.InitialRetryDelay = value;
+		Textbase.AuthPrincipalClientApplicationsClient.InitialRetryDelay = value;
+		Textbase.AuthPrincipalLocalesClient.InitialRetryDelay = value;
 		Textbase.ClientApplicationsClient.InitialRetryDelay = value;
 		Textbase.ClientApplicationLocalesClient.InitialRetryDelay = value;
 		Textbase.ClientApplicationTextResourcesClient.InitialRetryDelay = value;
@@ -108,6 +126,9 @@ public sealed partial class RestClients
 	private void SetMaxRetryDelayForTextbase(
 		TimeSpan value)
 	{
+		Textbase.AuthPrincipalsClient.MaxRetryDelay = value;
+		Textbase.AuthPrincipalClientApplicationsClient.MaxRetryDelay = value;
+		Textbase.AuthPrincipalLocalesClient.MaxRetryDelay = value;
 		Textbase.ClientApplicationsClient.MaxRetryDelay = value;
 		Textbase.ClientApplicationLocalesClient.MaxRetryDelay = value;
 		Textbase.ClientApplicationTextResourcesClient.MaxRetryDelay = value;
@@ -123,6 +144,9 @@ public sealed partial class RestClients
 	private void SetMaxRetriesForTextbase(
 		int value)
 	{
+		Textbase.AuthPrincipalsClient.MaxRetries = value;
+		Textbase.AuthPrincipalClientApplicationsClient.MaxRetries = value;
+		Textbase.AuthPrincipalLocalesClient.MaxRetries = value;
 		Textbase.ClientApplicationsClient.MaxRetries = value;
 		Textbase.ClientApplicationLocalesClient.MaxRetries = value;
 		Textbase.ClientApplicationTextResourcesClient.MaxRetries = value;
@@ -139,6 +163,9 @@ public sealed partial class RestClients
 		string key,
 		string value)
 	{
+		Textbase.AuthPrincipalsClient.CustomRequestHeaders[key] = value;
+		Textbase.AuthPrincipalClientApplicationsClient.CustomRequestHeaders[key] = value;
+		Textbase.AuthPrincipalLocalesClient.CustomRequestHeaders[key] = value;
 		Textbase.ClientApplicationsClient.CustomRequestHeaders[key] = value;
 		Textbase.ClientApplicationLocalesClient.CustomRequestHeaders[key] = value;
 		Textbase.ClientApplicationTextResourcesClient.CustomRequestHeaders[key] = value;
@@ -154,6 +181,9 @@ public sealed partial class RestClients
 	private void RemoveCustomRequestHeaderFromTextbase(
 		string key)
 	{
+		Textbase.AuthPrincipalsClient.CustomRequestHeaders.Remove(key);
+		Textbase.AuthPrincipalClientApplicationsClient.CustomRequestHeaders.Remove(key);
+		Textbase.AuthPrincipalLocalesClient.CustomRequestHeaders.Remove(key);
 		Textbase.ClientApplicationsClient.CustomRequestHeaders.Remove(key);
 		Textbase.ClientApplicationLocalesClient.CustomRequestHeaders.Remove(key);
 		Textbase.ClientApplicationTextResourcesClient.CustomRequestHeaders.Remove(key);

@@ -13,5 +13,6 @@ internal sealed partial class FlatTranslationEntityConfiguration
 		builder.ToTable("Translation", "flat");
 
 		builder.HasKey(e => new { e.LocaleKey, e.TextKey, e.FormalityKey, e.PresentationKey });
+		builder.HasIndex(e => new {e.TextKey, e.LocaleKey });
 	}
 }

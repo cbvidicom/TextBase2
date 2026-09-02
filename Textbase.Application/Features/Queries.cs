@@ -1,4 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
+using Textbase.Application.Features.AuthPrincipals;
+using Textbase.Application.Features.AuthPrincipalClientApplications;
+using Textbase.Application.Features.AuthPrincipalLocales;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Application.Features.ClientApplicationLocales;
 using Textbase.Application.Features.ClientApplicationTextResources;
@@ -12,6 +15,9 @@ using Textbase.Application.Features.FlatTranslations;
 namespace Textbase.Application.Features;
 
 public partial class Queries(
+	IAuthPrincipalQueries authPrincipalQueries,
+	IAuthPrincipalClientApplicationQueries authPrincipalClientApplicationQueries,
+	IAuthPrincipalLocaleQueries authPrincipalLocaleQueries,
 	IClientApplicationQueries clientApplicationQueries,
 	IClientApplicationLocaleQueries clientApplicationLocaleQueries,
 	IClientApplicationTextResourceQueries clientApplicationTextResourceQueries,
@@ -23,6 +29,9 @@ public partial class Queries(
 	IFlatTranslationQueries flatTranslationQueries
 )
 {
+	public readonly IAuthPrincipalQueries AuthPrincipalQueries = authPrincipalQueries;
+	public readonly IAuthPrincipalClientApplicationQueries AuthPrincipalClientApplicationQueries = authPrincipalClientApplicationQueries;
+	public readonly IAuthPrincipalLocaleQueries AuthPrincipalLocaleQueries = authPrincipalLocaleQueries;
 	public readonly IClientApplicationQueries ClientApplicationQueries = clientApplicationQueries;
 	public readonly IClientApplicationLocaleQueries ClientApplicationLocaleQueries = clientApplicationLocaleQueries;
 	public readonly IClientApplicationTextResourceQueries ClientApplicationTextResourceQueries = clientApplicationTextResourceQueries;

@@ -9,6 +9,9 @@ public static partial class ApiStrings
 	public const string TotalCountHeaderKey = "X-Total-Count";
 
 	
+	public const string AuthPrincipalsControllerName = "AuthPrincipals";
+	public const string AuthPrincipalClientApplicationsControllerName = "AuthPrincipalClientApplications";
+	public const string AuthPrincipalLocalesControllerName = "AuthPrincipalLocales";
 	public const string ClientApplicationsControllerName = "ClientApplications";
 	public const string ClientApplicationLocalesControllerName = "ClientApplicationLocales";
 	public const string ClientApplicationTextResourcesControllerName = "ClientApplicationTextResources";

@@ -1,13 +1,13 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
-using Microsoft.AspNetCore.Mvc;
 using Textbase.Application.Common;
 using Textbase.Application.Features.FlatTranslations;
 using Textbase.Host.Api.Common.Extensions;
-using Uwn.Common.Querying;
-using Uwn.EntityFrameworkCore.Infrastructure;
 using CM = Textbase.Contracts.Models;
 using DM = Textbase.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
+using Uwn.Common.Querying;
+using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Controllers;
 
@@ -23,7 +23,7 @@ public sealed partial class FlatTranslationsController(
 	public async Task<ActionResult<CM.FlatTranslationDto>> Create(
 		[FromBody] CM.FlatTranslationDto dto,
 		CancellationToken cancellationToken)
-	{
+	{	
 		CreateResult<DM.FlatTranslation> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.FlatTranslation, CM.FlatTranslationDto>(
@@ -79,12 +79,12 @@ public sealed partial class FlatTranslationsController(
 	[HttpDelete("{localeKey}/{textKey}/{formalityKey}/{presentationKey}")]
 	public async Task<IActionResult> Delete(
 		string localeKey, string textKey, string formalityKey, string presentationKey,
-		CancellationToken cancellationToken)
+		CancellationToken cancellationToken)	
 	{
 		DeleteResult result = await Commands.DeleteAsync(localeKey, textKey, formalityKey, presentationKey, cancellationToken);
 
 		return result.ToActionResult(Ok);
 	}
 
-
+	
 }

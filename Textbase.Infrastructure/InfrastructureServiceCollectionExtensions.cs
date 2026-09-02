@@ -3,6 +3,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Textbase.Infrastructure.Persistence;
+using Textbase.Infrastructure.Persistence.AuthPrincipals;
+using Textbase.Infrastructure.Persistence.AuthPrincipalClientApplications;
+using Textbase.Infrastructure.Persistence.AuthPrincipalLocales;
 using Textbase.Infrastructure.Persistence.ClientApplications;
 using Textbase.Infrastructure.Persistence.ClientApplicationLocales;
 using Textbase.Infrastructure.Persistence.ClientApplicationTextResources;
@@ -42,6 +45,9 @@ public static class ServiceCollectionExtensions
 		this IServiceCollection services)
 	{
 		
+		services.AddScoped<IAuthPrincipalEntityFactory, AuthPrincipalEntityFactory>();
+		services.AddScoped<IAuthPrincipalClientApplicationEntityFactory, AuthPrincipalClientApplicationEntityFactory>();
+		services.AddScoped<IAuthPrincipalLocaleEntityFactory, AuthPrincipalLocaleEntityFactory>();
 		services.AddScoped<IClientApplicationEntityFactory, ClientApplicationEntityFactory>();
 		services.AddScoped<IClientApplicationLocaleEntityFactory, ClientApplicationLocaleEntityFactory>();
 		services.AddScoped<IClientApplicationTextResourceEntityFactory, ClientApplicationTextResourceEntityFactory>();

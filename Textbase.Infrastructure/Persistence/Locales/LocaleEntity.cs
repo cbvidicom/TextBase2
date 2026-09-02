@@ -2,6 +2,7 @@
 
 using DM = Textbase.Domain.Models;
 using Textbase.Infrastructure.Persistence.Locales;
+using Textbase.Infrastructure.Persistence.AuthPrincipalLocales;
 using Textbase.Infrastructure.Persistence.ClientApplicationLocales;
 using Textbase.Infrastructure.Persistence.Translations;
 
@@ -11,6 +12,7 @@ public partial class LocaleEntity
 	: DM.Locale
 {
 	public virtual LocaleEntity? Locale { get; set; }
+	public virtual ICollection<AuthPrincipalLocaleEntity> AuthPrincipalLocales { get; set; } = [];
 	public virtual ICollection<ClientApplicationLocaleEntity> ClientApplicationLocales { get; set; } = [];
 	public virtual ICollection<LocaleEntity> Locales { get; set; } = [];
 	public virtual ICollection<TranslationEntity> Translations { get; set; } = [];
