@@ -46,8 +46,8 @@
 		- According to the Connected Application definition
 		- Connected entries are deleted together with the Application
 	i. Locales, Formalities, and Presentations are readable by every user
-	j. Decide on an authentication source: Existing Azure AD B2C, or local user store.
-2. Them same authentication/authorization rules as defined in 1. must be applied to the Web GUI ("Textbase.Host"), once it is being implemented.
+	j. Authentication source: Existing Azure AD B2C
+2. The same authentication/authorization rules as defined in 1. must be applied to the Web GUI ("Textbase.Host"), once it is being implemented.
 3. Implement Web GUI ("Textbase.Host")
 	a. View/Create/Edit Applications, Application Locales, Application TextResources
 	b. View/Create/Edit Formalities
