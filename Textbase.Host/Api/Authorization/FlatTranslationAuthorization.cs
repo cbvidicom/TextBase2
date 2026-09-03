@@ -6,27 +6,52 @@ using Textbase.Host.Authorization;
 
 namespace Textbase.Host.Api.Authorization;
 
-public sealed class FlatTranslationAuthorization(AuthorizationScope _scope)
-	: IFlatTranslationAuthorization
+public sealed class FlatTranslationAuthorization(
+	AuthorizationScope scope)
+	: AuthorizationBase(scope)
+	, IFlatTranslationAuthorization
 {
-	public ValueTask<bool> CanCreateAsync(FlatTranslationDto dto, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public ValueTask<bool> CanCreateAsync(
+		FlatTranslationDto dto,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> ValueTask.FromResult(false);
 
-	public async ValueTask<bool> CanReadAsync(string localeKey, string textKey, string formalityKey, string presentationKey, ClaimsPrincipal user,
+	public async ValueTask<bool> CanReadAsync(
+		string localeKey,
+		string textKey,
+		string formalityKey,
+		string presentationKey,
+		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> await CanAccessAsync(localeKey, textKey, cancellationToken);
 
-	public async ValueTask<bool> CanCountAsync(FlatTranslationFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanCountAsync(
+		FlatTranslationFilter filter,
+		ClaimsPrincipal user, CancellationToken cancellationToken = default)
 		=> await CanAccessListAsync(filter, cancellationToken);
 
-	public async ValueTask<bool> CanListAsync(FlatTranslationFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanListAsync(
+		FlatTranslationFilter filter,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await CanAccessListAsync(filter, cancellationToken);
 
-	public ValueTask<bool> CanUpdateAsync(string localeKey, string textKey, string formalityKey, string presentationKey, FlatTranslationDto dto,
+	public ValueTask<bool> CanUpdateAsync(
+		string localeKey,
+		string textKey,
+		string formalityKey,
+		string presentationKey,
+		FlatTranslationDto dto,
 		ClaimsPrincipal user, CancellationToken cancellationToken = default)
 		=> ValueTask.FromResult(false);
 
-	public ValueTask<bool> CanDeleteAsync(string localeKey, string textKey, string formalityKey, string presentationKey, ClaimsPrincipal user,
+	public ValueTask<bool> CanDeleteAsync(
+		string localeKey,
+		string textKey,
+		string formalityKey,
+		string presentationKey,
+		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> ValueTask.FromResult(false);
 
@@ -36,7 +61,9 @@ public sealed class FlatTranslationAuthorization(AuthorizationScope _scope)
 		CancellationToken cancellationToken)
 	{
 		CurrentPrincipal? principal = await _scope.GetPrincipalAsync(cancellationToken);
-		return principal is not null && AuthorizationScope.HasRole(principal, Roles.Consumer) &&
+
+		return principal is not null &&
+			AuthorizationScope.HasRole(principal, Roles.Consumer) &&
 			await _scope.CanAccessTranslationAsync(principal, localeKey, textKey, cancellationToken);
 	}
 
@@ -45,15 +72,13 @@ public sealed class FlatTranslationAuthorization(AuthorizationScope _scope)
 		CancellationToken cancellationToken)
 	{
 		CurrentPrincipal? principal = await _scope.GetPrincipalAsync(cancellationToken);
-		if (principal is null || !AuthorizationScope.HasRole(principal, Roles.Consumer))
-		{
+		if (principal is null ||
+			!AuthorizationScope.HasRole(principal, Roles.Consumer))
 			return false;
-		}
 
-		if (!principal.HasApplicationRestrictions && !principal.HasLocaleRestrictions)
-		{
+		if (!principal.HasApplicationRestrictions &&
+			!principal.HasLocaleRestrictions)
 			return true;
-		}
 
 		return AuthorizationScope.TryGetExactValue(filter.LocaleKey, out string localeKey) &&
 			AuthorizationScope.TryGetExactValue(filter.TextKey, out string textKey) &&

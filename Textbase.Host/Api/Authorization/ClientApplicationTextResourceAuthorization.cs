@@ -7,31 +7,56 @@ using Uwn.EntityFrameworkCore.Querying;
 
 namespace Textbase.Host.Api.Authorization;
 
-public sealed class ClientApplicationTextResourceAuthorization(AuthorizationScope _scope)
-	: IClientApplicationTextResourceAuthorization
+public sealed class ClientApplicationTextResourceAuthorization(
+	AuthorizationScope scope)
+	: AuthorizationBase(scope)
+	, IClientApplicationTextResourceAuthorization
 {
-	public async ValueTask<bool> CanCreateAsync(ClientApplicationTextResourceDto dto, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanCreateAsync(
+		ClientApplicationTextResourceDto dto,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await CanManageApplicationAsync(dto.ClientApplicationGuid, cancellationToken);
 
-	public async ValueTask<bool> CanReadAsync(Guid clientApplicationGuid, string textKey, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanReadAsync(
+		Guid clientApplicationGuid,
+		string textKey,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await CanManageApplicationAsync(clientApplicationGuid, cancellationToken);
 
-	public async ValueTask<bool> CanCountAsync(ClientApplicationTextResourceFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanCountAsync(
+		ClientApplicationTextResourceFilter filter,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await RestrictListAsync(filter, cancellationToken);
 
-	public async ValueTask<bool> CanListAsync(ClientApplicationTextResourceFilter filter, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanListAsync(
+		ClientApplicationTextResourceFilter filter,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await RestrictListAsync(filter, cancellationToken);
 
-	public async ValueTask<bool> CanUpdateAsync(Guid clientApplicationGuid, string textKey, ClientApplicationTextResourceDto dto, ClaimsPrincipal user,
+	public async ValueTask<bool> CanUpdateAsync(
+		Guid clientApplicationGuid,
+		string textKey,
+		ClientApplicationTextResourceDto dto,
+		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 	{
 		CurrentPrincipal? principal = await _scope.GetPrincipalAsync(cancellationToken);
-		return principal is not null && AuthorizationScope.HasRole(principal, Roles.AppAdmin) &&
+
+		return principal is not null &&
+			AuthorizationScope.HasRole(principal, Roles.AppAdmin) &&
 			AuthorizationScope.CanAccessApplication(principal, clientApplicationGuid) &&
 			AuthorizationScope.CanAccessApplication(principal, dto.ClientApplicationGuid);
 	}
 
-	public async ValueTask<bool> CanDeleteAsync(Guid clientApplicationGuid, string textKey, ClaimsPrincipal user, CancellationToken cancellationToken = default)
+	public async ValueTask<bool> CanDeleteAsync(
+		Guid clientApplicationGuid,
+		string textKey,
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await CanManageApplicationAsync(clientApplicationGuid, cancellationToken);
 
 	private async ValueTask<bool> CanManageApplicationAsync(
@@ -39,7 +64,9 @@ public sealed class ClientApplicationTextResourceAuthorization(AuthorizationScop
 		CancellationToken cancellationToken)
 	{
 		CurrentPrincipal? principal = await _scope.GetPrincipalAsync(cancellationToken);
-		return principal is not null && AuthorizationScope.HasRole(principal, Roles.AppAdmin) &&
+
+		return principal is not null &&
+			AuthorizationScope.HasRole(principal, Roles.AppAdmin) &&
 			AuthorizationScope.CanAccessApplication(principal, clientApplicationGuid);
 	}
 
@@ -48,13 +75,13 @@ public sealed class ClientApplicationTextResourceAuthorization(AuthorizationScop
 		CancellationToken cancellationToken)
 	{
 		CurrentPrincipal? principal = await _scope.GetPrincipalAsync(cancellationToken);
-		if (principal is null || !AuthorizationScope.HasRole(principal, Roles.AppAdmin) ||
+		if (principal is null ||
+			!AuthorizationScope.HasRole(principal, Roles.AppAdmin) ||
 			!AuthorizationScope.TryRestrictApplications(principal, filter.ClientApplicationGuid, out GuidFilter? restrictedFilter))
-		{
 			return false;
-		}
 
 		filter.ClientApplicationGuid = restrictedFilter;
+
 		return true;
 	}
 }

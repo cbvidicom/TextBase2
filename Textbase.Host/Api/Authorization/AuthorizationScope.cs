@@ -13,6 +13,7 @@ public sealed class AuthorizationScope(
 	ICurrentPrincipalAccessor _currentPrincipalAccessor)
 {
 	private Task<IReadOnlyList<ClientApplicationLocale>>? _applicationLocalesTask;
+
 	private readonly Dictionary<string, Task<IReadOnlyList<ClientApplicationTextResource>>> _applicationTextResourcesTasks = new(StringComparer.OrdinalIgnoreCase);
 
 	public Task<CurrentPrincipal?> GetPrincipalAsync(
@@ -57,6 +58,7 @@ public sealed class AuthorizationScope(
 		}
 
 		restrictedFilter = new GuidFilter { AnyOf = permittedGuids };
+
 		return true;
 	}
 
@@ -65,16 +67,13 @@ public sealed class AuthorizationScope(
 		string textKey,
 		CancellationToken cancellationToken)
 	{
-		if (!principal.HasApplicationRestrictions && !principal.HasLocaleRestrictions)
-		{
+		if (!principal.HasApplicationRestrictions &&
+			!principal.HasLocaleRestrictions)
 			return true;
-		}
 
 		IReadOnlyList<ClientApplicationTextResource> textResources = await GetApplicationTextResourcesAsync(textKey, cancellationToken);
 		if (textResources.Count == 0)
-		{
 			return false;
-		}
 
 		IReadOnlyList<ClientApplicationLocale> applicationLocales = await GetApplicationLocalesAsync(cancellationToken);
 
@@ -91,14 +90,11 @@ public sealed class AuthorizationScope(
 		CancellationToken cancellationToken)
 	{
 		if (!CanAccessLocale(principal, localeKey))
-		{
 			return false;
-		}
 
-		if (!principal.HasApplicationRestrictions && !principal.HasLocaleRestrictions)
-		{
+		if (!principal.HasApplicationRestrictions &&
+			!principal.HasLocaleRestrictions)
 			return true;
-		}
 
 		IReadOnlyList<ClientApplicationTextResource> textResources = await GetApplicationTextResourcesAsync(textKey, cancellationToken);
 		IReadOnlyList<ClientApplicationLocale> applicationLocales = await GetApplicationLocalesAsync(cancellationToken);
@@ -113,7 +109,9 @@ public sealed class AuthorizationScope(
 		StringFilter? filter,
 		out string value)
 	{
-		if (filter is not null && filter.Matching == StringMatching.Exact && !String.IsNullOrWhiteSpace(filter.Value))
+		if (filter is not null &&
+			filter.Matching == StringMatching.Exact &&
+			!String.IsNullOrWhiteSpace(filter.Value))
 		{
 			value = filter.Value;
 			return true;
@@ -127,6 +125,7 @@ public sealed class AuthorizationScope(
 		CancellationToken cancellationToken)
 	{
 		_applicationLocalesTask ??= _clientApplicationLocaleQueries.ListItemsAsync(ClientApplicationLocaleFilter.All(), cancellationToken);
+
 		return _applicationLocalesTask;
 	}
 
