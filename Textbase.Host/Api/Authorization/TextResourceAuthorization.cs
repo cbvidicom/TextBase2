@@ -3,6 +3,7 @@ using Textbase.Application.Features.TextResources;
 using Textbase.Contracts.Models;
 using Textbase.Domain.Enumerations;
 using Textbase.Host.Authorization;
+using Uwn.EntityFrameworkCore.Querying;
 
 namespace Textbase.Host.Api.Authorization;
 
@@ -76,7 +77,12 @@ public sealed class TextResourceAuthorization(
 			!principal.HasLocaleRestrictions)
 			return true;
 
-		return AuthorizationScope.TryGetExactValue(filter.TextKey, out string textKey) &&
-			await _scope.CanAccessTextAsync(principal, textKey, cancellationToken);
+		IReadOnlyCollection<string> permittedTextKeys = await _scope.GetPermittedTextKeysAsync(principal, cancellationToken);
+		if (!AuthorizationScope.TryRestrictStrings(filter.TextKey, permittedTextKeys, out StringFilter? restrictedFilter))
+			return false;
+
+		filter.TextKey = restrictedFilter;
+
+		return true;
 	}
 }
