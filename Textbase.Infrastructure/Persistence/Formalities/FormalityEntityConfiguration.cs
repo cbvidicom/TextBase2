@@ -13,5 +13,7 @@ internal sealed partial class FormalityEntityConfiguration
 		builder.ToTable("Formality", "dbo", t => t.UseSqlOutputClause(false));
 
 		builder.HasKey(e => new { e.FormalityKey });
+		builder.Property(e => e.FormalityKey).IsRequired().HasMaxLength(16).IsUnicode(false);
+		builder.Property(e => e.Description).HasMaxLength(1024).IsUnicode(true);
 	}
 }

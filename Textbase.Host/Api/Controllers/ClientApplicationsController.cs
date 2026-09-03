@@ -1,6 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
 using Textbase.Application.Common;
+using Textbase.Host.Api.Authorization;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Host.Api.Common.Extensions;
 using CM = Textbase.Contracts.Models;
@@ -15,7 +16,8 @@ namespace Textbase.Host.Api.Controllers;
 [Route("api/[controller]")]
 public sealed partial class ClientApplicationsController(
 	IClientApplicationQueries Queries,
-	IClientApplicationServerCommands Commands
+	IClientApplicationServerCommands Commands,
+	IClientApplicationAuthorization? Authorization = null
 	)
 	: ControllerBase
 {
@@ -24,6 +26,10 @@ public sealed partial class ClientApplicationsController(
 		[FromBody] CM.ClientApplicationDto dto,
 		CancellationToken cancellationToken)
 	{	
+		if (Authorization is not null &&
+			!await Authorization.CanCreateAsync(dto, User, cancellationToken))
+			return Forbid();
+
 		CreateResult<DM.ClientApplication> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.ClientApplication, CM.ClientApplicationDto>(
@@ -35,6 +41,10 @@ public sealed partial class ClientApplicationsController(
 		Guid clientApplicationGuid,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanReadAsync(clientApplicationGuid, User, cancellationToken))
+			return Forbid();
+
 		DM.ClientApplication? result = await Queries.ReadAsync(clientApplicationGuid, cancellationToken);
 
 		return result is null ? NotFound() : Ok(result);
@@ -45,6 +55,10 @@ public sealed partial class ClientApplicationsController(
 		[FromQuery] ClientApplicationFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanCountAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		long result = await Queries.CountAsync(filter, cancellationToken);
 
 		Response.Headers[ApiStrings.TotalCountHeaderKey] = result.ToString();
@@ -57,6 +71,10 @@ public sealed partial class ClientApplicationsController(
 		[FromQuery] ClientApplicationFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanListAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		PagedResponse<DM.ClientApplication> result = await Queries.ListAsync(filter, cancellationToken);
 
 		return Ok(result);
@@ -68,6 +86,10 @@ public sealed partial class ClientApplicationsController(
 		[FromBody] CM.ClientApplicationDto dto,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanUpdateAsync(clientApplicationGuid, dto, User, cancellationToken))
+			return Forbid();
+
 		if (clientApplicationGuid != dto.ClientApplicationGuid)
 			return Conflict();
 
@@ -81,6 +103,10 @@ public sealed partial class ClientApplicationsController(
 		Guid clientApplicationGuid,
 		CancellationToken cancellationToken)	
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanDeleteAsync(clientApplicationGuid, User, cancellationToken))
+			return Forbid();
+
 		DeleteResult result = await Commands.DeleteAsync(clientApplicationGuid, cancellationToken);
 
 		return result.ToActionResult(Ok);

@@ -1,5 +1,6 @@
-﻿using System.Linq.Expressions;
-using Microsoft.AspNetCore.Routing;
+/// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
+
+using System.Linq.Expressions;
 using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Common.Extensions;
@@ -27,8 +28,6 @@ public static class ModelCommandsRouteExtensions
 
 		return result;
 	}
-
-	//
 
 	private static string[] ExtractRouteParameterNames<TDTO>(
 		Expression<Func<TDTO, object>> keySelector)

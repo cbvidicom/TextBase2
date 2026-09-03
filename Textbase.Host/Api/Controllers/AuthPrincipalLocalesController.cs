@@ -1,6 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
 using Textbase.Application.Common;
+using Textbase.Host.Api.Authorization;
 using Textbase.Application.Features.AuthPrincipalLocales;
 using Textbase.Host.Api.Common.Extensions;
 using CM = Textbase.Contracts.Models;
@@ -15,7 +16,8 @@ namespace Textbase.Host.Api.Controllers;
 [Route("api/[controller]")]
 public sealed partial class AuthPrincipalLocalesController(
 	IAuthPrincipalLocaleQueries Queries,
-	IAuthPrincipalLocaleServerCommands Commands
+	IAuthPrincipalLocaleServerCommands Commands,
+	IAuthPrincipalLocaleAuthorization? Authorization = null
 	)
 	: ControllerBase
 {
@@ -24,6 +26,10 @@ public sealed partial class AuthPrincipalLocalesController(
 		[FromBody] CM.AuthPrincipalLocaleDto dto,
 		CancellationToken cancellationToken)
 	{	
+		if (Authorization is not null &&
+			!await Authorization.CanCreateAsync(dto, User, cancellationToken))
+			return Forbid();
+
 		CreateResult<DM.AuthPrincipalLocale> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.AuthPrincipalLocale, CM.AuthPrincipalLocaleDto>(
@@ -35,6 +41,10 @@ public sealed partial class AuthPrincipalLocalesController(
 		Guid entraObjectId, string localeKey,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanReadAsync(entraObjectId, localeKey, User, cancellationToken))
+			return Forbid();
+
 		DM.AuthPrincipalLocale? result = await Queries.ReadAsync(entraObjectId, localeKey, cancellationToken);
 
 		return result is null ? NotFound() : Ok(result);
@@ -45,6 +55,10 @@ public sealed partial class AuthPrincipalLocalesController(
 		[FromQuery] AuthPrincipalLocaleFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanCountAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		long result = await Queries.CountAsync(filter, cancellationToken);
 
 		Response.Headers[ApiStrings.TotalCountHeaderKey] = result.ToString();
@@ -57,6 +71,10 @@ public sealed partial class AuthPrincipalLocalesController(
 		[FromQuery] AuthPrincipalLocaleFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanListAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		PagedResponse<DM.AuthPrincipalLocale> result = await Queries.ListAsync(filter, cancellationToken);
 
 		return Ok(result);
@@ -68,6 +86,10 @@ public sealed partial class AuthPrincipalLocalesController(
 		[FromBody] CM.AuthPrincipalLocaleDto dto,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanUpdateAsync(entraObjectId, localeKey, dto, User, cancellationToken))
+			return Forbid();
+
 		if (entraObjectId != dto.EntraObjectId || localeKey != dto.LocaleKey)
 			return Conflict();
 
@@ -81,6 +103,10 @@ public sealed partial class AuthPrincipalLocalesController(
 		Guid entraObjectId, string localeKey,
 		CancellationToken cancellationToken)	
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanDeleteAsync(entraObjectId, localeKey, User, cancellationToken))
+			return Forbid();
+
 		DeleteResult result = await Commands.DeleteAsync(entraObjectId, localeKey, cancellationToken);
 
 		return result.ToActionResult(Ok);

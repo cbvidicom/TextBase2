@@ -1,4 +1,4 @@
-# TODO
+# Overview
 
 ## Definitions
 1. **"Connected Application"**
@@ -15,7 +15,7 @@
 	d. **Translation**: a `Translation` entity
 	e. **Flat Translation**: a `flat.Translation` entity
 
-## Missing Functionality
+## Functionality
 1. Require authentication for the API
 	a. Users can have one or more of the following roles:
 		i. **Sysadmin**
@@ -47,6 +47,7 @@
 		- Connected entries are deleted together with the Application
 	i. Locales, Formalities, and Presentations are readable by every user
 	j. Authentication source: Existing Azure AD B2C
+	k. When a new user authenticates who is not yet in the `Principal` table, add them there with Role=0
 2. The same authentication/authorization rules as defined in 1. must be applied to the Web GUI ("Textbase.Host"), once it is being implemented.
 3. Implement Web GUI ("Textbase.Host")
 	a. View/Create/Edit Applications, Application Locales, Application TextResources
@@ -55,16 +56,11 @@
 	d. View/Create/Edit Presentations
 	e. View/Create/Edit TextResources
 	f. View/Create/Edit Translations
-	g. Get an overview of missing translations, filtered by Application and/or Locale
-	h. Import/Export functionality (*to be specified*)
-	i. Use Radzen components, and the Uwn.Blazor package
+	g. User administration / role assignments (only for Sysadmin users)
+		- Add a badge containing the number of active users with Role=0 to the link
+	h. Get an overview of missing translations, filtered by Application and/or Locale
+	i. Import/Export functionality (*to be specified*)
+	j. Use Radzen components, and the Uwn.Blazor package
 
 ## Known Issues
-1. DSB generator does not include files from `Host.Api.Common.Extensions`
-2. Index `UX_ClientApplicationLocale_Default` has a wrong implementation: `.HasFilter("[IsDefault] = 1")` is missing
-3. `EntityConfiguration` are missing required properties:
-	a. `HasMaxLength`
-	b. `IsUnicode`
-	c. `IsRequired`
-	d. `IsFixedLength`
-4. `flat.Translation` is treated like a normal table, while it should be read-only
+1. `flat.Translation` is treated like a normal table, while it should be read-only

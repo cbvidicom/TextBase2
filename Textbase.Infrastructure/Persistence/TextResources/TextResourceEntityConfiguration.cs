@@ -13,5 +13,7 @@ internal sealed partial class TextResourceEntityConfiguration
 		builder.ToTable("TextResource", "dbo");
 
 		builder.HasKey(e => new { e.TextKey });
+		builder.Property(e => e.TextKey).IsRequired().HasMaxLength(128).IsUnicode(false);
+		builder.Property(e => e.Description).HasMaxLength(1024).IsUnicode(true);
 	}
 }

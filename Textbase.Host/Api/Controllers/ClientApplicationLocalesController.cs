@@ -1,6 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
 using Textbase.Application.Common;
+using Textbase.Host.Api.Authorization;
 using Textbase.Application.Features.ClientApplicationLocales;
 using Textbase.Host.Api.Common.Extensions;
 using CM = Textbase.Contracts.Models;
@@ -15,7 +16,8 @@ namespace Textbase.Host.Api.Controllers;
 [Route("api/[controller]")]
 public sealed partial class ClientApplicationLocalesController(
 	IClientApplicationLocaleQueries Queries,
-	IClientApplicationLocaleServerCommands Commands
+	IClientApplicationLocaleServerCommands Commands,
+	IClientApplicationLocaleAuthorization? Authorization = null
 	)
 	: ControllerBase
 {
@@ -24,6 +26,10 @@ public sealed partial class ClientApplicationLocalesController(
 		[FromBody] CM.ClientApplicationLocaleDto dto,
 		CancellationToken cancellationToken)
 	{	
+		if (Authorization is not null &&
+			!await Authorization.CanCreateAsync(dto, User, cancellationToken))
+			return Forbid();
+
 		CreateResult<DM.ClientApplicationLocale> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.ClientApplicationLocale, CM.ClientApplicationLocaleDto>(
@@ -35,6 +41,10 @@ public sealed partial class ClientApplicationLocalesController(
 		Guid clientApplicationGuid, string localeKey,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanReadAsync(clientApplicationGuid, localeKey, User, cancellationToken))
+			return Forbid();
+
 		DM.ClientApplicationLocale? result = await Queries.ReadAsync(clientApplicationGuid, localeKey, cancellationToken);
 
 		return result is null ? NotFound() : Ok(result);
@@ -45,6 +55,10 @@ public sealed partial class ClientApplicationLocalesController(
 		[FromQuery] ClientApplicationLocaleFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanCountAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		long result = await Queries.CountAsync(filter, cancellationToken);
 
 		Response.Headers[ApiStrings.TotalCountHeaderKey] = result.ToString();
@@ -57,6 +71,10 @@ public sealed partial class ClientApplicationLocalesController(
 		[FromQuery] ClientApplicationLocaleFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanListAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		PagedResponse<DM.ClientApplicationLocale> result = await Queries.ListAsync(filter, cancellationToken);
 
 		return Ok(result);
@@ -68,6 +86,10 @@ public sealed partial class ClientApplicationLocalesController(
 		[FromBody] CM.ClientApplicationLocaleDto dto,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanUpdateAsync(clientApplicationGuid, localeKey, dto, User, cancellationToken))
+			return Forbid();
+
 		if (clientApplicationGuid != dto.ClientApplicationGuid || localeKey != dto.LocaleKey)
 			return Conflict();
 
@@ -81,6 +103,10 @@ public sealed partial class ClientApplicationLocalesController(
 		Guid clientApplicationGuid, string localeKey,
 		CancellationToken cancellationToken)	
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanDeleteAsync(clientApplicationGuid, localeKey, User, cancellationToken))
+			return Forbid();
+
 		DeleteResult result = await Commands.DeleteAsync(clientApplicationGuid, localeKey, cancellationToken);
 
 		return result.ToActionResult(Ok);
@@ -92,6 +118,10 @@ public sealed partial class ClientApplicationLocalesController(
 		Guid key,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanReadByClientApplicationGuidAsync(key, User, cancellationToken))
+			return Forbid();
+
 		DM.ClientApplicationLocale? result = await Queries.ReadByClientApplicationGuidAsync(key, cancellationToken);
 
 		return result is null ? NotFound() : Ok(result);

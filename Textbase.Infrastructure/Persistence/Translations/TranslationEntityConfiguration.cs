@@ -13,6 +13,11 @@ internal sealed partial class TranslationEntityConfiguration
 		builder.ToTable("Translation", "dbo", t => t.UseSqlOutputClause(false));
 
 		builder.HasKey(e => new { e.LocaleKey, e.TextKey, e.FormalityKey, e.PresentationKey });
+		builder.Property(e => e.LocaleKey).IsRequired().HasMaxLength(85).IsUnicode(false);
+		builder.Property(e => e.TextKey).IsRequired().HasMaxLength(128).IsUnicode(false);
+		builder.Property(e => e.FormalityKey).IsRequired().HasMaxLength(16).IsUnicode(false).HasDefaultValue("Default");
+		builder.Property(e => e.PresentationKey).IsRequired().HasMaxLength(16).IsUnicode(false).HasDefaultValue("Default");
+		builder.Property(e => e.Value).IsRequired().IsUnicode(true);
 		builder.HasIndex(e => new {e.LocaleKey });
 		builder.HasIndex(e => new {e.TextKey });
 		builder.HasOne(e => e.Formality).WithMany(e => e.Translations).HasForeignKey(e => new { e.FormalityKey }).HasPrincipalKey(e => new { e.FormalityKey }).OnDelete(DeleteBehavior.NoAction);
