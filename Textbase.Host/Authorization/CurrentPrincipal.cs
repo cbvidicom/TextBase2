@@ -11,8 +11,8 @@ public sealed record CurrentPrincipal(
 	IReadOnlyList<string> LocaleKeys)
 {
 	public bool HasApplicationRestrictions =>
-		!RolesValue.HasFlag(Roles.Sysadmin) && ClientApplicationGuids.Count > 0;
+		!RolesValue.HasFlag(Roles.SysAdmin) && ClientApplicationGuids.Count > 0;
 
 	public bool HasLocaleRestrictions =>
-		!RolesValue.HasFlag(Roles.Sysadmin) && LocaleKeys.Count > 0;
+		!RolesValue.HasFlag(Roles.SysAdmin) && LocaleKeys.Count > 0;
 }

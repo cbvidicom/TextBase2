@@ -15,6 +15,8 @@ public sealed class AuthenticationController(
 	{
 		CurrentPrincipal? principal = await currentPrincipalAccessor.GetAsync(cancellationToken);
 
-		return principal is null ? Forbid() : Ok(principal);
+		return principal is null
+			? Forbid()
+			: Ok(principal);
 	}
 }
