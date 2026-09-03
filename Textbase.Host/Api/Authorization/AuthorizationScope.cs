@@ -13,6 +13,7 @@ public sealed class AuthorizationScope(
 	ICurrentPrincipalAccessor _currentPrincipalAccessor)
 {
 	private Task<IReadOnlyList<ClientApplicationLocale>>? _applicationLocalesTask;
+	private Task<IReadOnlyList<ClientApplicationTextResource>>? _applicationTextResourcesTask;
 
 	private readonly Dictionary<string, Task<IReadOnlyList<ClientApplicationTextResource>>> _applicationTextResourcesTasks = new(StringComparer.OrdinalIgnoreCase);
 
@@ -62,6 +63,65 @@ public sealed class AuthorizationScope(
 		return true;
 	}
 
+	public static bool TryRestrictStrings(
+		StringFilter? filter,
+		IReadOnlyCollection<string> permittedValues,
+		out StringFilter? restrictedFilter)
+	{
+		if (!String.IsNullOrEmpty(filter?.Value) && filter.AnyOf?.Count > 0)
+		{
+			restrictedFilter = null;
+			return false;
+		}
+
+		StringComparer comparer = filter?.IgnoreCase == false ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+		IEnumerable<string> restrictedValues = permittedValues;
+
+		if (filter?.AnyOf?.Count > 0)
+			restrictedValues = restrictedValues.Intersect(filter.AnyOf, comparer);
+		else if (!String.IsNullOrEmpty(filter?.Value))
+			restrictedValues = restrictedValues.Where(value => Matches(value, filter));
+
+		string[] values = [.. restrictedValues.Distinct(comparer).Order(comparer)];
+		if (values.Length == 0)
+		{
+			restrictedFilter = null;
+			return false;
+		}
+
+		restrictedFilter = new StringFilter
+		{
+			AnyOf = values,
+			IgnoreCase = filter?.IgnoreCase ?? true
+		};
+
+		return true;
+	}
+
+	public async Task<IReadOnlyCollection<string>> GetPermittedTextKeysAsync(
+		CurrentPrincipal principal,
+		CancellationToken cancellationToken)
+	{
+		IReadOnlyList<ClientApplicationTextResource> textResources = await GetApplicationTextResourcesAsync(cancellationToken);
+		IEnumerable<ClientApplicationTextResource> permittedTextResources = textResources;
+
+		if (principal.HasApplicationRestrictions)
+			permittedTextResources = permittedTextResources.Where(textResource => principal.ClientApplicationGuids.Contains(textResource.ClientApplicationGuid));
+
+		if (principal.HasLocaleRestrictions)
+		{
+			IReadOnlyList<ClientApplicationLocale> applicationLocales = await GetApplicationLocalesAsync(cancellationToken);
+			Guid[] applicationGuids = [.. applicationLocales
+				.Where(locale => principal.LocaleKeys.Contains(locale.LocaleKey, StringComparer.OrdinalIgnoreCase))
+				.Select(locale => locale.ClientApplicationGuid)
+				.Distinct()];
+
+			permittedTextResources = permittedTextResources.Where(textResource => applicationGuids.Contains(textResource.ClientApplicationGuid));
+		}
+
+		return [.. permittedTextResources.Select(textResource => textResource.TextKey).Distinct(StringComparer.OrdinalIgnoreCase)];
+	}
+
 	public async ValueTask<bool> CanAccessTextAsync(
 		CurrentPrincipal principal,
 		string textKey,
@@ -89,36 +149,8 @@ public sealed class AuthorizationScope(
 		string textKey,
 		CancellationToken cancellationToken)
 	{
-		if (!CanAccessLocale(principal, localeKey))
-			return false;
-
-		if (!principal.HasApplicationRestrictions &&
-			!principal.HasLocaleRestrictions)
-			return true;
-
-		IReadOnlyList<ClientApplicationTextResource> textResources = await GetApplicationTextResourcesAsync(textKey, cancellationToken);
-		IReadOnlyList<ClientApplicationLocale> applicationLocales = await GetApplicationLocalesAsync(cancellationToken);
-
-		return textResources.Any(textResource =>
-			CanAccessApplication(principal, textResource.ClientApplicationGuid) &&
-			applicationLocales.Any(locale => locale.ClientApplicationGuid == textResource.ClientApplicationGuid &&
-				String.Equals(locale.LocaleKey, localeKey, StringComparison.OrdinalIgnoreCase)));
-	}
-
-	public static bool TryGetExactValue(
-		StringFilter? filter,
-		out string value)
-	{
-		if (filter is not null &&
-			filter.Matching == StringMatching.Exact &&
-			!String.IsNullOrWhiteSpace(filter.Value))
-		{
-			value = filter.Value;
-			return true;
-		}
-
-		value = String.Empty;
-		return false;
+		return CanAccessLocale(principal, localeKey) &&
+			await CanAccessTextAsync(principal, textKey, cancellationToken);
 	}
 
 	private Task<IReadOnlyList<ClientApplicationLocale>> GetApplicationLocalesAsync(
@@ -127,6 +159,14 @@ public sealed class AuthorizationScope(
 		_applicationLocalesTask ??= _clientApplicationLocaleQueries.ListItemsAsync(ClientApplicationLocaleFilter.All(), cancellationToken);
 
 		return _applicationLocalesTask;
+	}
+
+	private Task<IReadOnlyList<ClientApplicationTextResource>> GetApplicationTextResourcesAsync(
+		CancellationToken cancellationToken)
+	{
+		_applicationTextResourcesTask ??= _clientApplicationTextResourceQueries.ListItemsAsync(ClientApplicationTextResourceFilter.All(), cancellationToken);
+
+		return _applicationTextResourcesTask;
 	}
 
 	private Task<IReadOnlyList<ClientApplicationTextResource>> GetApplicationTextResourcesAsync(
@@ -145,5 +185,21 @@ public sealed class AuthorizationScope(
 		}
 
 		return task;
+	}
+
+	private static bool Matches(
+		string value,
+		StringFilter filter)
+	{
+		StringComparison comparison = filter.IgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+		return filter.Matching switch
+		{
+			StringMatching.Exact => String.Equals(value, filter.Value, comparison),
+			StringMatching.StartsWith => value.StartsWith(filter.Value!, comparison),
+			StringMatching.EndsWith => value.EndsWith(filter.Value!, comparison),
+			StringMatching.Contains => value.Contains(filter.Value!, comparison),
+			_ => false
+		};
 	}
 }

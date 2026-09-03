@@ -3,6 +3,7 @@ using Textbase.Application.Features.FlatTranslations;
 using Textbase.Contracts.Models;
 using Textbase.Domain.Enumerations;
 using Textbase.Host.Authorization;
+using Uwn.EntityFrameworkCore.Querying;
 
 namespace Textbase.Host.Api.Authorization;
 
@@ -80,8 +81,20 @@ public sealed class FlatTranslationAuthorization(
 			!principal.HasLocaleRestrictions)
 			return true;
 
-		return AuthorizationScope.TryGetExactValue(filter.LocaleKey, out string localeKey) &&
-			AuthorizationScope.TryGetExactValue(filter.TextKey, out string textKey) &&
-			await _scope.CanAccessTranslationAsync(principal, localeKey, textKey, cancellationToken);
+		StringFilter? restrictedLocaleFilter = filter.LocaleKey;
+		if (principal.HasLocaleRestrictions &&
+			!AuthorizationScope.TryRestrictStrings(filter.LocaleKey, principal.LocaleKeys, out restrictedLocaleFilter))
+			return false;
+
+		IReadOnlyCollection<string> permittedTextKeys = await _scope.GetPermittedTextKeysAsync(principal, cancellationToken);
+		if (!AuthorizationScope.TryRestrictStrings(filter.TextKey, permittedTextKeys, out StringFilter? restrictedTextFilter))
+			return false;
+
+		if (principal.HasLocaleRestrictions)
+			filter.LocaleKey = restrictedLocaleFilter;
+
+		filter.TextKey = restrictedTextFilter;
+
+		return true;
 	}
 }
