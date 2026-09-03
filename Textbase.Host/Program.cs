@@ -1,16 +1,18 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Textbase.Application.Common;
 using Textbase.Host.Components;
 using Textbase.Infrastructure;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 string connectionString = builder.Configuration.GetConnectionString("Textbase")
 	?? throw new InvalidOperationException("Connection string 'Textbase' is not configured.");
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services
+	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
 
 builder.Services.AddAuthorization();
@@ -23,10 +25,13 @@ builder.Services.AddControllers(options =>
 	options.Filters.Add(new AuthorizeFilter());
 });
 
-builder.Services.AddRazorComponents()
+builder.Services
+	.AddRazorComponents()
 	.AddInteractiveServerComponents();
 
-var app = builder.Build();
+//
+
+WebApplication app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
