@@ -18,12 +18,12 @@
 ## Functionality
 1. Require authentication for the API
 	a. Users can have one or more of the following roles:
-		i. **Sysadmin**
+		i. **SysAdmin**
 			- Full administrative access, but still subject to data-integrity rules below
 			- Can CRUD Applications, Texts, Formalities, Presentations, Translations
 			- Can assign roles and Application/Locale restrictions to users
 			- Is always unrestricted
-		ii. **Appadmin**
+		ii. **AppAdmin**
 			- Can manage one or more assigned Applications
 			- Can CRUD `ClientApplicationLocale` and `ClientApplicationTextResource` entries for assigned Applications
 			- Ignores Locale restrictions for Application administration purposes
