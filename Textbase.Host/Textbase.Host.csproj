@@ -5,7 +5,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Textbase.Application\Textbase.Application.csproj" />
+		<PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="4.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Textbase.Application\Textbase.Application.csproj" />
+		<ProjectReference Include="..\Textbase.Infrastructure\Textbase.Infrastructure.csproj" />
 	</ItemGroup>
 
 </Project>
