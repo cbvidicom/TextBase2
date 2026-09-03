@@ -137,7 +137,7 @@ public sealed class AuthorizationScope(
 		{
 			ClientApplicationTextResourceFilter filter = new()
 			{
-				TextKey = new StringFilter(textKey, StringMatching.Exact)
+				TextKey = FilterFactory.CreateStringFilterFrom(textKey, StringMatching.Exact)
 			};
 
 			task = _clientApplicationTextResourceQueries.ListItemsAsync(filter, cancellationToken);

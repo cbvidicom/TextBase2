@@ -64,3 +64,4 @@
 
 ## Known Issues
 1. `flat.Translation` is treated like a normal table, while it should be read-only
+	- Don't wait for this to happen, it will take months; handle it through Authorization for the time being
