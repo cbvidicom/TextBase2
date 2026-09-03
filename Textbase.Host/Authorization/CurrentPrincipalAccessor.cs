@@ -1,53 +1,53 @@
-using System.Security.Claims;
 using Microsoft.Identity.Web;
+using System.Security.Claims;
 using Textbase.Application.Features.AuthPrincipalClientApplications;
 using Textbase.Application.Features.AuthPrincipalLocales;
 using Textbase.Application.Features.AuthPrincipals;
-using Textbase.Contracts.Models;
 using Textbase.Domain.Enumerations;
-using Uwn.EntityFrameworkCore.Infrastructure;
-using DM = Textbase.Domain.Models;
+using Textbase.Domain.Models;
+using Textbase.Infrastructure.Persistence.AuthPrincipals;
 
 namespace Textbase.Host.Authorization;
 
 public sealed class CurrentPrincipalAccessor(
-	IHttpContextAccessor httpContextAccessor,
-	IAuthPrincipalQueries authPrincipalQueries,
-	IAuthPrincipalCommands authPrincipalCommands,
-	IAuthPrincipalClientApplicationQueries authPrincipalClientApplicationQueries,
-	IAuthPrincipalLocaleQueries authPrincipalLocaleQueries)
+	IAuthPrincipalClientApplicationQueries _authPrincipalClientApplicationQueries,
+	IAuthPrincipalCommands _authPrincipalCommands,
+	IAuthPrincipalEntityFactory _authPrincipalEntityFactory,
+	IAuthPrincipalLocaleQueries _authPrincipalLocaleQueries,
+	IAuthPrincipalQueries _authPrincipalQueries,
+	IHttpContextAccessor _httpContextAccessor)
 	: ICurrentPrincipalAccessor
 {
 	private Task<CurrentPrincipal?>? currentPrincipalTask;
 
-	public Task<CurrentPrincipal?> GetAsync(CancellationToken cancellationToken = default)
+	//
+
+	public Task<CurrentPrincipal?> GetAsync(
+		CancellationToken cancellationToken = default)
 	{
 		currentPrincipalTask ??= LoadAsync(cancellationToken);
 
 		return currentPrincipalTask;
 	}
 
-	private async Task<CurrentPrincipal?> LoadAsync(CancellationToken cancellationToken)
+	//
+
+	private async Task<CurrentPrincipal?> LoadAsync(
+		CancellationToken cancellationToken)
 	{
-		ClaimsPrincipal? user = httpContextAccessor.HttpContext?.User;
+		ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
 		string? objectId = user?.GetObjectId();
 
-		if (user is null || !Guid.TryParse(objectId, out Guid entraObjectId))
-		{
+		if (user is null ||
+			!Guid.TryParse(objectId, out Guid entraObjectId))
 			return null;
-		}
 
-		DM.AuthPrincipal? principal = await authPrincipalQueries.ReadAsync(entraObjectId, cancellationToken);
+		AuthPrincipal? principal = await _authPrincipalQueries.ReadAsync(entraObjectId, cancellationToken);
 
-		if (principal is null)
-		{
-			principal = await CreateAsync(user, entraObjectId, cancellationToken);
-		}
+		principal ??= await CreateAsync(user, entraObjectId, cancellationToken);
 
 		if (!principal.IsActive)
-		{
 			return null;
-		}
 
 		AuthPrincipalClientApplicationFilter applicationFilter = new()
 		{
@@ -59,15 +59,15 @@ public sealed class CurrentPrincipalAccessor(
 			EntraObjectId = entraObjectId
 		};
 
-		Task<IReadOnlyList<DM.AuthPrincipalClientApplication>> applicationsTask =
-			authPrincipalClientApplicationQueries.ListItemsAsync(applicationFilter, cancellationToken);
+		Task<IReadOnlyList<AuthPrincipalClientApplication>> applicationsTask =
+			_authPrincipalClientApplicationQueries.ListItemsAsync(applicationFilter, cancellationToken);
 
-		Task<IReadOnlyList<DM.AuthPrincipalLocale>> localesTask = authPrincipalLocaleQueries.ListItemsAsync(localeFilter, cancellationToken);
+		Task<IReadOnlyList<AuthPrincipalLocale>> localesTask = _authPrincipalLocaleQueries.ListItemsAsync(localeFilter, cancellationToken);
 
 		await Task.WhenAll(applicationsTask, localesTask);
 
-		IReadOnlyList<DM.AuthPrincipalClientApplication> applications = await applicationsTask;
-		IReadOnlyList<DM.AuthPrincipalLocale> locales = await localesTask;
+		IReadOnlyList<AuthPrincipalClientApplication> applications = await applicationsTask;
+		IReadOnlyList<AuthPrincipalLocale> locales = await localesTask;
 
 		return new CurrentPrincipal(
 			principal.EntraObjectId,
@@ -78,32 +78,24 @@ public sealed class CurrentPrincipalAccessor(
 			[.. locales.Select(l => l.LocaleKey).Order(StringComparer.OrdinalIgnoreCase)]);
 	}
 
-	private async Task<DM.AuthPrincipal> CreateAsync(
+	private async Task<AuthPrincipal> CreateAsync(
 		ClaimsPrincipal user,
 		Guid entraObjectId,
 		CancellationToken cancellationToken)
 	{
-		AuthPrincipalDto dto = new()
-		{
-			EntraObjectId = entraObjectId,
-			Role = (int)Roles.None,
-			DisplayName = LimitLength(user.FindFirstValue("name") ?? user.Identity?.Name, 128),
-			EmailAddress = LimitLength(GetEmailAddress(user), 256),
-			IsActive = true
-		};
+		AuthPrincipal principal = _authPrincipalEntityFactory.Create(entraObjectId, (int)Roles.None, true);
+		principal.DisplayName = LimitLength(user.FindFirstValue("name") ?? user.Identity?.Name, 128);
+		principal.EmailAddress = LimitLength(GetEmailAddress(user), 256);
 
-		CreateResult<DM.AuthPrincipal> result = await authPrincipalCommands.CreateAsync(dto, cancellationToken);
+		if (await _authPrincipalCommands.TryCreateAsync(principal, cancellationToken))
+			return principal;
 
-		if (result.Succeeded)
-		{
-			return result.Model;
-		}
-
-		return await authPrincipalQueries.ReadAsync(entraObjectId, cancellationToken)
+		return await _authPrincipalQueries.ReadAsync(entraObjectId, cancellationToken)
 			?? throw new InvalidOperationException("The authenticated principal could not be created.");
 	}
 
-	private static string? GetEmailAddress(ClaimsPrincipal user)
+	private static string? GetEmailAddress(
+		ClaimsPrincipal user)
 	{
 		string[] claimTypes = [ClaimTypes.Email, "emails", "email", "preferred_username"];
 
@@ -111,15 +103,17 @@ public sealed class CurrentPrincipalAccessor(
 		{
 			string? value = user.FindFirstValue(claimType);
 
-			if (!string.IsNullOrWhiteSpace(value))
-			{
+			if (!String.IsNullOrWhiteSpace(value))
 				return value;
-			}
 		}
 
 		return null;
 	}
 
-	private static string? LimitLength(string? value, int maximumLength)
-		=> value is null || value.Length <= maximumLength ? value : value[..maximumLength];
+	private static string? LimitLength(
+		string? value,
+		int maximumLength)
+		=> value is null || value.Length <= maximumLength
+		? value
+		: value[..maximumLength];
 }
