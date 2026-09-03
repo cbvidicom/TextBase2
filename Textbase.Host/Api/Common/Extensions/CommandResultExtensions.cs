@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+/// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
+
+using Microsoft.AspNetCore.Mvc;
 using Uwn.EntityFrameworkCore.Infrastructure;
 
 namespace Textbase.Host.Api.Common.Extensions;
@@ -45,7 +47,9 @@ public static class CommandResultExtensions
 
 	private static ActionResult<TResponse> ToFailureActionResult<TResponse>(
 		this CommandResult result)
-		=> result.ToFailureActionResult();
+	{
+		return result.ToFailureActionResult();
+	}
 
 	private static ActionResult ToFailureActionResult(
 		this CommandResult result)

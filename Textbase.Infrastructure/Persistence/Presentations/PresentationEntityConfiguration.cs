@@ -13,5 +13,7 @@ internal sealed partial class PresentationEntityConfiguration
 		builder.ToTable("Presentation", "dbo", t => t.UseSqlOutputClause(false));
 
 		builder.HasKey(e => new { e.PresentationKey });
+		builder.Property(e => e.PresentationKey).IsRequired().HasMaxLength(16).IsUnicode(false);
+		builder.Property(e => e.Description).HasMaxLength(1024).IsUnicode(true);
 	}
 }

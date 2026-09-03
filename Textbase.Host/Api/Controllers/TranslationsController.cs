@@ -1,6 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
 using Textbase.Application.Common;
+using Textbase.Host.Api.Authorization;
 using Textbase.Application.Features.Translations;
 using Textbase.Host.Api.Common.Extensions;
 using CM = Textbase.Contracts.Models;
@@ -15,7 +16,8 @@ namespace Textbase.Host.Api.Controllers;
 [Route("api/[controller]")]
 public sealed partial class TranslationsController(
 	ITranslationQueries Queries,
-	ITranslationServerCommands Commands
+	ITranslationServerCommands Commands,
+	ITranslationAuthorization? Authorization = null
 	)
 	: ControllerBase
 {
@@ -24,6 +26,10 @@ public sealed partial class TranslationsController(
 		[FromBody] CM.TranslationDto dto,
 		CancellationToken cancellationToken)
 	{	
+		if (Authorization is not null &&
+			!await Authorization.CanCreateAsync(dto, User, cancellationToken))
+			return Forbid();
+
 		CreateResult<DM.Translation> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.Translation, CM.TranslationDto>(
@@ -35,6 +41,10 @@ public sealed partial class TranslationsController(
 		string localeKey, string textKey, string formalityKey, string presentationKey,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanReadAsync(localeKey, textKey, formalityKey, presentationKey, User, cancellationToken))
+			return Forbid();
+
 		DM.Translation? result = await Queries.ReadAsync(localeKey, textKey, formalityKey, presentationKey, cancellationToken);
 
 		return result is null ? NotFound() : Ok(result);
@@ -45,6 +55,10 @@ public sealed partial class TranslationsController(
 		[FromQuery] TranslationFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanCountAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		long result = await Queries.CountAsync(filter, cancellationToken);
 
 		Response.Headers[ApiStrings.TotalCountHeaderKey] = result.ToString();
@@ -57,6 +71,10 @@ public sealed partial class TranslationsController(
 		[FromQuery] TranslationFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanListAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		PagedResponse<DM.Translation> result = await Queries.ListAsync(filter, cancellationToken);
 
 		return Ok(result);
@@ -68,6 +86,10 @@ public sealed partial class TranslationsController(
 		[FromBody] CM.TranslationDto dto,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanUpdateAsync(localeKey, textKey, formalityKey, presentationKey, dto, User, cancellationToken))
+			return Forbid();
+
 		if (localeKey != dto.LocaleKey || textKey != dto.TextKey || formalityKey != dto.FormalityKey || presentationKey != dto.PresentationKey)
 			return Conflict();
 
@@ -81,6 +103,10 @@ public sealed partial class TranslationsController(
 		string localeKey, string textKey, string formalityKey, string presentationKey,
 		CancellationToken cancellationToken)	
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanDeleteAsync(localeKey, textKey, formalityKey, presentationKey, User, cancellationToken))
+			return Forbid();
+
 		DeleteResult result = await Commands.DeleteAsync(localeKey, textKey, formalityKey, presentationKey, cancellationToken);
 
 		return result.ToActionResult(Ok);

@@ -13,6 +13,8 @@ internal sealed partial class AuthPrincipalClientApplicationEntityConfiguration
 		builder.ToTable("PrincipalClientApplication", "auth");
 
 		builder.HasKey(e => new { e.EntraObjectId, e.ClientApplicationGuid });
+		builder.Property(e => e.EntraObjectId).IsRequired();
+		builder.Property(e => e.ClientApplicationGuid).IsRequired();
 		builder.HasIndex(e => new {e.ClientApplicationGuid });
 		builder.HasIndex(e => new {e.EntraObjectId });
 		builder.HasOne(e => e.ClientApplication).WithMany(e => e.AuthPrincipalClientApplications).HasForeignKey(e => new { e.ClientApplicationGuid }).HasPrincipalKey(e => new { e.ClientApplicationGuid }).OnDelete(DeleteBehavior.NoAction);

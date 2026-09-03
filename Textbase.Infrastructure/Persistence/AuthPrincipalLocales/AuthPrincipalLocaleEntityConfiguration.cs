@@ -13,6 +13,8 @@ internal sealed partial class AuthPrincipalLocaleEntityConfiguration
 		builder.ToTable("PrincipalLocale", "auth");
 
 		builder.HasKey(e => new { e.EntraObjectId, e.LocaleKey });
+		builder.Property(e => e.EntraObjectId).IsRequired();
+		builder.Property(e => e.LocaleKey).IsRequired().HasMaxLength(85).IsUnicode(false);
 		builder.HasIndex(e => new {e.EntraObjectId });
 		builder.HasIndex(e => new {e.LocaleKey });
 		builder.HasOne(e => e.Locale).WithMany(e => e.AuthPrincipalLocales).HasForeignKey(e => new { e.LocaleKey }).HasPrincipalKey(e => new { e.LocaleKey }).OnDelete(DeleteBehavior.NoAction);

@@ -1,6 +1,7 @@
 /// This file was created by a generator. Do not modify the content, as any changes will be lost if the file is regenerated.
 
 using Textbase.Application.Common;
+using Textbase.Host.Api.Authorization;
 using Textbase.Application.Features.Presentations;
 using Textbase.Host.Api.Common.Extensions;
 using CM = Textbase.Contracts.Models;
@@ -15,7 +16,8 @@ namespace Textbase.Host.Api.Controllers;
 [Route("api/[controller]")]
 public sealed partial class PresentationsController(
 	IPresentationQueries Queries,
-	IPresentationServerCommands Commands
+	IPresentationServerCommands Commands,
+	IPresentationAuthorization? Authorization = null
 	)
 	: ControllerBase
 {
@@ -24,6 +26,10 @@ public sealed partial class PresentationsController(
 		[FromBody] CM.PresentationDto dto,
 		CancellationToken cancellationToken)
 	{	
+		if (Authorization is not null &&
+			!await Authorization.CanCreateAsync(dto, User, cancellationToken))
+			return Forbid();
+
 		CreateResult<DM.Presentation> result = await Commands.CreateAsync(dto, cancellationToken);
 
 		return result.ToActionResult<DM.Presentation, CM.PresentationDto>(
@@ -35,6 +41,10 @@ public sealed partial class PresentationsController(
 		string presentationKey,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanReadAsync(presentationKey, User, cancellationToken))
+			return Forbid();
+
 		DM.Presentation? result = await Queries.ReadAsync(presentationKey, cancellationToken);
 
 		return result is null ? NotFound() : Ok(result);
@@ -45,6 +55,10 @@ public sealed partial class PresentationsController(
 		[FromQuery] PresentationFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanCountAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		long result = await Queries.CountAsync(filter, cancellationToken);
 
 		Response.Headers[ApiStrings.TotalCountHeaderKey] = result.ToString();
@@ -57,6 +71,10 @@ public sealed partial class PresentationsController(
 		[FromQuery] PresentationFilter filter,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanListAsync(filter, User, cancellationToken))
+			return Forbid();
+
 		PagedResponse<DM.Presentation> result = await Queries.ListAsync(filter, cancellationToken);
 
 		return Ok(result);
@@ -68,6 +86,10 @@ public sealed partial class PresentationsController(
 		[FromBody] CM.PresentationDto dto,
 		CancellationToken cancellationToken)
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanUpdateAsync(presentationKey, dto, User, cancellationToken))
+			return Forbid();
+
 		if (presentationKey != dto.PresentationKey)
 			return Conflict();
 
@@ -81,6 +103,10 @@ public sealed partial class PresentationsController(
 		string presentationKey,
 		CancellationToken cancellationToken)	
 	{
+		if (Authorization is not null &&
+			!await Authorization.CanDeleteAsync(presentationKey, User, cancellationToken))
+			return Forbid();
+
 		DeleteResult result = await Commands.DeleteAsync(presentationKey, cancellationToken);
 
 		return result.ToActionResult(Ok);

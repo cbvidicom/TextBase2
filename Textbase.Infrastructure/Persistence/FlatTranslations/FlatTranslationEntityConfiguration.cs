@@ -13,6 +13,12 @@ internal sealed partial class FlatTranslationEntityConfiguration
 		builder.ToTable("Translation", "flat");
 
 		builder.HasKey(e => new { e.LocaleKey, e.TextKey, e.FormalityKey, e.PresentationKey });
+		builder.Property(e => e.LocaleKey).IsRequired().HasMaxLength(85).IsUnicode(false);
+		builder.Property(e => e.SourceLocaleKey).IsRequired().HasMaxLength(85).IsUnicode(false);
+		builder.Property(e => e.TextKey).IsRequired().HasMaxLength(128).IsUnicode(false);
+		builder.Property(e => e.FormalityKey).IsRequired().HasMaxLength(16).IsUnicode(false);
+		builder.Property(e => e.PresentationKey).IsRequired().HasMaxLength(16).IsUnicode(false);
+		builder.Property(e => e.Value).IsRequired().IsUnicode(true);
 		builder.HasIndex(e => new {e.TextKey, e.LocaleKey });
 	}
 }
