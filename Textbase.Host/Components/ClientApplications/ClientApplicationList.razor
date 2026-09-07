@@ -1,0 +1,80 @@
+﻿@page "/client-applications"
+
+@using Textbase.Application.Features.ClientApplications
+@using Textbase.Host.ViewModels.ClientApplications
+
+@inherits BaseDataGridView<ClientApplicationListViewModel,ClientApplication,ClientApplicationFilter>
+
+@if (IsInitialized)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="ClientApplication"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(ClientApplication.Name)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Name" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(ClientApplication.DefaultLanguageTag)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Tag" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(ClientApplication.DefaultFileName)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="File" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(ClientApplication.IsActive)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Active" />
+			<RadzenDataGridColumn Filterable="false"
+								  Property="Locales"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Locales">
+				<Template Context="clientApplication">
+					@ViewModel.GetLocaleCount(clientApplication.ClientApplicationGuid)
+				</Template>
+			</RadzenDataGridColumn>
+			<RadzenDataGridColumn Filterable="false"
+								  Property="Texts"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Texts">
+				<Template Context="clientApplication">
+					@ViewModel.GetTextResourceCount(clientApplication.ClientApplicationGuid)
+				</Template>
+			</RadzenDataGridColumn>
+		</Columns>
+	</RzDataGrid>
+}
+else
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+
+<RzAddButton Path="@StaticRoutes.ClientApplicationCreate" />
+
+@code {
+	protected override string EditRoute => StaticRoutes.ClientApplicationEdit;
+
+	protected override Func<ClientApplication, object> GetKey => e => e.ClientApplicationGuid;
+
+	protected override bool IsInitialized { get; set; } = true;
+}

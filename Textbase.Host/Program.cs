@@ -1,12 +1,17 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Radzen;
 using Textbase.Application.Common;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
-using Textbase.Host.Components;
+using Textbase.Host.Components.Infrastructure;
+using Textbase.Host.ViewModels;
 using Textbase.Infrastructure;
+using Uwn.Blazor.Extensions.Common;
+using Uwn.Blazor.Services.Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +45,11 @@ builder.Services.AddControllers(options =>
 builder.Services
 	.AddRazorComponents()
 	.AddInteractiveServerComponents();
+
+builder.Services.AddRadzenComponents();
+
+builder.Services.AddUwRadzen(builder.Configuration);
+builder.Services.AddViewModels<ViewModelMarker>();
 
 //
 

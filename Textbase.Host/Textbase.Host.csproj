@@ -8,11 +8,19 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Identity.Web" Version="4.14.2" />
+		<PackageReference Include="Radzen.Blazor" Version="11.3.2" />
+		<PackageReference Include="Uwn.Blazor" Version="10.26.9.707" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Textbase.Application\Textbase.Application.csproj" />
 		<ProjectReference Include="..\Textbase.Infrastructure\Textbase.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="wwwroot\MainLayout.css" />
+	  <None Include="wwwroot\ReconnectModal.css" />
+	  <None Include="wwwroot\ReconnectModal.js" />
 	</ItemGroup>
 
 </Project>

@@ -1,0 +1,10 @@
+﻿<RzStack Orientation="Orientation.Horizontal"
+		 Width="40rem"
+		 WidthMode="WidthMode.Maximum">
+	@ChildContent
+</RzStack>
+
+@code {
+	[Parameter, EditorRequired]
+	public RenderFragment ChildContent { get; set; } = default!;
+}

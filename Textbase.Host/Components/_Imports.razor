@@ -1,11 +1,49 @@
-﻿@using System.Net.Http
+﻿@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+@using System.Net.Http
 @using System.Net.Http.Json
+
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
+
+@using Radzen
+@using Radzen.Blazor
+
+@using Textbase.Contracts.Enumerations
+@using Textbase.Contracts.Models
+@using Textbase.Domain.Models
 @using Textbase.Host
 @using Textbase.Host.Components
-@using Textbase.Host.Components.Layout
+@using Textbase.Host.Components.Common
+@using Textbase.Host.Components.Infrastructure
+@using Textbase.Host.Components.Pages
+
+@using Uwn.Blazor.Components.Abstractions.Querying
+@using Uwn.Blazor.Components.Radzen
+@using Uwn.Blazor.Components.Radzen.Buttons
+@using Uwn.Blazor.Components.Radzen.Cards
+@using Uwn.Blazor.Components.Radzen.DataGrids
+@using Uwn.Blazor.Components.Radzen.Dialogs
+@using Uwn.Blazor.Components.Radzen.FormFields
+@using Uwn.Blazor.Components.Radzen.Icons
+@using Uwn.Blazor.Components.Radzen.Indicators
+@using Uwn.Blazor.Components.Radzen.Links
+@using Uwn.Blazor.Components.Radzen.Stacks
+@using Uwn.Blazor.Components.Radzen.Texts
+@using Uwn.Blazor.Enumerations.Radzen
+@using Uwn.Blazor.Extensions.Radzen
+@using Uwn.Blazor.Icons
+@using Uwn.Blazor.Models.Common
+@using Uwn.Blazor.Providers
+@using Uwn.Blazor.Services
+@using Uwn.Blazor.Services.Radzen
+@using Uwn.Blazor.Utils.Common
+
+@inject RzAlertService AlertService
+@inject DialogService DialogService
+@inject IIconSet Icons
+@inject NavigationManager NavigationManager
+@inject NotificationService NotificationService

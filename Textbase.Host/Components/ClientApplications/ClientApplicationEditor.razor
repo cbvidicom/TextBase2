@@ -1,0 +1,105 @@
+﻿@page "/client-application"
+@page "/client-application/{Guid:guid}"
+
+@using Textbase.Application.Features.ClientApplications
+@using Textbase.Host.ViewModels.ClientApplications
+
+@inherits BaseGuidEditorView<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
+
+<RzGoBackLink Path="@GoBackPath" />
+
+@if (IsBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else
+{
+	<RadzenTemplateForm TItem="ClientApplication"
+						Data="@Item"
+						class="rz-mt-4 rz-mb-4">
+		<AntiforgeryToken />
+		<DataAnnotationsValidator />
+		<VerticalStack>
+			@if (!IsNewItem)
+			{
+				<RzTextBoxFormField Name="@nameof(ClientApplication.ClientApplicationGuid)"
+									ReadOnly="true"
+									StartIcon="@Icons.Barcode"
+									Text="GUID"
+									Value="@Item.ClientApplicationGuid.ToString()" />
+			}
+			<RzTextBoxFormField MinLength="3"
+								MaxLength="128"
+								Name="@nameof(ClientApplication.Name)"
+								Required="true"
+								StartIcon="@Icons.Name"
+								Text="Name"
+								@bind-Value="@Item.Name" />
+			<RzTextAreaFormField MaxLength="1024"
+								 Name="@nameof(ClientApplication.Description)"
+								 StartIcon="@Icons.Description"
+								 Text="Description"
+								 @bind-Value="@Item.Description" />
+			<RzDropDownFormField TValue="LanguageTag?"
+								 AllowClear="true"
+								 EnumTextResolver="LanguageTagExtensions.GetDisplayText"
+								 EnumType="@typeof(LanguageTag)"
+								 Name="@nameof(ClientApplication.DefaultLanguageTag)"
+								 Required="false"
+								 StartIcon="@Icons.Language"
+								 Text="Default Language Tag"
+								 @bind-Value="@Item.DefaultLanguageTagValue" />
+			<RzTextAreaFormField MaxLength="1024"
+								 Name="@nameof(ClientApplication.DefaultFormat)"
+								 StartIcon="@Icons.CodeXml"
+								 Text="Default Format"
+								 @bind-Value="@Item.DefaultFormat" />
+			<RzTextBoxFormField MaxLength="128"
+								Name="@nameof(ClientApplication.DefaultFileName)"
+								StartIcon="@Icons.DriveFileRename"
+								Text="Default File Name"
+								@bind-Value="@Item.DefaultFileName" />
+			<RzSwitchFormField Name="@nameof(ClientApplication.IsActive)"
+							   Text="Is Active"
+							   @bind-Value="@Item.IsActive" />
+
+			<HorizontalStack>
+				<RzSaveButton RenderStack="false"
+							  Click="OnSave" />
+				@if (!String.IsNullOrWhiteSpace(GoBackPath))
+				{
+					<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+								   Click="OnSaveAndGoBack"
+								   Icon="@Icons.Save"
+								   RenderStack="false"
+								   Text="Save & Go back" />
+				}
+				@if (IsNewItem)
+				{
+					<RzClickButton ButtonStyle="ButtonStyle.Info"
+								   Click="OnSaveAndNew"
+								   Icon="@Icons.Save"
+								   RenderStack="false"
+								   Text="Save & New" />
+				}
+			</HorizontalStack>
+		</VerticalStack>
+	</RadzenTemplateForm>
+}
+
+@code {
+	protected override string GoBackPath => StaticRoutes.ClientApplicationList;
+
+	private Task OnSave()
+		=> HandleSaveAsync(SaveMode.Save);
+
+	private Task OnSaveAndGoBack()
+		=> HandleSaveAsync(SaveMode.SaveAndGoBack);
+
+	private Task OnSaveAndNew()
+		=> HandleSaveAsync(SaveMode.SaveAndNew);
+
+	private async Task HandleSaveAsync(
+		SaveMode mode)
+		=> await SaveItemAsync(mode);
+}
