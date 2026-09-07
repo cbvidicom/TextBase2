@@ -1,0 +1,13 @@
+﻿@code {
+	[CascadingParameter]
+	private MainLayout MainLayout { get; set; } = default!;
+
+	[Parameter, EditorRequired]
+	public string Text { get; set; } = String.Empty;
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+		MainLayout.SetHeader(Text);
+	}
+}
