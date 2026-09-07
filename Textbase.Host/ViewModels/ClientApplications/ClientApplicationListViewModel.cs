@@ -25,7 +25,7 @@ public class ClientApplicationListViewModel(
 
 		AuthenticationState authenticationState = await _authenticationStateProvider.GetAuthenticationStateAsync();
 		ClaimsPrincipal user = authenticationState.User;
-		if (!await _authorization.CanListAsync(filter, user))
+		if (!await _authorization.CanCountAsync(filter, user) || !await _authorization.CanListAsync(filter, user))
 			throw new UnauthorizedAccessException("The current principal is not authorized to list client applications.");
 	}
 
