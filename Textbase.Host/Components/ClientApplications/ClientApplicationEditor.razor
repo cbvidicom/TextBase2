@@ -6,6 +6,7 @@
 
 @inherits TextbaseGuidEditorViewBase<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
 
+<PageHeader Text="@(IsNewItem ? "Create Application" : "Edit Application")" />
 <RzGoBackLink Path="@GoBackPath" />
 
 @if (IsBusy)
@@ -95,8 +96,6 @@ else
 
 @code {
 	protected override string GoBackPath => StaticRoutes.ClientApplicationList;
-
-	protected override string Header => IsNewItem ? "Create Application" : "Edit Application";
 
 	protected override string UnauthorizedPath => StaticRoutes.ClientApplicationList;
 
