@@ -3,7 +3,7 @@
 @using Textbase.Application.Features.ClientApplications
 @using Textbase.Host.ViewModels.ClientApplications
 
-@inherits BaseDataGridView<ClientApplicationListViewModel,ClientApplication,ClientApplicationFilter>
+@inherits ClientApplicationListViewBase
 
 @if (IsInitialized)
 {
@@ -22,6 +22,16 @@
 				RowSelect="OnRowSelect"
 				class="rz-mb-4">
 		<Columns>
+			@if (AuthorizedClientApplicationGuids is { Count: > 0 })
+			{
+				<RadzenDataGridColumn TItem="ClientApplication"
+									  FilterOperator="FilterOperator.In"
+									  FilterValue="@AuthorizedClientApplicationGuids"
+									  Filterable="true"
+									  Property="@nameof(ClientApplication.ClientApplicationGuid)"
+									  Sortable="false"
+									  Visible="false" />
+			}
 			<RadzenDataGridColumn Filterable="true"
 								  Frozen="true"
 								  Property="@nameof(ClientApplication.Name)"
@@ -31,31 +41,24 @@
 			<RadzenDataGridColumn Filterable="true"
 								  Property="@nameof(ClientApplication.DefaultLanguageTag)"
 								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
 								  Title="Tag" />
 			<RadzenDataGridColumn Filterable="true"
 								  Property="@nameof(ClientApplication.DefaultFileName)"
 								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
 								  Title="File" />
-			<RadzenDataGridColumn Filterable="true"
+			<RadzenDataGridColumn Filterable="false"
 								  Property="@nameof(ClientApplication.IsActive)"
 								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
 								  Title="Active" />
 			<RadzenDataGridColumn Filterable="false"
-								  Property="Locales"
-								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
+								  Sortable="false"
 								  Title="Locales">
 				<Template Context="clientApplication">
 					@ViewModel.GetLocaleCount(clientApplication.ClientApplicationGuid)
 				</Template>
 			</RadzenDataGridColumn>
 			<RadzenDataGridColumn Filterable="false"
-								  Property="Texts"
-								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
+								  Sortable="false"
 								  Title="Texts">
 				<Template Context="clientApplication">
 					@ViewModel.GetTextResourceCount(clientApplication.ClientApplicationGuid)
