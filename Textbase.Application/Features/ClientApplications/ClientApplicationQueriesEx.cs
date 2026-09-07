@@ -4,6 +4,7 @@ using Textbase.Infrastructure.Persistence;
 namespace Textbase.Application.Features.ClientApplications;
 
 public sealed partial class ClientApplicationQueries
+	: IClientApplicationServerQueries
 {
 	public async Task<IReadOnlyDictionary<Guid, ClientApplicationReferenceCounts>> GetReferenceCountsAsync(
 		IReadOnlyCollection<Guid> clientApplicationGuids,
