@@ -37,7 +37,7 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
-builder.Services.AddScoped<IClientApplicationServerQueries, ClientApplicationQueries>();
+builder.Services.AddScoped<IClientApplicationServerQueries>(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
 
 builder.Services.AddControllers(options =>
 {
