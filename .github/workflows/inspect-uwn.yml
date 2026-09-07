@@ -1,4 +1,4 @@
-name: Inspect Uwn.Blazor API
+name: Validate PR branch
 
 on:
   push:
@@ -6,35 +6,12 @@ on:
       - codex/client-application-gui-authorization
 
 jobs:
-  inspect:
+  build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
-      - name: Inspect package API
-        shell: bash
-        run: |
-          mkdir -p /tmp/inspect-uwn
-          cd /tmp/inspect-uwn
-          dotnet new console --framework net10.0 --force
-          dotnet add package Uwn.Blazor --version 10.26.9.707
-          cat > Program.cs <<'EOF'
-          using System.Reflection;
-          using Uwn.Blazor.Components.Abstractions.Querying;
-
-          static void Dump(Type type)
-          {
-              Console.WriteLine($"TYPE: {type.FullName}");
-              foreach (Type parameter in type.GetGenericArguments())
-              {
-                  Console.WriteLine($"GENERIC: {parameter.Name} {parameter.GenericParameterAttributes}");
-                  foreach (Type constraint in parameter.GetGenericParameterConstraints())
-                      Console.WriteLine($"CONSTRAINT: {constraint}");
-              }
-          }
-
-          Dump(typeof(BaseDataGridView<,,>));
-          Dump(typeof(BaseGuidEditorView<,,,>));
-          EOF
-          dotnet run
+      - name: Build
+        run: dotnet build TextBase2.slnx --configuration Release
