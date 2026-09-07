@@ -25,11 +25,12 @@ public abstract class ClientApplicationListViewBase
 	private NavigationManager Navigation { get; set; } = default!;
 
 	protected IReadOnlyCollection<Guid>? AuthorizedClientApplicationGuids { get; private set; }
+	protected abstract string Header { get; }
 
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
-		MainLayout.SetHeader("Applications");
+		MainLayout.SetHeader(Header);
 
 		ClientApplicationFilter filter = ClientApplicationFilter.All();
 		ClaimsPrincipal user = HttpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
