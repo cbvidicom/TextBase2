@@ -9,35 +9,41 @@ public sealed class AuthPrincipalLocaleAuthorization(
 	: AuthorizationBase(scope)
 	, IAuthPrincipalLocaleAuthorization
 {
-	public ValueTask<bool> CanCreateAsync(AuthPrincipalLocaleDto dto,
+	public ValueTask<bool> CanCreateAsync(
+		AuthPrincipalLocaleDto dto,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanReadAsync(Guid entraObjectId,
+	public ValueTask<bool> CanReadAsync(
+		Guid entraObjectId,
 		string localeKey,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanCountAsync(AuthPrincipalLocaleFilter filter,
+	public ValueTask<bool> CanCountAsync(
+		AuthPrincipalLocaleFilter filter,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanListAsync(AuthPrincipalLocaleFilter filter,
+	public ValueTask<bool> CanListAsync(
+		AuthPrincipalLocaleFilter filter,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanUpdateAsync(Guid entraObjectId,
+	public ValueTask<bool> CanUpdateAsync(
+		Guid entraObjectId,
 		string localeKey,
 		AuthPrincipalLocaleDto dto,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanDeleteAsync(Guid entraObjectId,
+	public ValueTask<bool> CanDeleteAsync(
+		Guid entraObjectId,
 		string localeKey,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)

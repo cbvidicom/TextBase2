@@ -12,7 +12,8 @@ public sealed class ClientApplicationAuthorization(
 	: AuthorizationBase(scope)
 	, IClientApplicationAuthorization
 {
-	public async ValueTask<bool> CanCreateAsync(ClientApplicationDto dto,
+	public async ValueTask<bool> CanCreateAsync(
+		ClientApplicationDto dto,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> await HasRoleAsync(Roles.SysAdmin, cancellationToken);
@@ -29,12 +30,14 @@ public sealed class ClientApplicationAuthorization(
 			AuthorizationScope.CanAccessApplication(principal, clientApplicationGuid);
 	}
 
-	public async ValueTask<bool> CanCountAsync(ClientApplicationFilter filter,
+	public async ValueTask<bool> CanCountAsync(
+		ClientApplicationFilter filter,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> await RestrictListAsync(filter, cancellationToken);
 
-	public async ValueTask<bool> CanListAsync(ClientApplicationFilter filter,
+	public async ValueTask<bool> CanListAsync(
+		ClientApplicationFilter filter,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> await RestrictListAsync(filter, cancellationToken);
@@ -46,7 +49,8 @@ public sealed class ClientApplicationAuthorization(
 		CancellationToken cancellationToken = default)
 		=> await HasRoleAsync(Roles.SysAdmin, cancellationToken);
 
-	public async ValueTask<bool> CanDeleteAsync(Guid clientApplicationGuid,
+	public async ValueTask<bool> CanDeleteAsync(
+		Guid clientApplicationGuid,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> await HasRoleAsync(Roles.SysAdmin, cancellationToken);

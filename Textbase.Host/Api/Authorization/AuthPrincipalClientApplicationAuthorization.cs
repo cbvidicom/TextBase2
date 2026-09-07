@@ -9,35 +9,41 @@ public sealed class AuthPrincipalClientApplicationAuthorization(
 	: AuthorizationBase(scope)
 	, IAuthPrincipalClientApplicationAuthorization
 {
-	public ValueTask<bool> CanCreateAsync(AuthPrincipalClientApplicationDto dto,
+	public ValueTask<bool> CanCreateAsync(
+		AuthPrincipalClientApplicationDto dto,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanReadAsync(Guid entraObjectId,
+	public ValueTask<bool> CanReadAsync(
+		Guid entraObjectId,
 		Guid clientApplicationGuid,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanCountAsync(AuthPrincipalClientApplicationFilter filter,
+	public ValueTask<bool> CanCountAsync(
+		AuthPrincipalClientApplicationFilter filter,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanListAsync(AuthPrincipalClientApplicationFilter filter,
+	public ValueTask<bool> CanListAsync(
+		AuthPrincipalClientApplicationFilter filter,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanUpdateAsync(Guid entraObjectId,
+	public ValueTask<bool> CanUpdateAsync(
+		Guid entraObjectId,
 		Guid clientApplicationGuid,
 		AuthPrincipalClientApplicationDto dto,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> IsSysAdminAsync(cancellationToken);
 
-	public ValueTask<bool> CanDeleteAsync(Guid entraObjectId,
+	public ValueTask<bool> CanDeleteAsync(
+		Guid entraObjectId,
 		Guid clientApplicationGuid,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
