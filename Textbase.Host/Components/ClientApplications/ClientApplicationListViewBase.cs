@@ -21,6 +21,9 @@ public abstract class ClientApplicationListViewBase
 	[Inject]
 	private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
+	[Inject]
+	private NavigationManager Navigation { get; set; } = default!;
+
 	protected IReadOnlyCollection<Guid>? AuthorizedClientApplicationGuids { get; private set; }
 
 	protected override async Task OnInitializedAsync()
@@ -32,7 +35,7 @@ public abstract class ClientApplicationListViewBase
 		ClaimsPrincipal user = HttpContextAccessor.HttpContext?.User ?? new ClaimsPrincipal();
 		if (!await Authorization.CanListAsync(filter, user))
 		{
-			NavigationManager.NavigateTo(StaticRoutes.Home);
+			Navigation.NavigateTo(StaticRoutes.Home);
 			return;
 		}
 
