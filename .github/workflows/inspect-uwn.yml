@@ -30,13 +30,16 @@ jobs:
               foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).OrderBy(p => p.Name))
                   Console.WriteLine($"PROPERTY: {property.PropertyType} {property.Name} get={property.GetMethod?.Attributes} set={property.SetMethod?.Attributes}");
               foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).OrderBy(m => m.Name))
-                  Console.WriteLine($"METHOD: {method}");
+                  Console.WriteLine($"METHOD: access={(method.IsPublic ? "public" : method.IsFamily ? "protected" : method.IsPrivate ? "private" : "other")} virtual={method.IsVirtual} final={method.IsFinal} {method}");
               Console.WriteLine();
           }
 
           Assembly assembly = typeof(RzAlertService).Assembly;
-          Dump(typeof(RzAlertService));
-          foreach (Type type in assembly.GetTypes().Where(t => t.Name.Contains("DataGridView", StringComparison.Ordinal) || t.Name.Contains("EditorView", StringComparison.Ordinal)).OrderBy(t => t.FullName))
+          foreach (Type type in assembly.GetTypes().Where(t => t.FullName is not null &&
+              (t == typeof(RzAlertService) ||
+               t.Name == "BaseView`1" ||
+               t.Name.Contains("DataGridView", StringComparison.Ordinal) ||
+               t.Name.Contains("EditorView", StringComparison.Ordinal))).OrderBy(t => t.FullName))
               Dump(type);
           EOF
           dotnet run
