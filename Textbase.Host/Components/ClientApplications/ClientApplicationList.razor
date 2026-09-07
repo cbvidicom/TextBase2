@@ -3,7 +3,9 @@
 @using Textbase.Application.Features.ClientApplications
 @using Textbase.Host.ViewModels.ClientApplications
 
-@inherits BaseDataGridView<ClientApplicationListViewModel,ClientApplication,ClientApplicationFilter>
+@inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
+
+<PageHeader Text="Applications" />
 
 @if (IsInitialized)
 {
@@ -17,7 +19,7 @@
 				IsLoading="@IsBusy"
 				PageSize="@ViewModel.PageSize"
 				SelectionMode="DataGridSelectionMode.Single"
-				LoadData="ViewModel.LoadDataAsync"
+				LoadData="LoadDataAsync"
 				RowRender="OnRowRender"
 				RowSelect="OnRowSelect"
 				class="rz-mb-4">
@@ -31,31 +33,24 @@
 			<RadzenDataGridColumn Filterable="true"
 								  Property="@nameof(ClientApplication.DefaultLanguageTag)"
 								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
 								  Title="Tag" />
 			<RadzenDataGridColumn Filterable="true"
 								  Property="@nameof(ClientApplication.DefaultFileName)"
 								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
 								  Title="File" />
-			<RadzenDataGridColumn Filterable="true"
+			<RadzenDataGridColumn Filterable="false"
 								  Property="@nameof(ClientApplication.IsActive)"
 								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
 								  Title="Active" />
 			<RadzenDataGridColumn Filterable="false"
-								  Property="Locales"
-								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
+								  Sortable="false"
 								  Title="Locales">
 				<Template Context="clientApplication">
 					@ViewModel.GetLocaleCount(clientApplication.ClientApplicationGuid)
 				</Template>
 			</RadzenDataGridColumn>
 			<RadzenDataGridColumn Filterable="false"
-								  Property="Texts"
-								  Sortable="true"
-								  SortOrder="SortOrder.Ascending"
+								  Sortable="false"
 								  Title="Texts">
 				<Template Context="clientApplication">
 					@ViewModel.GetTextResourceCount(clientApplication.ClientApplicationGuid)

@@ -2,6 +2,7 @@
 @using System.Diagnostics
 
 <PageTitle>Error</PageTitle>
+<PageHeader Text="Error" />
 
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
@@ -29,8 +30,11 @@
 	private HttpContext? HttpContext { get; set; }
 
 	private string? RequestId { get; set; }
-	private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+	private bool ShowRequestId => !String.IsNullOrEmpty(RequestId);
 
-	protected override void OnInitialized() =>
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
 		RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+	}
 }

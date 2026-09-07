@@ -1,6 +1,7 @@
-﻿namespace Textbase.Application.Features.ClientApplications;
+namespace Textbase.Application.Features.ClientApplications;
 
-public partial interface IClientApplicationQueries
+public interface IClientApplicationServerQueries
+	: IClientApplicationQueries
 {
 	Task<IReadOnlyDictionary<Guid, ClientApplicationReferenceCounts>> GetReferenceCountsAsync(
 		IReadOnlyCollection<Guid> clientApplicationGuids, CancellationToken cancellationToken = default);

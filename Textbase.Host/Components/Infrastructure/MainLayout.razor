@@ -1,31 +1,33 @@
 ﻿@inherits LayoutComponentBase
 
-<RadzenLayout>
-	<RadzenHeader>
-		<RadzenStack AlignItems="AlignItems.Center"
-					 Gap="0"
-					 Orientation="Orientation.Horizontal">
-			<RadzenSidebarToggle Click="@(() => _isSidebarExpanded = !_isSidebarExpanded)" />
-			<RadzenLabel Text="Header" />
-		</RadzenStack>
-	</RadzenHeader>
-	<RadzenSidebar FullHeight="true"
-				   @bind-Expanded="@_isSidebarExpanded">
-		<RadzenPanelMenu>
-			<RadzenPanelMenuItem Icon="@Icons.Home"
-								 Path="@StaticRoutes.Home"
-								 Text="Home" />
-			<RadzenPanelMenuItem Icon="@Icons.Apps"
-								 Path="@StaticRoutes.ClientApplicationList"
-								 Text="Applications" />
-		</RadzenPanelMenu>
-	</RadzenSidebar>
-	<RadzenBody>
-		<div class="rz-p-4">
-			@Body
-		</div>
-	</RadzenBody>
-</RadzenLayout>
+<CascadingValue Value="this">
+	<RadzenLayout>
+		<RadzenHeader>
+			<RadzenStack AlignItems="AlignItems.Center"
+						 Gap="0"
+						 Orientation="Orientation.Horizontal">
+				<RadzenSidebarToggle Click="@(() => _isSidebarExpanded = !_isSidebarExpanded)" />
+				<RadzenLabel Text="@_header" />
+			</RadzenStack>
+		</RadzenHeader>
+		<RadzenSidebar FullHeight="true"
+					   @bind-Expanded="@_isSidebarExpanded">
+			<RadzenPanelMenu>
+				<RadzenPanelMenuItem Icon="@Icons.Home"
+									 Path="@StaticRoutes.Home"
+									 Text="Home" />
+				<RadzenPanelMenuItem Icon="@Icons.Apps"
+									 Path="@StaticRoutes.ClientApplicationList"
+									 Text="Applications" />
+			</RadzenPanelMenu>
+		</RadzenSidebar>
+		<RadzenBody>
+			<div class="rz-p-4">
+				@Body
+			</div>
+		</RadzenBody>
+	</RadzenLayout>
+</CascadingValue>
 
 <div id="blazor-error-ui" data-nosnippet>
 	An unhandled error has occurred.
@@ -34,5 +36,16 @@
 </div>
 
 @code {
+	private string _header = String.Empty;
 	private bool _isSidebarExpanded = true;
+
+	public void SetHeader(
+		string header)
+	{
+		if (_header == header)
+			return;
+
+		_header = header;
+		_ = InvokeAsync(StateHasChanged);
+	}
 }

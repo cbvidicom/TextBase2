@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Radzen;
 using Textbase.Application.Common;
+using Textbase.Application.Features.ClientApplications;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Components.Infrastructure;
@@ -22,6 +24,7 @@ builder.Services
 	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
 
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentPrincipalAccessor, CurrentPrincipalAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, ActivePrincipalAuthorizationHandler>();
@@ -36,6 +39,7 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
+builder.Services.AddScoped<IClientApplicationServerQueries>(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
 
 builder.Services.AddControllers(options =>
 {
