@@ -1,9 +1,8 @@
 ﻿@page "/Error"
 @using System.Diagnostics
 
-@inherits TextbasePageViewBase
-
 <PageTitle>Error</PageTitle>
+<PageHeader Text="Error" />
 
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
@@ -32,8 +31,6 @@
 
 	private string? RequestId { get; set; }
 	private bool ShowRequestId => !String.IsNullOrEmpty(RequestId);
-
-	protected override string Header => "Error";
 
 	protected override void OnInitialized()
 	{
