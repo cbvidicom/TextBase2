@@ -6,9 +6,10 @@ using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 namespace Textbase.Host.ViewModels.ClientApplications;
 
 public class ClientApplicationListViewModel(
-	IClientApplicationQueries _clientApplicationQueries)
+	IClientApplicationQueries clientApplicationQueries,
+	IClientApplicationServerQueries _clientApplicationServerQueries)
 	: DataGridViewModel<ClientApplication, ClientApplicationFilter>(
-		_clientApplicationQueries)
+		clientApplicationQueries)
 {
 	private IReadOnlyDictionary<Guid, ClientApplicationReferenceCounts>? _referenceCounts;
 
@@ -16,7 +17,7 @@ public class ClientApplicationListViewModel(
 	{
 		_referenceCounts = Data is null
 			? null
-			: await _clientApplicationQueries.GetReferenceCountsAsync([.. Data.Select(ca => ca.ClientApplicationGuid)]);
+			: await _clientApplicationServerQueries.GetReferenceCountsAsync([.. Data.Select(clientApplication => clientApplication.ClientApplicationGuid)]);
 	}
 
 	public override DataGridRowStyle GetItemStyle(
