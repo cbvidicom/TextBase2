@@ -3,7 +3,7 @@
 @using Textbase.Application.Features.ClientApplications
 @using Textbase.Host.ViewModels.ClientApplications
 
-@inherits ClientApplicationListViewBase
+@inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
 
 @if (IsInitialized)
 {
@@ -17,21 +17,11 @@
 				IsLoading="@IsBusy"
 				PageSize="@ViewModel.PageSize"
 				SelectionMode="DataGridSelectionMode.Single"
-				LoadData="ViewModel.LoadDataAsync"
+				LoadData="LoadDataAsync"
 				RowRender="OnRowRender"
 				RowSelect="OnRowSelect"
 				class="rz-mb-4">
 		<Columns>
-			@if (AuthorizedClientApplicationGuids is { Count: > 0 })
-			{
-				<RadzenDataGridColumn TItem="ClientApplication"
-									  FilterOperator="FilterOperator.In"
-									  FilterValue="@AuthorizedClientApplicationGuids"
-									  Filterable="true"
-									  Property="@nameof(ClientApplication.ClientApplicationGuid)"
-									  Sortable="false"
-									  Visible="false" />
-			}
 			<RadzenDataGridColumn Filterable="true"
 								  Frozen="true"
 								  Property="@nameof(ClientApplication.Name)"
@@ -78,6 +68,8 @@ else
 	protected override string EditRoute => StaticRoutes.ClientApplicationEdit;
 
 	protected override Func<ClientApplication, object> GetKey => e => e.ClientApplicationGuid;
+
+	protected override string Header => "Applications";
 
 	protected override bool IsInitialized { get; set; } = true;
 }
