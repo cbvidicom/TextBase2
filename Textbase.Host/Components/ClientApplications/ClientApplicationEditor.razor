@@ -98,6 +98,8 @@ else
 
 	protected override string Header => IsNewItem ? "Create Application" : "Edit Application";
 
+	protected override string UnauthorizedPath => StaticRoutes.ClientApplicationList;
+
 	private Task OnSave()
 		=> SaveAuthorizedItemAsync(SaveMode.Save);
 
