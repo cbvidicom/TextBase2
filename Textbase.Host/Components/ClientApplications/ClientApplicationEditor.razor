@@ -4,7 +4,7 @@
 @using Textbase.Application.Features.ClientApplications
 @using Textbase.Host.ViewModels.ClientApplications
 
-@inherits BaseGuidEditorView<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
+@inherits ClientApplicationEditorViewBase
 
 <RzGoBackLink Path="@GoBackPath" />
 
@@ -19,28 +19,30 @@ else
 						class="rz-mt-4 rz-mb-4">
 		<AntiforgeryToken />
 		<DataAnnotationsValidator />
-		<VerticalStack>
-			@if (!IsNewItem)
-			{
-				<RzTextBoxFormField Name="@nameof(ClientApplication.ClientApplicationGuid)"
+		<fieldset disabled="@(!CanWrite)"
+				  style="border: 0; margin: 0; padding: 0;">
+			<VerticalStack>
+				@if (!IsNewItem)
+				{
+					<RzTextBoxFormField Name="@nameof(ClientApplication.ClientApplicationGuid)"
 									ReadOnly="true"
 									StartIcon="@Icons.Barcode"
 									Text="GUID"
 									Value="@Item.ClientApplicationGuid.ToString()" />
-			}
-			<RzTextBoxFormField MinLength="3"
+				}
+				<RzTextBoxFormField MinLength="3"
 								MaxLength="128"
 								Name="@nameof(ClientApplication.Name)"
 								Required="true"
 								StartIcon="@Icons.Name"
 								Text="Name"
 								@bind-Value="@Item.Name" />
-			<RzTextAreaFormField MaxLength="1024"
+				<RzTextAreaFormField MaxLength="1024"
 								 Name="@nameof(ClientApplication.Description)"
 								 StartIcon="@Icons.Description"
 								 Text="Description"
 								 @bind-Value="@Item.Description" />
-			<RzDropDownFormField TValue="LanguageTag?"
+				<RzDropDownFormField TValue="LanguageTag?"
 								 AllowClear="true"
 								 EnumTextResolver="LanguageTagExtensions.GetDisplayText"
 								 EnumType="@typeof(LanguageTag)"
@@ -49,41 +51,45 @@ else
 								 StartIcon="@Icons.Language"
 								 Text="Default Language Tag"
 								 @bind-Value="@Item.DefaultLanguageTagValue" />
-			<RzTextAreaFormField MaxLength="1024"
+				<RzTextAreaFormField MaxLength="1024"
 								 Name="@nameof(ClientApplication.DefaultFormat)"
 								 StartIcon="@Icons.CodeXml"
 								 Text="Default Format"
 								 @bind-Value="@Item.DefaultFormat" />
-			<RzTextBoxFormField MaxLength="128"
+				<RzTextBoxFormField MaxLength="128"
 								Name="@nameof(ClientApplication.DefaultFileName)"
 								StartIcon="@Icons.DriveFileRename"
 								Text="Default File Name"
 								@bind-Value="@Item.DefaultFileName" />
-			<RzSwitchFormField Name="@nameof(ClientApplication.IsActive)"
+				<RzSwitchFormField Name="@nameof(ClientApplication.IsActive)"
 							   Text="Is Active"
 							   @bind-Value="@Item.IsActive" />
 
-			<HorizontalStack>
-				<RzSaveButton RenderStack="false"
-							  Click="OnSave" />
-				@if (!String.IsNullOrWhiteSpace(GoBackPath))
+				@if (CanWrite)
 				{
-					<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-								   Click="OnSaveAndGoBack"
-								   Icon="@Icons.Save"
-								   RenderStack="false"
-								   Text="Save & Go back" />
+					<HorizontalStack>
+						<RzSaveButton RenderStack="false"
+									  Click="OnSave" />
+						@if (!String.IsNullOrWhiteSpace(GoBackPath))
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+										   Click="OnSaveAndGoBack"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & Go back" />
+						}
+						@if (IsNewItem)
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Info"
+										   Click="OnSaveAndNew"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & New" />
+						}
+					</HorizontalStack>
 				}
-				@if (IsNewItem)
-				{
-					<RzClickButton ButtonStyle="ButtonStyle.Info"
-								   Click="OnSaveAndNew"
-								   Icon="@Icons.Save"
-								   RenderStack="false"
-								   Text="Save & New" />
-				}
-			</HorizontalStack>
-		</VerticalStack>
+			</VerticalStack>
+		</fieldset>
 	</RadzenTemplateForm>
 }
 
@@ -98,8 +104,4 @@ else
 
 	private Task OnSaveAndNew()
 		=> HandleSaveAsync(SaveMode.SaveAndNew);
-
-	private async Task HandleSaveAsync(
-		SaveMode mode)
-		=> await SaveItemAsync(mode);
 }
