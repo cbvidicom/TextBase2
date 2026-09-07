@@ -21,25 +21,20 @@ jobs:
           dotnet add package Uwn.Blazor --version 10.26.9.707
           cat > Program.cs <<'EOF'
           using System.Reflection;
-          using Uwn.Blazor.Services.Radzen;
+          using Uwn.Blazor.Components.Abstractions.Querying;
 
           static void Dump(Type type)
           {
               Console.WriteLine($"TYPE: {type.FullName}");
-              Console.WriteLine($"BASE: {type.BaseType}");
-              foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).OrderBy(p => p.Name))
-                  Console.WriteLine($"PROPERTY: {property.PropertyType} {property.Name} get={property.GetMethod?.Attributes} set={property.SetMethod?.Attributes}");
-              foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).OrderBy(m => m.Name))
-                  Console.WriteLine($"METHOD: access={(method.IsPublic ? "public" : method.IsFamily ? "protected" : method.IsPrivate ? "private" : "other")} virtual={method.IsVirtual} final={method.IsFinal} {method}");
-              Console.WriteLine();
+              foreach (Type parameter in type.GetGenericArguments())
+              {
+                  Console.WriteLine($"GENERIC: {parameter.Name} {parameter.GenericParameterAttributes}");
+                  foreach (Type constraint in parameter.GetGenericParameterConstraints())
+                      Console.WriteLine($"CONSTRAINT: {constraint}");
+              }
           }
 
-          Assembly assembly = typeof(RzAlertService).Assembly;
-          foreach (Type type in assembly.GetTypes().Where(t => t.FullName is not null &&
-              (t == typeof(RzAlertService) ||
-               t.Name == "BaseView`1" ||
-               t.Name.Contains("DataGridView", StringComparison.Ordinal) ||
-               t.Name.Contains("EditorView", StringComparison.Ordinal))).OrderBy(t => t.FullName))
-              Dump(type);
+          Dump(typeof(BaseDataGridView<,,>));
+          Dump(typeof(BaseGuidEditorView<,,,>));
           EOF
           dotnet run
