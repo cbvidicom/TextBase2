@@ -18,7 +18,7 @@ public abstract class TextbaseGuidEditorViewBase<TViewModel, TDTO, TModel, TFilt
 	private MainLayout MainLayout { get; set; } = default!;
 
 	protected abstract string Header { get; }
-	protected virtual string UnauthorizedPath => StaticRoutes.ClientApplicationList;
+	protected virtual string UnauthorizedPath => StaticRoutes.Home;
 
 	protected override async Task OnParametersSetAsync()
 	{
