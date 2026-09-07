@@ -24,6 +24,9 @@ public abstract class ClientApplicationEditorViewBase
 	[Inject]
 	private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
+	[Inject]
+	private NavigationManager Navigation { get; set; } = default!;
+
 	protected bool CanWrite { get; private set; }
 
 	protected override async Task OnParametersSetAsync()
@@ -51,7 +54,7 @@ public abstract class ClientApplicationEditorViewBase
 		{
 			CanWrite = await Authorization.CanCreateAsync(dto, user);
 			if (!CanWrite)
-				NavigationManager.NavigateTo(StaticRoutes.ClientApplicationList);
+				Navigation.NavigateTo(StaticRoutes.ClientApplicationList);
 
 			return CanWrite;
 		}
@@ -59,7 +62,7 @@ public abstract class ClientApplicationEditorViewBase
 		if (!await Authorization.CanReadAsync(Item.ClientApplicationGuid, user))
 		{
 			CanWrite = false;
-			NavigationManager.NavigateTo(StaticRoutes.ClientApplicationList);
+			Navigation.NavigateTo(StaticRoutes.ClientApplicationList);
 			return false;
 		}
 
