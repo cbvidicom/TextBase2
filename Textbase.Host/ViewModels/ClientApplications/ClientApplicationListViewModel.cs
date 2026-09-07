@@ -1,17 +1,33 @@
-﻿using Textbase.Application.Features.ClientApplications;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
+using Textbase.Application.Features.ClientApplications;
 using Textbase.Domain.Models;
+using Textbase.Host.Api.Authorization;
 using Uwn.Blazor.Enumerations.Radzen;
 using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 
 namespace Textbase.Host.ViewModels.ClientApplications;
 
 public class ClientApplicationListViewModel(
+	IClientApplicationAuthorization _authorization,
+	AuthenticationStateProvider _authenticationStateProvider,
 	IClientApplicationQueries clientApplicationQueries,
 	IClientApplicationServerQueries _clientApplicationServerQueries)
 	: DataGridViewModel<ClientApplication, ClientApplicationFilter>(
 		clientApplicationQueries)
 {
 	private IReadOnlyDictionary<Guid, ClientApplicationReferenceCounts>? _referenceCounts;
+
+	protected override async Task ConfigureFilterAsync(
+		ClientApplicationFilter filter)
+	{
+		await base.ConfigureFilterAsync(filter);
+
+		AuthenticationState authenticationState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+		ClaimsPrincipal user = authenticationState.User;
+		if (!await _authorization.CanListAsync(filter, user))
+			throw new UnauthorizedAccessException("The current principal is not authorized to list client applications.");
+	}
 
 	protected override async Task AfterLoadDataAsync()
 	{
