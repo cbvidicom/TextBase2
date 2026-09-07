@@ -5,6 +5,8 @@
 
 @inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
 
+<PageHeader Text="Applications" />
+
 @if (IsInitialized)
 {
 	<RzDataGrid @ref="Grid"
@@ -68,8 +70,6 @@ else
 	protected override string EditRoute => StaticRoutes.ClientApplicationEdit;
 
 	protected override Func<ClientApplication, object> GetKey => e => e.ClientApplicationGuid;
-
-	protected override string Header => "Applications";
 
 	protected override bool IsInitialized { get; set; } = true;
 }
