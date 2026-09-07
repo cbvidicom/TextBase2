@@ -4,7 +4,7 @@
 @using Textbase.Application.Features.ClientApplications
 @using Textbase.Host.ViewModels.ClientApplications
 
-@inherits ClientApplicationEditorViewBase
+@inherits TextbaseGuidEditorViewBase<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
 
 <RzGoBackLink Path="@GoBackPath" />
 
@@ -19,7 +19,7 @@ else
 						class="rz-mt-4 rz-mb-4">
 		<AntiforgeryToken />
 		<DataAnnotationsValidator />
-		<fieldset disabled="@(!CanWrite)"
+		<fieldset disabled="@(!ViewModel.CanWrite)"
 				  style="border: 0; margin: 0; padding: 0;">
 			<VerticalStack>
 				@if (!IsNewItem)
@@ -65,7 +65,7 @@ else
 							   Text="Is Active"
 							   @bind-Value="@Item.IsActive" />
 
-				@if (CanWrite)
+				@if (ViewModel.CanWrite)
 				{
 					<HorizontalStack>
 						<RzSaveButton RenderStack="false"
@@ -96,12 +96,14 @@ else
 @code {
 	protected override string GoBackPath => StaticRoutes.ClientApplicationList;
 
+	protected override string Header => IsNewItem ? "Create Application" : "Edit Application";
+
 	private Task OnSave()
-		=> HandleSaveAsync(SaveMode.Save);
+		=> SaveAuthorizedItemAsync(SaveMode.Save);
 
 	private Task OnSaveAndGoBack()
-		=> HandleSaveAsync(SaveMode.SaveAndGoBack);
+		=> SaveAuthorizedItemAsync(SaveMode.SaveAndGoBack);
 
 	private Task OnSaveAndNew()
-		=> HandleSaveAsync(SaveMode.SaveAndNew);
+		=> SaveAuthorizedItemAsync(SaveMode.SaveAndNew);
 }
