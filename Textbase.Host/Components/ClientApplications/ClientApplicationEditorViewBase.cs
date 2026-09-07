@@ -28,11 +28,12 @@ public abstract class ClientApplicationEditorViewBase
 	private NavigationManager Navigation { get; set; } = default!;
 
 	protected bool CanWrite { get; private set; }
+	protected abstract string Header { get; }
 
 	protected override async Task OnParametersSetAsync()
 	{
 		await base.OnParametersSetAsync();
-		MainLayout.SetHeader(IsNewItem ? "Create Application" : "Edit Application");
+		MainLayout.SetHeader(Header);
 		await CheckAuthorizationAsync();
 	}
 
