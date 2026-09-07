@@ -1,0 +1,42 @@
+name: Inspect Uwn.Blazor API
+
+on:
+  push:
+    branches:
+      - codex/client-application-gui-authorization
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Inspect package API
+        shell: bash
+        run: |
+          mkdir -p /tmp/inspect-uwn
+          cd /tmp/inspect-uwn
+          dotnet new console --framework net10.0 --force
+          dotnet add package Uwn.Blazor --version 10.26.9.707
+          cat > Program.cs <<'EOF'
+          using System.Reflection;
+          using Uwn.Blazor.Services.Radzen;
+
+          static void Dump(Type type)
+          {
+              Console.WriteLine($"TYPE: {type.FullName}");
+              Console.WriteLine($"BASE: {type.BaseType}");
+              foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).OrderBy(p => p.Name))
+                  Console.WriteLine($"PROPERTY: {property.PropertyType} {property.Name} get={property.GetMethod?.Attributes} set={property.SetMethod?.Attributes}");
+              foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).OrderBy(m => m.Name))
+                  Console.WriteLine($"METHOD: {method}");
+              Console.WriteLine();
+          }
+
+          Assembly assembly = typeof(RzAlertService).Assembly;
+          Dump(typeof(RzAlertService));
+          foreach (Type type in assembly.GetTypes().Where(t => t.Name.Contains("DataGridView", StringComparison.Ordinal) || t.Name.Contains("EditorView", StringComparison.Ordinal)).OrderBy(t => t.FullName))
+              Dump(type);
+          EOF
+          dotnet run
