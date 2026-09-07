@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Radzen;
 using Textbase.Application.Common;
+using Textbase.Application.Features.ClientApplications;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Components.Infrastructure;
@@ -36,6 +37,7 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
+builder.Services.AddScoped<IClientApplicationServerQueries, ClientApplicationQueries>();
 
 builder.Services.AddControllers(options =>
 {
