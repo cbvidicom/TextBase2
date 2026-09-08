@@ -8,6 +8,7 @@ using Microsoft.Identity.Web;
 using Radzen;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
+using Textbase.Host;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Components.Infrastructure;
