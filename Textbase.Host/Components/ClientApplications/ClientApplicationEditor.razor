@@ -15,14 +15,7 @@
 {
 	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
 }
-else if (!HasAccess)
-{
-	<RadzenAlert AlertStyle="AlertStyle.Danger"
-					ShowIcon="true">
-		@(AccessDeniedMessage ?? "The current principal is not authorized to access this client application.")
-	</RadzenAlert>
-}
-else
+else if (HasAccess)
 {
 	<RadzenTemplateForm TItem="ClientApplication"
 						Data="@Item"
