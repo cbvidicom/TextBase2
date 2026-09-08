@@ -7,7 +7,14 @@
 
 <PageHeader Text="@MainHeader" />
 
-@if (IsInitialized)
+@if (!HasAccess)
+{
+	<RadzenAlert AlertStyle="AlertStyle.Danger"
+					ShowIcon="true">
+		@(AccessDeniedMessage ?? "The current principal is not authorized to access client applications.")
+	</RadzenAlert>
+}
+else if (IsInitialized)
 {
 	<RzDataGrid @ref="Grid"
 				TItem="ClientApplication"
@@ -64,7 +71,10 @@ else
 	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
 }
 
-<RzAddButton Path="@StaticRoutes.ClientApplicationCreate" />
+@if (ViewModel.CreateAuthorization.IsAllowed)
+{
+	<RzAddButton Path="@StaticRoutes.ClientApplicationCreate" />
+}
 
 @code {
 	public override string MainHeader => "Applications";
