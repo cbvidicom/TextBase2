@@ -1,4 +1,3 @@
-using Radzen;
 using Uwn.Blazor.Components.Abstractions.Querying;
 using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 using Uwn.Common.Querying;
@@ -11,19 +10,9 @@ public abstract class TextbaseDataGridViewBase<TViewModel, TModel, TFilter>
 	where TModel : class
 	where TFilter : QueryFilterBase, new()
 {
-	protected virtual string UnauthorizedPath => StaticRoutes.Home;
+	protected bool IsInitialized { get; private set; } = false;
 
-	protected async Task LoadDataAsync(
-		LoadDataArgs args)
-	{
-		try
-		{
-			await ViewModel.LoadDataAsync(args);
-		}
-		catch (UnauthorizedAccessException exception)
-		{
-			CoreAlertService.Show(exception.Message, AlertStyle.Danger);
-			CoreNavigationManager.NavigateTo(UnauthorizedPath);
-		}
-	}
+	protected override void OnAfterRender(
+		bool firstRender)
+		=> IsInitialized = true;
 }

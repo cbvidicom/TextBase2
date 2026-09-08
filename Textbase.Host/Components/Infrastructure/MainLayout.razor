@@ -29,6 +29,20 @@
 	</RadzenLayout>
 </CascadingValue>
 
+@if (AlertService.IsVisible)
+{
+	<RadzenAlert AlertStyle="@AlertService.AlertStyle"
+				 AllowClose="@AlertService.AllowClose"
+				 Size="@AlertService.Size"
+				 Title="@AlertService.Title"
+				 Variant="@AlertService.Variant"
+				 Close="OnAlertClose">
+		@((MarkupString)AlertService.HtmlFormattedText)
+	</RadzenAlert>
+}
+
+<RadzenDialog />
+
 <div id="blazor-error-ui" data-nosnippet>
 	An unhandled error has occurred.
 	<a href="." class="reload">Reload</a>
@@ -48,4 +62,8 @@
 		_header = header;
 		_ = InvokeAsync(StateHasChanged);
 	}
+
+	private void OnAlertClose(
+		dynamic _)
+		=> AlertService.Hide();
 }

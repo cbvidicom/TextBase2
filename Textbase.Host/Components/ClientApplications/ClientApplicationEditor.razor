@@ -4,10 +4,14 @@
 @using Textbase.Application.Features.ClientApplications
 @using Textbase.Host.ViewModels.ClientApplications
 
-@inherits TextbaseGuidEditorViewBase<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
+@inherits TextbaseEditorViewBase<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
 
-<PageHeader Text="@(IsNewItem ? "Create Application" : "Edit Application")" />
-<RzGoBackLink Path="@GoBackPath" />
+<PageHeader Text="@MainHeader" />
+
+@if (CanGoBack)
+{
+	<RzGoBackLink Path="@GoBackPath" />
+}
 
 @if (IsBusy)
 {
@@ -20,58 +24,57 @@ else
 						class="rz-mt-4 rz-mb-4">
 		<AntiforgeryToken />
 		<DataAnnotationsValidator />
-		<fieldset disabled="@(!ViewModel.CanWrite)"
-				  style="border: 0; margin: 0; padding: 0;">
+		<fieldset disabled="@(!ViewModel.CanWrite)">
 			<VerticalStack>
 				@if (!IsNewItem)
 				{
 					<RzTextBoxFormField Name="@nameof(ClientApplication.ClientApplicationGuid)"
-									ReadOnly="true"
-									StartIcon="@Icons.Barcode"
-									Text="GUID"
-									Value="@Item.ClientApplicationGuid.ToString()" />
+										ReadOnly="true"
+										StartIcon="@Icons.Barcode"
+										Text="GUID"
+										Value="@Item.ClientApplicationGuid.ToString()" />
 				}
 				<RzTextBoxFormField MinLength="3"
-								MaxLength="128"
-								Name="@nameof(ClientApplication.Name)"
-								Required="true"
-								StartIcon="@Icons.Name"
-								Text="Name"
-								@bind-Value="@Item.Name" />
+									MaxLength="128"
+									Name="@nameof(ClientApplication.Name)"
+									Required="true"
+									StartIcon="@Icons.Name"
+									Text="Name"
+									@bind-Value="@Item.Name" />
 				<RzTextAreaFormField MaxLength="1024"
-								 Name="@nameof(ClientApplication.Description)"
-								 StartIcon="@Icons.Description"
-								 Text="Description"
-								 @bind-Value="@Item.Description" />
+									 Name="@nameof(ClientApplication.Description)"
+									 StartIcon="@Icons.Description"
+									 Text="Description"
+									 @bind-Value="@Item.Description" />
 				<RzDropDownFormField TValue="LanguageTag?"
-								 AllowClear="true"
-								 EnumTextResolver="LanguageTagExtensions.GetDisplayText"
-								 EnumType="@typeof(LanguageTag)"
-								 Name="@nameof(ClientApplication.DefaultLanguageTag)"
-								 Required="false"
-								 StartIcon="@Icons.Language"
-								 Text="Default Language Tag"
-								 @bind-Value="@Item.DefaultLanguageTagValue" />
+									 AllowClear="true"
+									 EnumTextResolver="LanguageTagExtensions.GetDisplayText"
+									 EnumType="@typeof(LanguageTag)"
+									 Name="@nameof(ClientApplication.DefaultLanguageTag)"
+									 Required="false"
+									 StartIcon="@Icons.Language"
+									 Text="Default Language Tag"
+									 @bind-Value="@Item.DefaultLanguageTagValue" />
 				<RzTextAreaFormField MaxLength="1024"
-								 Name="@nameof(ClientApplication.DefaultFormat)"
-								 StartIcon="@Icons.CodeXml"
-								 Text="Default Format"
-								 @bind-Value="@Item.DefaultFormat" />
+									 Name="@nameof(ClientApplication.DefaultFormat)"
+									 StartIcon="@Icons.CodeXml"
+									 Text="Default Format"
+									 @bind-Value="@Item.DefaultFormat" />
 				<RzTextBoxFormField MaxLength="128"
-								Name="@nameof(ClientApplication.DefaultFileName)"
-								StartIcon="@Icons.DriveFileRename"
-								Text="Default File Name"
-								@bind-Value="@Item.DefaultFileName" />
+									Name="@nameof(ClientApplication.DefaultFileName)"
+									StartIcon="@Icons.DriveFileRename"
+									Text="Default File Name"
+									@bind-Value="@Item.DefaultFileName" />
 				<RzSwitchFormField Name="@nameof(ClientApplication.IsActive)"
-							   Text="Is Active"
-							   @bind-Value="@Item.IsActive" />
+								   Text="Is Active"
+								   @bind-Value="@Item.IsActive" />
 
 				@if (ViewModel.CanWrite)
 				{
 					<HorizontalStack>
 						<RzSaveButton RenderStack="false"
 									  Click="OnSave" />
-						@if (!String.IsNullOrWhiteSpace(GoBackPath))
+						@if (CanGoBack)
 						{
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
 										   Click="OnSaveAndGoBack"
@@ -79,7 +82,7 @@ else
 										   RenderStack="false"
 										   Text="Save & Go back" />
 						}
-						@if (IsNewItem)
+						@if (CanNew)
 						{
 							<RzClickButton ButtonStyle="ButtonStyle.Info"
 										   Click="OnSaveAndNew"
@@ -95,16 +98,9 @@ else
 }
 
 @code {
+	public override string MainHeader => IsNewItem ? "Create Application" : "Edit Application";
+
 	protected override string GoBackPath => StaticRoutes.ClientApplicationList;
 
-	protected override string UnauthorizedPath => StaticRoutes.ClientApplicationList;
-
-	private Task OnSave()
-		=> SaveAuthorizedItemAsync(SaveMode.Save);
-
-	private Task OnSaveAndGoBack()
-		=> SaveAuthorizedItemAsync(SaveMode.SaveAndGoBack);
-
-	private Task OnSaveAndNew()
-		=> SaveAuthorizedItemAsync(SaveMode.SaveAndNew);
+	protected override string CreatePath => StaticRoutes.ClientApplicationCreate;
 }

@@ -5,7 +5,7 @@
 
 @inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
 
-<PageHeader Text="Applications" />
+<PageHeader Text="@MainHeader" />
 
 @if (IsInitialized)
 {
@@ -19,7 +19,7 @@
 				IsLoading="@IsBusy"
 				PageSize="@ViewModel.PageSize"
 				SelectionMode="DataGridSelectionMode.Single"
-				LoadData="LoadDataAsync"
+				LoadData="ViewModel.LoadDataAsync"
 				RowRender="OnRowRender"
 				RowSelect="OnRowSelect"
 				class="rz-mb-4">
@@ -67,9 +67,9 @@ else
 <RzAddButton Path="@StaticRoutes.ClientApplicationCreate" />
 
 @code {
+	public override string MainHeader => "Applications";
+
 	protected override string EditRoute => StaticRoutes.ClientApplicationEdit;
 
 	protected override Func<ClientApplication, object> GetKey => e => e.ClientApplicationGuid;
-
-	protected override bool IsInitialized { get; set; } = true;
 }

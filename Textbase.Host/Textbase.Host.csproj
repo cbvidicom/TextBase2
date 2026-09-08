@@ -9,7 +9,7 @@
 		<PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
 		<PackageReference Include="Microsoft.Identity.Web" Version="4.14.2" />
 		<PackageReference Include="Radzen.Blazor" Version="11.3.2" />
-		<PackageReference Include="Uwn.Blazor" Version="10.26.9.707" />
+		<PackageReference Include="Uwn.Blazor" Version="10.26.9.809" />
 	</ItemGroup>
 
 	<ItemGroup>

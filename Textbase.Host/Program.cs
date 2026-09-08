@@ -13,6 +13,7 @@ using Textbase.Host.Components.Infrastructure;
 using Textbase.Host.ViewModels;
 using Textbase.Infrastructure;
 using Uwn.Blazor.Extensions.Common;
+using Uwn.Blazor.Models.Common;
 using Uwn.Blazor.Services.Infrastructure;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
