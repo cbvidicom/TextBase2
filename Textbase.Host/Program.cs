@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
@@ -8,6 +7,7 @@ using Radzen;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Host.Api.Authorization;
+using Textbase.Host.Api.Infrastructure;
 using Textbase.Host.Authorization;
 using Textbase.Host.Components.Infrastructure;
 using Textbase.Host.ViewModels;
@@ -46,7 +46,7 @@ builder.Services.AddScoped(services => (IClientApplicationServerQueries)services
 builder.Services
 	.AddControllersWithViews(options =>
 	{
-		options.Filters.Add(new AuthorizeFilter());
+		options.Conventions.Add(new ApiAuthorizationConvention());
 	})
 	.AddMicrosoftIdentityUI();
 
