@@ -6,8 +6,8 @@ using Uwn.Common.Querying;
 namespace Textbase.Host.Components.Common;
 
 public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
-	: BaseEditorView<TViewModel, TDTO, TModel, TFilter>
-	where TViewModel : EditorViewModel<TDTO, TModel>
+	: BaseGuidEditorView<TViewModel, TDTO, TModel, TFilter>
+	where TViewModel : GuidEditorViewModel<TDTO, TModel>
 	where TDTO : class
 	where TModel : class, TDTO
 	where TFilter : QueryFilterBase, new()
