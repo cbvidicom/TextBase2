@@ -15,7 +15,16 @@ internal static class TextbaseViewHelper
 	{
 		mainLayout.SetHeader(mainHeader ?? String.Empty);
 
-		if (!hasAccess)
-			alertService.Show(accessDeniedMessage ?? "Access denied.", AlertStyle.Danger);
+		if (hasAccess)
+			return;
+
+		string message = accessDeniedMessage ?? "Access denied.";
+
+		if (alertService.IsVisible &&
+			alertService.AlertStyle == AlertStyle.Danger &&
+			String.Equals(alertService.HtmlFormattedText, message, StringComparison.Ordinal))
+			return;
+
+		alertService.Show(message, AlertStyle.Danger);
 	}
 }
