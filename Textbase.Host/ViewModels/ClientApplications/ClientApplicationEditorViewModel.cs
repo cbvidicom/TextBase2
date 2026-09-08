@@ -13,7 +13,7 @@ namespace Textbase.Host.ViewModels.ClientApplications;
 
 public class ClientApplicationEditorViewModel(
 	IClientApplicationAuthorization _authorization,
-	ICurrentUserAccessor _currentUserAccessor,
+	ICurrentPrincipalAccessor _currentPrincipalAccessor,
 	IClientApplicationQueries clientApplicationQueries,
 	IClientApplicationCommands clientApplicationCommands,
 	IClientApplicationEntityFactory _clientApplicationEntityFactory)
@@ -29,7 +29,7 @@ public class ClientApplicationEditorViewModel(
 	{
 		ClientApplication clientApplication = _clientApplicationEntityFactory.Create(Guid.CreateVersion7());
 		clientApplication.IsActive = true;
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool isAuthorized = await _authorization.CanCreateAsync(clientApplication, user, cancellationToken);
 
 		return isAuthorized
@@ -44,7 +44,7 @@ public class ClientApplicationEditorViewModel(
 		if (key is not Guid clientApplicationGuid)
 			return ViewAuthorizationResult.Denied();
 
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool isAuthorized = await _authorization.CanReadAsync(clientApplicationGuid, user, cancellationToken);
 
 		return isAuthorized
@@ -56,7 +56,7 @@ public class ClientApplicationEditorViewModel(
 		ClientApplication item,
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool isAuthorized = await _authorization.CanUpdateAsync(item.ClientApplicationGuid, item, user, cancellationToken);
 
 		return isAuthorized
@@ -68,7 +68,7 @@ public class ClientApplicationEditorViewModel(
 		ClientApplication item,
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool isAuthorized = await _authorization.CanDeleteAsync(item.ClientApplicationGuid, user, cancellationToken);
 
 		return isAuthorized

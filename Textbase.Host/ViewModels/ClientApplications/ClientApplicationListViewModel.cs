@@ -14,7 +14,7 @@ namespace Textbase.Host.ViewModels.ClientApplications;
 
 public class ClientApplicationListViewModel(
 	IClientApplicationAuthorization _authorization,
-	ICurrentUserAccessor _currentUserAccessor,
+	ICurrentPrincipalAccessor _currentPrincipalAccessor,
 	IClientApplicationQueries clientApplicationQueries,
 	IClientApplicationServerQueries _clientApplicationServerQueries,
 	IClientApplicationEntityFactory _clientApplicationEntityFactory)
@@ -30,7 +30,7 @@ public class ClientApplicationListViewModel(
 	{
 		ClientApplication clientApplication = _clientApplicationEntityFactory.Create(Guid.CreateVersion7());
 		clientApplication.IsActive = true;
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool isAuthorized = await _authorization.CanCreateAsync(clientApplication, user, cancellationToken);
 
 		return isAuthorized
@@ -41,7 +41,7 @@ public class ClientApplicationListViewModel(
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		ClientApplicationFilter filter = ClientApplicationFilter.All();
 		bool isAuthorized = await _authorization.CanListAsync(filter, user, cancellationToken);
 
@@ -54,7 +54,7 @@ public class ClientApplicationListViewModel(
 		ClientApplicationFilter filter,
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool canCount = await _authorization.CanCountAsync(filter, user, cancellationToken);
 		bool canList = canCount && await _authorization.CanListAsync(filter, user, cancellationToken);
 

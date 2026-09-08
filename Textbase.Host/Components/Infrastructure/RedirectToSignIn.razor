@@ -1,0 +1,14 @@
+@code {
+	protected override void OnAfterRender(
+		bool firstRender)
+	{
+		if (!firstRender)
+			return;
+
+		string relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+		string returnUrl = String.IsNullOrWhiteSpace(relativePath) ? StaticRoutes.Home : $"/{relativePath}";
+		string path = $"{StaticRoutes.SignIn}?returnUrl={Uri.EscapeDataString(returnUrl)}";
+
+		NavigationManager.NavigateTo(path, true);
+	}
+}

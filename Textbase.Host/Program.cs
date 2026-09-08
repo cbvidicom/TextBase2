@@ -1,4 +1,6 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -22,19 +24,18 @@ string connectionString = builder.Configuration.GetConnectionString("Textbase")
 	?? throw new InvalidOperationException("Connection string 'Textbase' is not configured.");
 
 builder.Services
-	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-	.AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
+	.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+	.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAdB2C"));
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentPrincipalAccessor, CurrentPrincipalAccessor>();
-builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, ActivePrincipalAuthorizationHandler>();
 
 AuthorizationBase.RegisterAuthorizationServices(builder.Services);
 
 builder.Services.AddAuthorizationBuilder()
-	.SetDefaultPolicy(new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+	.SetDefaultPolicy(new AuthorizationPolicyBuilder()
 	.RequireAuthenticatedUser()
 	.AddRequirements(new ActivePrincipalRequirement())
 	.Build());
@@ -80,6 +81,28 @@ app.UseAuthorization();
 
 app.UseAntiforgery();
 
+app.MapGet(StaticRoutes.SignIn, async (HttpContext context, string? returnUrl) =>
+{
+	string redirectUri = IsLocalReturnUrl(returnUrl) ? returnUrl! : StaticRoutes.Home;
+	AuthenticationProperties properties = new()
+	{
+		RedirectUri = redirectUri
+	};
+
+	await context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
+}).AllowAnonymous();
+
+app.MapGet(StaticRoutes.SignOut, async (HttpContext context) =>
+{
+	AuthenticationProperties properties = new()
+	{
+		RedirectUri = StaticRoutes.Home
+	};
+
+	await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+	await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
+}).AllowAnonymous();
+
 app.MapControllers();
 
 app.MapStaticAssets();
@@ -87,3 +110,9 @@ app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode();
 
 app.Run();
+
+static bool IsLocalReturnUrl(
+	string? returnUrl)
+	=> !String.IsNullOrWhiteSpace(returnUrl) &&
+	returnUrl[0] == '/' &&
+	(returnUrl.Length == 1 || returnUrl[1] != '/' && returnUrl[1] != '\\');

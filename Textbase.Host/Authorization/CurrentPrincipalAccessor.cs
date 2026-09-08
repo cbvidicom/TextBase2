@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Web;
 using System.Security.Claims;
 using Textbase.Application.Features.AuthPrincipalClientApplications;
@@ -10,6 +11,7 @@ using Textbase.Infrastructure.Persistence.AuthPrincipals;
 namespace Textbase.Host.Authorization;
 
 public sealed class CurrentPrincipalAccessor(
+	AuthenticationStateProvider _authenticationStateProvider,
 	IAuthPrincipalClientApplicationQueries _authPrincipalClientApplicationQueries,
 	IAuthPrincipalCommands _authPrincipalCommands,
 	IAuthPrincipalEntityFactory _authPrincipalEntityFactory,
@@ -18,16 +20,28 @@ public sealed class CurrentPrincipalAccessor(
 	IHttpContextAccessor _httpContextAccessor)
 	: ICurrentPrincipalAccessor
 {
-	private Task<CurrentPrincipal?>? currentPrincipalTask;
+	private Task<CurrentPrincipal?>? _currentPrincipalTask;
 
 	//
 
 	public Task<CurrentPrincipal?> GetAsync(
 		CancellationToken cancellationToken = default)
 	{
-		currentPrincipalTask ??= LoadAsync(cancellationToken);
+		_currentPrincipalTask ??= LoadAsync(cancellationToken);
 
-		return currentPrincipalTask;
+		return _currentPrincipalTask;
+	}
+
+	public async Task<ClaimsPrincipal> GetUserAsync()
+	{
+		ClaimsPrincipal? httpUser = _httpContextAccessor.HttpContext?.User;
+
+		if (httpUser?.Identity?.IsAuthenticated == true)
+			return httpUser;
+
+		AuthenticationState authenticationState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+
+		return authenticationState.User;
 	}
 
 	//
@@ -35,10 +49,10 @@ public sealed class CurrentPrincipalAccessor(
 	private async Task<CurrentPrincipal?> LoadAsync(
 		CancellationToken cancellationToken)
 	{
-		ClaimsPrincipal? user = _httpContextAccessor.HttpContext?.User;
-		string? objectId = user?.GetObjectId();
+		ClaimsPrincipal user = await GetUserAsync();
+		string? objectId = user.GetObjectId();
 
-		if (user is null ||
+		if (user.Identity?.IsAuthenticated != true ||
 			!Guid.TryParse(objectId, out Guid entraObjectId))
 			return null;
 
