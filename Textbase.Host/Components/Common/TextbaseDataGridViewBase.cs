@@ -10,7 +10,7 @@ public abstract class TextbaseDataGridViewBase<TViewModel, TModel, TFilter>
 	where TModel : class
 	where TFilter : QueryFilterBase, new()
 {
-	protected bool IsInitialized { get; private set; } = false;
+	protected bool IsInitialized { get; private set; }
 
 	protected override void OnAfterRender(
 		bool firstRender)
