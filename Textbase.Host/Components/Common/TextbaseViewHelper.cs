@@ -22,7 +22,7 @@ internal static class TextbaseViewHelper
 
 		if (alertService.IsVisible &&
 			alertService.AlertStyle == AlertStyle.Danger &&
-			String.Equals(alertService.HtmlFormattedText, message, StringComparison.Ordinal))
+			String.Equals(alertService.Text, message, StringComparison.Ordinal))
 			return;
 
 		alertService.Show(message, AlertStyle.Danger);
