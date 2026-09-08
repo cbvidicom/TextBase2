@@ -26,6 +26,7 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 	protected override async Task AfterInitializeViewModelAsync()
 	{
 		await base.AfterInitializeViewModelAsync();
+
 		TextbaseViewHelper.Initialize(MainLayout, CoreAlertService, MainHeader, HasAccess, AccessDeniedMessage);
 	}
 
@@ -37,9 +38,6 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 	protected Task OnSaveAndGoBack()
 		=> SaveItemAsync(SaveMode.SaveAndGoBack);
 
-	protected async Task OnSaveAndNew()
-	{
-		if (await SaveItemAsync() && CanNew)
-			CoreNavigationManager.NavigateTo(CreatePath!, true);
-	}
+	protected Task OnSaveAndNew()
+		=> SaveItemAsync(SaveMode.SaveAndNew);
 }

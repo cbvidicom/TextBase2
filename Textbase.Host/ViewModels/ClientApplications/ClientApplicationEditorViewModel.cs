@@ -4,6 +4,7 @@ using Textbase.Contracts.Models;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
+using Textbase.Host.Enumerations;
 using Textbase.Infrastructure.Persistence.ClientApplications;
 using Uwn.Blazor.Models.Common;
 using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
@@ -21,6 +22,8 @@ public class ClientApplicationEditorViewModel(
 		clientApplicationCommands,
 		clientApplicationCommands)
 {
+	private readonly Type ModelType = typeof(ClientApplication);
+
 	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
 		CancellationToken cancellationToken = default)
 	{
@@ -29,7 +32,9 @@ public class ClientApplicationEditorViewModel(
 		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool isAuthorized = await _authorization.CanCreateAsync(clientApplication, user, cancellationToken);
 
-		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to create client applications.");
+		return isAuthorized
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, ModelType));
 	}
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
@@ -42,7 +47,9 @@ public class ClientApplicationEditorViewModel(
 		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool isAuthorized = await _authorization.CanReadAsync(clientApplicationGuid, user, cancellationToken);
 
-		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to read this client application.");
+		return isAuthorized
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Read, ModelType));
 	}
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeUpdateAsync(
@@ -52,7 +59,9 @@ public class ClientApplicationEditorViewModel(
 		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool isAuthorized = await _authorization.CanUpdateAsync(item.ClientApplicationGuid, item, user, cancellationToken);
 
-		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to update this client application.");
+		return isAuthorized
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Update, ModelType));
 	}
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeDeleteAsync(
@@ -62,7 +71,9 @@ public class ClientApplicationEditorViewModel(
 		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool isAuthorized = await _authorization.CanDeleteAsync(item.ClientApplicationGuid, user, cancellationToken);
 
-		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to delete this client application.");
+		return isAuthorized
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Delete, ModelType));
 	}
 
 	protected override Task<ClientApplication> CreateNewItemAsync(

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -42,7 +41,7 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
-builder.Services.AddScoped<IClientApplicationServerQueries>(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
+builder.Services.AddScoped(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
 
 builder.Services.AddControllers(options =>
 {

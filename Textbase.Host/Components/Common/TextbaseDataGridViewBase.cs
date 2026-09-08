@@ -20,6 +20,7 @@ public abstract class TextbaseDataGridViewBase<TViewModel, TModel, TFilter>
 	protected override async Task AfterInitializeViewModelAsync()
 	{
 		await base.AfterInitializeViewModelAsync();
+
 		TextbaseViewHelper.Initialize(MainLayout, CoreAlertService, MainHeader, HasAccess, AccessDeniedMessage);
 	}
 

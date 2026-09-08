@@ -5,7 +5,11 @@
 
 @inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
 
-@if (HasAccess && IsInitialized)
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
 {
 	<RzDataGrid @ref="Grid"
 				TItem="ClientApplication"
@@ -56,10 +60,6 @@
 			</RadzenDataGridColumn>
 		</Columns>
 	</RzDataGrid>
-}
-else if (!IsInitialized)
-{
-	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
 }
 
 @if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)

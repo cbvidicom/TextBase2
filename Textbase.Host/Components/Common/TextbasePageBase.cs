@@ -14,6 +14,7 @@ public abstract class TextbasePageBase
 	protected override void OnParametersSet()
 	{
 		base.OnParametersSet();
+
 		MainLayout.SetHeader(MainHeader);
 	}
 }

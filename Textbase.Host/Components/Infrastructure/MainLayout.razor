@@ -57,6 +57,7 @@
 	protected override void OnInitialized()
 	{
 		base.OnInitialized();
+
 		AlertService.OnChange += OnAlertChange;
 	}
 
@@ -67,6 +68,7 @@
 			return;
 
 		_header = header;
+
 		_ = InvokeAsync(StateHasChanged);
 	}
 

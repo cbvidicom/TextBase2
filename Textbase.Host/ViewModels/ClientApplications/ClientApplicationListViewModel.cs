@@ -4,6 +4,7 @@ using Textbase.Application.Features.ClientApplications;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
+using Textbase.Host.Enumerations;
 using Textbase.Infrastructure.Persistence.ClientApplications;
 using Uwn.Blazor.Enumerations.Radzen;
 using Uwn.Blazor.Models.Common;
@@ -20,6 +21,8 @@ public class ClientApplicationListViewModel(
 	: DataGridViewModel<ClientApplication, ClientApplicationFilter>(
 		clientApplicationQueries)
 {
+	private readonly Type ModelType = typeof(ClientApplication);
+
 	private IReadOnlyDictionary<Guid, ClientApplicationReferenceCounts>? _referenceCounts;
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
@@ -30,7 +33,9 @@ public class ClientApplicationListViewModel(
 		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool isAuthorized = await _authorization.CanCreateAsync(clientApplication, user, cancellationToken);
 
-		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to create client applications.");
+		return isAuthorized
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, ModelType));
 	}
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
@@ -40,7 +45,9 @@ public class ClientApplicationListViewModel(
 		ClientApplicationFilter filter = ClientApplicationFilter.All();
 		bool isAuthorized = await _authorization.CanListAsync(filter, user, cancellationToken);
 
-		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to read client applications.");
+		return isAuthorized
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Read, ModelType));
 	}
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeListAsync(
@@ -51,7 +58,9 @@ public class ClientApplicationListViewModel(
 		bool canCount = await _authorization.CanCountAsync(filter, user, cancellationToken);
 		bool canList = canCount && await _authorization.CanListAsync(filter, user, cancellationToken);
 
-		return canList ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to list client applications.");
+		return canList
+			? ViewAuthorizationResult.Authorized
+			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.List, ModelType));
 	}
 
 	protected override async Task AfterLoadDataAsync(
