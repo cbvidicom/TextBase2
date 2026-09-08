@@ -29,6 +29,7 @@ builder.Services
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentPrincipalAccessor, CurrentPrincipalAccessor>();
+builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
 builder.Services.AddScoped<IAuthorizationHandler, ActivePrincipalAuthorizationHandler>();
 
 AuthorizationBase.RegisterAuthorizationServices(builder.Services);
