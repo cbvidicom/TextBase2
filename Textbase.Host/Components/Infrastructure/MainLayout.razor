@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@implements IDisposable
 
 <CascadingValue Value="this">
 	<RadzenLayout>
@@ -54,14 +53,6 @@
 	private string _header = String.Empty;
 	private bool _isSidebarExpanded = true;
 
-	protected override void OnInitialized()
-	{
-		base.OnInitialized();
-
-		_header = GetDefaultHeader(NavigationManager.Uri);
-		NavigationManager.LocationChanged += OnLocationChanged;
-	}
-
 	public void SetHeader(
 		string header)
 	{
@@ -72,35 +63,7 @@
 		_ = InvokeAsync(StateHasChanged);
 	}
 
-	public void Dispose()
-		=> NavigationManager.LocationChanged -= OnLocationChanged;
-
 	private void OnAlertClose(
 		dynamic _)
 		=> AlertService.Hide();
-
-	private void OnLocationChanged(
-		object? sender,
-		LocationChangedEventArgs args)
-		=> SetHeader(GetDefaultHeader(args.Location));
-
-	private string GetDefaultHeader(
-		string location)
-	{
-		string path = NavigationManager.ToBaseRelativePath(location);
-		int suffixIndex = path.IndexOfAny(['?', '#']);
-		if (suffixIndex >= 0)
-			path = path[..suffixIndex];
-
-		string segment = path.Split('/', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "home";
-		string[] words = segment.Split('-', StringSplitOptions.RemoveEmptyEntries);
-
-		for (int i = 0; i < words.Length; i++)
-		{
-			if (words[i].Length > 0)
-				words[i] = Char.ToUpperInvariant(words[i][0]) + words[i][1..];
-		}
-
-		return String.Join(' ', words);
-	}
 }
