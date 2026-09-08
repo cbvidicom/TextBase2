@@ -16,10 +16,10 @@ public abstract class TextbaseDataGridViewBase<TViewModel, TModel, TFilter>
 
 	protected bool IsInitialized { get; private set; }
 
-	protected override async Task OnParametersSetAsync()
+	protected override async Task AfterInitializeViewModelAsync()
 	{
-		await base.OnParametersSetAsync();
-		MainLayout.SetHeader(MainHeader ?? String.Empty);
+		await base.AfterInitializeViewModelAsync();
+		TextbaseViewHelper.Initialize(MainLayout, CoreAlertService, MainHeader, HasAccess, AccessDeniedMessage);
 	}
 
 	protected override void OnAfterRender(
