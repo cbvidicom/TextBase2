@@ -5,14 +5,7 @@
 
 @inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
 
-@if (!HasAccess)
-{
-	<RadzenAlert AlertStyle="AlertStyle.Danger"
-					ShowIcon="true">
-		@(AccessDeniedMessage ?? "The current principal is not authorized to access client applications.")
-	</RadzenAlert>
-}
-else if (IsInitialized)
+@if (HasAccess && IsInitialized)
 {
 	<RzDataGrid @ref="Grid"
 				TItem="ClientApplication"
@@ -64,12 +57,12 @@ else if (IsInitialized)
 		</Columns>
 	</RzDataGrid>
 }
-else
+else if (!IsInitialized)
 {
 	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
 }
 
-@if (ViewModel.CreateAuthorization.IsAllowed)
+@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
 {
 	<RzAddButton Path="@StaticRoutes.ClientApplicationCreate" />
 }
