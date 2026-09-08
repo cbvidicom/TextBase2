@@ -7,4 +7,7 @@ public static class StaticRoutes
 	public const string ClientApplicationEdit = "/client-application/{0}";
 
 	public const string Home = "/";
+
+	public const string SignIn = "/authentication/sign-in";
+	public const string SignOut = "/authentication/sign-out";
 }
