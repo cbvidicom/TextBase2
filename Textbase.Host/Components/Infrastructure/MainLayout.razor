@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 
 <CascadingValue Value="this">
 	<RadzenLayout>
@@ -53,6 +54,12 @@
 	private string _header = String.Empty;
 	private bool _isSidebarExpanded = true;
 
+	protected override void OnInitialized()
+	{
+		base.OnInitialized();
+		AlertService.OnChange += OnAlertChange;
+	}
+
 	public void SetHeader(
 		string header)
 	{
@@ -62,6 +69,12 @@
 		_header = header;
 		_ = InvokeAsync(StateHasChanged);
 	}
+
+	public void Dispose()
+		=> AlertService.OnChange -= OnAlertChange;
+
+	private void OnAlertChange()
+		=> _ = InvokeAsync(StateHasChanged);
 
 	private void OnAlertClose(
 		dynamic _)

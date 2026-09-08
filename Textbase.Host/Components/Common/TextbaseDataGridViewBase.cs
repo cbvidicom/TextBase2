@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components;
+using Textbase.Host.Components.Infrastructure;
 using Uwn.Blazor.Components.Abstractions.Querying;
 using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 using Uwn.Common.Querying;
@@ -10,7 +12,16 @@ public abstract class TextbaseDataGridViewBase<TViewModel, TModel, TFilter>
 	where TModel : class
 	where TFilter : QueryFilterBase, new()
 {
-	protected bool IsInitialized { get; private set; } = false;
+	[CascadingParameter]
+	private MainLayout MainLayout { get; set; } = default!;
+
+	protected bool IsInitialized { get; private set; }
+
+	protected override async Task AfterInitializeViewModelAsync()
+	{
+		await base.AfterInitializeViewModelAsync();
+		TextbaseViewHelper.Initialize(MainLayout, CoreAlertService, MainHeader, HasAccess, AccessDeniedMessage);
+	}
 
 	protected override void OnAfterRender(
 		bool firstRender)

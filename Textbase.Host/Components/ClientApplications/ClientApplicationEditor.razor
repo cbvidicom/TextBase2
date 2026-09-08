@@ -6,8 +6,6 @@
 
 @inherits TextbaseEditorViewBase<ClientApplicationEditorViewModel, ClientApplicationDto, ClientApplication, ClientApplicationFilter>
 
-<PageHeader Text="@MainHeader" />
-
 @if (CanGoBack)
 {
 	<RzGoBackLink Path="@GoBackPath" />
@@ -17,14 +15,14 @@
 {
 	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
 }
-else
+else if (HasAccess)
 {
 	<RadzenTemplateForm TItem="ClientApplication"
 						Data="@Item"
 						class="rz-mt-4 rz-mb-4">
 		<AntiforgeryToken />
 		<DataAnnotationsValidator />
-		<fieldset disabled="@(!ViewModel.CanWrite)">
+		<fieldset disabled="@IsReadOnly">
 			<VerticalStack>
 				@if (!IsNewItem)
 				{
@@ -69,7 +67,7 @@ else
 								   Text="Is Active"
 								   @bind-Value="@Item.IsActive" />
 
-				@if (ViewModel.CanWrite)
+				@if (CanSave)
 				{
 					<HorizontalStack>
 						<RzSaveButton RenderStack="false"
