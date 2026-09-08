@@ -5,8 +5,6 @@
 
 @inherits TextbaseDataGridViewBase<ClientApplicationListViewModel, ClientApplication, ClientApplicationFilter>
 
-<PageHeader Text="@MainHeader" />
-
 @if (!HasAccess)
 {
 	<RadzenAlert AlertStyle="AlertStyle.Danger"
