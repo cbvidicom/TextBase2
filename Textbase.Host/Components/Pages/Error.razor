@@ -1,6 +1,8 @@
 ﻿@page "/Error"
 @using System.Diagnostics
 
+@inherits TextbasePageBase
+
 <PageTitle>Error</PageTitle>
 
 <h1 class="text-danger">Error.</h1>
@@ -27,6 +29,8 @@
 @code {
 	[CascadingParameter]
 	private HttpContext? HttpContext { get; set; }
+
+	public override string MainHeader => "Error";
 
 	private string? RequestId { get; set; }
 	private bool ShowRequestId => !String.IsNullOrEmpty(RequestId);
