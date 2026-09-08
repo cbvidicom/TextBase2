@@ -2,8 +2,10 @@
 using Radzen;
 using System.Security.Claims;
 using Textbase.Application.Features.ClientApplications;
+using Textbase.Domain.Enumerations;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
+using Textbase.Host.Authorization;
 using Uwn.Blazor.Enumerations.Radzen;
 using Uwn.Blazor.Models.Common;
 using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
@@ -14,7 +16,8 @@ public class ClientApplicationListViewModel(
 	IClientApplicationAuthorization _authorization,
 	AuthenticationStateProvider _authenticationStateProvider,
 	IClientApplicationQueries clientApplicationQueries,
-	IClientApplicationServerQueries _clientApplicationServerQueries)
+	IClientApplicationServerQueries _clientApplicationServerQueries,
+	ICurrentPrincipalAccessor _currentPrincipalAccessor)
 	: DataGridViewModel<ClientApplication, ClientApplicationFilter>(
 		clientApplicationQueries)
 {
@@ -23,9 +26,8 @@ public class ClientApplicationListViewModel(
 	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await GetUserAsync();
-		ClientApplicationDto dto = new();
-		bool isAuthorized = await _authorization.CanCreateAsync(dto, user, cancellationToken);
+		CurrentPrincipal? principal = await _currentPrincipalAccessor.GetAsync(cancellationToken);
+		bool isAuthorized = principal?.RolesValue.HasFlag(Roles.SysAdmin) == true;
 
 		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to create client applications.");
 	}
