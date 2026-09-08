@@ -12,6 +12,7 @@ using Textbase.Host.Authorization;
 using Textbase.Host.Components.Infrastructure;
 using Textbase.Host.ViewModels;
 using Textbase.Infrastructure;
+using Uwn.Blazor.Enumerations.Common;
 using Uwn.Blazor.Extensions.Common;
 using Uwn.Blazor.Models.Common;
 using Uwn.Blazor.Services.Infrastructure;
@@ -55,6 +56,11 @@ builder.Services.AddRadzenComponents();
 
 builder.Services.AddUwRadzen(builder.Configuration);
 builder.Services.AddViewModels<ViewModelMarker>();
+builder.Services.Configure<QueryingOptions>(options =>
+{
+	options.AuthorizationMethods = AuthorizationMethods.Custom;
+	options.DefaultPageSize = 20;
+});
 
 //
 
