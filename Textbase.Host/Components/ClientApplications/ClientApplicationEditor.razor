@@ -17,6 +17,13 @@
 {
 	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
 }
+else if (!HasAccess)
+{
+	<RadzenAlert AlertStyle="AlertStyle.Danger"
+					ShowIcon="true">
+		@(AccessDeniedMessage ?? "The current principal is not authorized to access this client application.")
+	</RadzenAlert>
+}
 else
 {
 	<RadzenTemplateForm TItem="ClientApplication"
@@ -24,7 +31,7 @@ else
 						class="rz-mt-4 rz-mb-4">
 		<AntiforgeryToken />
 		<DataAnnotationsValidator />
-		<fieldset disabled="@(!ViewModel.CanWrite)">
+		<fieldset disabled="@IsReadOnly">
 			<VerticalStack>
 				@if (!IsNewItem)
 				{
@@ -69,7 +76,7 @@ else
 								   Text="Is Active"
 								   @bind-Value="@Item.IsActive" />
 
-				@if (ViewModel.CanWrite)
+				@if (CanSave)
 				{
 					<HorizontalStack>
 						<RzSaveButton RenderStack="false"
