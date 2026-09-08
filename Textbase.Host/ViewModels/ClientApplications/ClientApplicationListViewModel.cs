@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using Radzen;
+﻿using Radzen;
 using System.Security.Claims;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
+using Textbase.Host.Authorization;
 using Textbase.Infrastructure.Persistence.ClientApplications;
 using Uwn.Blazor.Enumerations.Radzen;
 using Uwn.Blazor.Models.Common;
@@ -13,7 +13,7 @@ namespace Textbase.Host.ViewModels.ClientApplications;
 
 public class ClientApplicationListViewModel(
 	IClientApplicationAuthorization _authorization,
-	AuthenticationStateProvider _authenticationStateProvider,
+	ICurrentUserAccessor _currentUserAccessor,
 	IClientApplicationQueries clientApplicationQueries,
 	IClientApplicationServerQueries _clientApplicationServerQueries,
 	IClientApplicationEntityFactory _clientApplicationEntityFactory)
@@ -27,7 +27,7 @@ public class ClientApplicationListViewModel(
 	{
 		ClientApplication clientApplication = _clientApplicationEntityFactory.Create(Guid.CreateVersion7());
 		clientApplication.IsActive = true;
-		ClaimsPrincipal user = await GetUserAsync();
+		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool isAuthorized = await _authorization.CanCreateAsync(clientApplication, user, cancellationToken);
 
 		return isAuthorized ? ViewAuthorizationResult.Authorized : ViewAuthorizationResult.Denied("The current principal is not authorized to create client applications.");
@@ -36,7 +36,7 @@ public class ClientApplicationListViewModel(
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await GetUserAsync();
+		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		ClientApplicationFilter filter = ClientApplicationFilter.All();
 		bool isAuthorized = await _authorization.CanListAsync(filter, user, cancellationToken);
 
@@ -47,7 +47,7 @@ public class ClientApplicationListViewModel(
 		ClientApplicationFilter filter,
 		CancellationToken cancellationToken = default)
 	{
-		ClaimsPrincipal user = await GetUserAsync();
+		ClaimsPrincipal user = await _currentUserAccessor.GetAsync();
 		bool canCount = await _authorization.CanCountAsync(filter, user, cancellationToken);
 		bool canList = canCount && await _authorization.CanListAsync(filter, user, cancellationToken);
 
@@ -87,7 +87,4 @@ public class ClientApplicationListViewModel(
 			? value.TextResourceCount
 			: 0;
 	}
-
-	private async Task<ClaimsPrincipal> GetUserAsync()
-		=> (await _authenticationStateProvider.GetAuthenticationStateAsync()).User;
 }
