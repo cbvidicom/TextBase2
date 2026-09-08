@@ -1,14 +1,12 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
+using Microsoft.Identity.Web.UI;
 using Radzen;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
-using Textbase.Host;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Components.Infrastructure;
@@ -45,10 +43,12 @@ builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
 builder.Services.AddScoped(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
 
-builder.Services.AddControllers(options =>
-{
-	options.Filters.Add(new AuthorizeFilter());
-});
+builder.Services
+	.AddControllersWithViews(options =>
+	{
+		options.Filters.Add(new AuthorizeFilter());
+	})
+	.AddMicrosoftIdentityUI();
 
 builder.Services
 	.AddRazorComponents()
@@ -82,28 +82,6 @@ app.UseAuthorization();
 
 app.UseAntiforgery();
 
-app.MapGet(StaticRoutes.SignIn, async (HttpContext context, string? returnUrl) =>
-{
-	string redirectUri = IsLocalReturnUrl(returnUrl) ? returnUrl! : StaticRoutes.Home;
-	AuthenticationProperties properties = new()
-	{
-		RedirectUri = redirectUri
-	};
-
-	await context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
-}).AllowAnonymous();
-
-app.MapGet(StaticRoutes.SignOut, async (HttpContext context) =>
-{
-	AuthenticationProperties properties = new()
-	{
-		RedirectUri = StaticRoutes.Home
-	};
-
-	await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-	await context.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
-}).AllowAnonymous();
-
 app.MapControllers();
 
 app.MapStaticAssets();
@@ -111,9 +89,3 @@ app.MapRazorComponents<App>()
 	.AddInteractiveServerRenderMode();
 
 app.Run();
-
-static bool IsLocalReturnUrl(
-	string? returnUrl)
-	=> !String.IsNullOrWhiteSpace(returnUrl) &&
-	returnUrl[0] == '/' &&
-	(returnUrl.Length == 1 || returnUrl[1] != '/' && returnUrl[1] != '\\');
