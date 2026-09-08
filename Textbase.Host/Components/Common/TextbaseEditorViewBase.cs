@@ -22,10 +22,10 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 
 	protected bool CanNew => IsNewItem && !String.IsNullOrWhiteSpace(CreatePath);
 
-	protected override async Task OnParametersSetAsync()
+	protected override async Task AfterInitializeViewModelAsync()
 	{
-		await base.OnParametersSetAsync();
-		MainLayout.SetHeader(MainHeader ?? String.Empty);
+		await base.AfterInitializeViewModelAsync();
+		TextbaseViewHelper.Initialize(MainLayout, CoreAlertService, MainHeader, HasAccess, AccessDeniedMessage);
 	}
 
 	//
