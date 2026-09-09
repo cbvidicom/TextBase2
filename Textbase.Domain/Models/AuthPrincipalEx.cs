@@ -18,4 +18,7 @@ public partial class AuthPrincipal
 		get => (PrincipalStatus)Status;
 		set => Status = (int)value;
 	}
+
+	[NotMapped]
+	public bool IsActive => StatusValue == PrincipalStatus.Active;
 }
