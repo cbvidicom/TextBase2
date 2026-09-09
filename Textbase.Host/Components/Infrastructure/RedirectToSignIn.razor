@@ -6,7 +6,9 @@
 			return;
 
 		string relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-		string redirectUri = String.IsNullOrWhiteSpace(relativePath) ? StaticRoutes.Home : $"/{relativePath}";
+		string redirectUri = String.IsNullOrWhiteSpace(relativePath) || relativePath.StartsWith("MicrosoftIdentity/", StringComparison.OrdinalIgnoreCase)
+			? StaticRoutes.Home
+			: $"/{relativePath}";
 		string path = $"{StaticRoutes.SignIn}?redirectUri={Uri.EscapeDataString(redirectUri)}";
 
 		NavigationManager.NavigateTo(path, true);
