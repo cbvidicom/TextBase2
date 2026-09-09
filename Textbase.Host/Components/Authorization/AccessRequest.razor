@@ -67,7 +67,7 @@ else if (_principal.StatusValue == PrincipalStatus.Deactivated)
 	private Guid _entraObjectId;
 	private string? _loadError;
 	private AuthPrincipal? _principal;
-	private string? _request;
+	private string _request = String.Empty;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -82,7 +82,8 @@ else if (_principal.StatusValue == PrincipalStatus.Deactivated)
 		_principal = await AuthPrincipalQueries.ReadAsync(_entraObjectId);
 	}
 
-	private async Task OnSubmitAsync()
+	private async Task OnSubmitAsync(
+		string _)
 	{
 		if (_principal is not null || String.IsNullOrWhiteSpace(_request))
 			return;
