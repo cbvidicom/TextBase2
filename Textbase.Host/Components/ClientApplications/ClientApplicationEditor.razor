@@ -22,76 +22,201 @@ else if (HasAccess)
 						class="rz-mt-4 rz-mb-4">
 		<AntiforgeryToken />
 		<DataAnnotationsValidator />
-		<fieldset disabled="@IsReadOnly">
-			<VerticalStack>
+		<RadzenTabs SelectedIndexChanged="OnSelectedTabIndexChanged">
+			<Tabs>
+				<RadzenTabsItem Text="Base">
+					<fieldset disabled="@IsReadOnly">
+						<VerticalStack>
+							@if (!IsNewItem)
+							{
+								<RzTextBoxFormField Name="@nameof(ClientApplication.ClientApplicationGuid)"
+													ReadOnly="true"
+													StartIcon="@Icons.Barcode"
+													Text="GUID"
+													Value="@Item.ClientApplicationGuid.ToString()" />
+							}
+							<RzTextBoxFormField MinLength="3"
+												MaxLength="128"
+												Name="@nameof(ClientApplication.Name)"
+												Required="true"
+												StartIcon="@Icons.Name"
+												Text="Name"
+												@bind-Value="@Item.Name" />
+							<RzTextAreaFormField MaxLength="1024"
+												 Name="@nameof(ClientApplication.Description)"
+												 StartIcon="@Icons.Description"
+												 Text="Description"
+												 @bind-Value="@Item.Description" />
+							<RzDropDownFormField TValue="LanguageTag?"
+												 AllowClear="true"
+												 EnumTextResolver="LanguageTagExtensions.GetDisplayText"
+												 EnumType="@typeof(LanguageTag)"
+												 Name="@nameof(ClientApplication.DefaultLanguageTag)"
+												 Required="false"
+												 StartIcon="@Icons.Language"
+												 Text="Default Language Tag"
+												 @bind-Value="@Item.DefaultLanguageTagValue" />
+							<RzTextAreaFormField MaxLength="1024"
+												 Name="@nameof(ClientApplication.DefaultFormat)"
+												 StartIcon="@Icons.CodeXml"
+												 Text="Default Format"
+												 @bind-Value="@Item.DefaultFormat" />
+							<RzTextBoxFormField MaxLength="128"
+												Name="@nameof(ClientApplication.DefaultFileName)"
+												StartIcon="@Icons.DriveFileRename"
+												Text="Default File Name"
+												@bind-Value="@Item.DefaultFileName" />
+							<RzSwitchFormField Name="@nameof(ClientApplication.IsActive)"
+											   Text="Is Active"
+											   @bind-Value="@Item.IsActive" />
+
+							@if (CanSave)
+							{
+								<HorizontalStack>
+									<RzSaveButton RenderStack="false"
+												  Click="OnSave" />
+									@if (CanGoBack)
+									{
+										<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+													   Click="OnSaveAndGoBack"
+													   Icon="@Icons.Save"
+													   RenderStack="false"
+													   Text="Save & Go back" />
+									}
+									@if (CanNew)
+									{
+										<RzClickButton ButtonStyle="ButtonStyle.Info"
+													   Click="OnSaveAndNew"
+													   Icon="@Icons.Save"
+													   RenderStack="false"
+													   Text="Save & New" />
+									}
+								</HorizontalStack>
+							}
+						</VerticalStack>
+					</fieldset>
+				</RadzenTabsItem>
 				@if (!IsNewItem)
 				{
-					<RzTextBoxFormField Name="@nameof(ClientApplication.ClientApplicationGuid)"
-										ReadOnly="true"
-										StartIcon="@Icons.Barcode"
-										Text="GUID"
-										Value="@Item.ClientApplicationGuid.ToString()" />
-				}
-				<RzTextBoxFormField MinLength="3"
-									MaxLength="128"
-									Name="@nameof(ClientApplication.Name)"
-									Required="true"
-									StartIcon="@Icons.Name"
-									Text="Name"
-									@bind-Value="@Item.Name" />
-				<RzTextAreaFormField MaxLength="1024"
-									 Name="@nameof(ClientApplication.Description)"
-									 StartIcon="@Icons.Description"
-									 Text="Description"
-									 @bind-Value="@Item.Description" />
-				<RzDropDownFormField TValue="LanguageTag?"
-									 AllowClear="true"
-									 EnumTextResolver="LanguageTagExtensions.GetDisplayText"
-									 EnumType="@typeof(LanguageTag)"
-									 Name="@nameof(ClientApplication.DefaultLanguageTag)"
-									 Required="false"
-									 StartIcon="@Icons.Language"
-									 Text="Default Language Tag"
-									 @bind-Value="@Item.DefaultLanguageTagValue" />
-				<RzTextAreaFormField MaxLength="1024"
-									 Name="@nameof(ClientApplication.DefaultFormat)"
-									 StartIcon="@Icons.CodeXml"
-									 Text="Default Format"
-									 @bind-Value="@Item.DefaultFormat" />
-				<RzTextBoxFormField MaxLength="128"
-									Name="@nameof(ClientApplication.DefaultFileName)"
-									StartIcon="@Icons.DriveFileRename"
-									Text="Default File Name"
-									@bind-Value="@Item.DefaultFileName" />
-				<RzSwitchFormField Name="@nameof(ClientApplication.IsActive)"
-								   Text="Is Active"
-								   @bind-Value="@Item.IsActive" />
+					<RadzenTabsItem Text="Locales">
+						@if (_isTabBusy)
+						{
+							<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+						}
+						else
+						{
+							<RadzenTable class="rz-mb-4">
+								<RadzenTableHeader>
+									<RadzenTableHeaderRow>
+										<RadzenTableHeaderCell>Locale</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Language</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Is Default</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
+									</RadzenTableHeaderRow>
+								</RadzenTableHeader>
+								<RadzenTableBody>
+									@foreach (ClientApplicationLocale cal in ViewModel.ClientApplicationLocales.OrderBy(cal => cal.LocaleKey))
+									{
+										Locale? locale = ViewModel.Locales.SingleOrDefault(l => l.LocaleKey == cal.LocaleKey);
 
-				@if (CanSave)
-				{
-					<HorizontalStack>
-						<RzSaveButton RenderStack="false"
-									  Click="OnSave" />
-						@if (CanGoBack)
-						{
-							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="OnSaveAndGoBack"
-										   Icon="@Icons.Save"
-										   RenderStack="false"
-										   Text="Save & Go back" />
+										<RadzenTableRow>
+											<RadzenTableCell>
+												<strong>@cal.LocaleKey</strong>
+											</RadzenTableCell>
+											<RadzenTableCell>@locale?.EnglishName</RadzenTableCell>
+											<RadzenTableCell>
+												@if (cal.IsDefault)
+												{
+													<RadzenIcon Icon="@Icons.Check" />
+												}
+											</RadzenTableCell>
+											<RadzenTableCell>
+												@if (!cal.IsDefault)
+												{
+													<HorizontalStack>
+														<RzClickButton ButtonStyle="ButtonStyle.Info"
+																	   Icon="@Icons.Check"
+																	   Text="Make default"
+																	   Click="@(() => OnMakeDefault(cal.LocaleKey))" />
+														<RzDeleteButton Click="@(() => OnRemoveLocale(cal.LocaleKey))" />
+													</HorizontalStack>
+												}
+											</RadzenTableCell>
+										</RadzenTableRow>
+									}
+								</RadzenTableBody>
+							</RadzenTable>
+
+							<HorizontalStack>
+								<RadzenDropDown TValue="Locale"
+												AllowClear="false"
+												AllowFiltering="true"
+												Data="@ViewModel.Locales"
+												FilterAsYouType="true"
+												FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+												Multiple="false"
+												Style="width: 40rem;"
+												@bind-Value="@_selectedLocale" />
+								<RzClickButton ButtonStyle="ButtonStyle.Primary"
+											   Icon="@Icons.Add"
+											   Text="Add"
+											   Click="OnAddLocale" />
+							</HorizontalStack>
 						}
-						@if (CanNew)
+					</RadzenTabsItem>
+
+					<RadzenTabsItem Text="Texts">
+						@if (_isTabBusy)
 						{
-							<RzClickButton ButtonStyle="ButtonStyle.Info"
-										   Click="OnSaveAndNew"
-										   Icon="@Icons.Save"
-										   RenderStack="false"
-										   Text="Save & New" />
+							<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
 						}
-					</HorizontalStack>
+						else
+						{
+							<RadzenTable class="rz-mb-4">
+								<RadzenTableHeader>
+									<RadzenTableHeaderRow>
+										<RadzenTableHeaderCell>Text</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Reference ID</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
+									</RadzenTableHeaderRow>
+								</RadzenTableHeader>
+								<RadzenTableBody>
+									@foreach (ClientApplicationTextResource cat in ViewModel.ClientApplicationTextResources.OrderBy(cat => cat.TextKey))
+									{
+										<RadzenTableRow>
+											<RadzenTableCell>
+												<strong>@cat.TextKey</strong>
+											</RadzenTableCell>
+											<RadzenTableCell>@cat.ReferenceId</RadzenTableCell>
+											<RadzenTableCell>
+												<RzDeleteButton Click="@(() => OnRemoveTextResource(cat.TextKey))" />
+											</RadzenTableCell>
+										</RadzenTableRow>
+									}
+								</RadzenTableBody>
+							</RadzenTable>
+
+							<HorizontalStack>
+								<RadzenDropDown TValue="TextResource"
+												AllowClear="false"
+												AllowFiltering="true"
+												Data="@ViewModel.TextResources"
+												FilterAsYouType="true"
+												FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+												Multiple="false"
+												TextProperty="TextKey"
+												Style="width: 40rem;"
+												@bind-Value="@_selectedTextResource" />
+								<RzClickButton ButtonStyle="ButtonStyle.Primary"
+											   Icon="@Icons.Add"
+											   Text="Add"
+											   Click="OnAddTextResource" />
+							</HorizontalStack>
+						}
+					</RadzenTabsItem>
 				}
-			</VerticalStack>
-		</fieldset>
+			</Tabs>
+		</RadzenTabs>
 	</RadzenTemplateForm>
 }
 
@@ -101,4 +226,143 @@ else if (HasAccess)
 	protected override string GoBackPath => StaticRoutes.ClientApplicationList;
 
 	protected override string CreatePath => StaticRoutes.ClientApplicationCreate;
+
+	private bool _isTabBusy = false;
+
+	private Locale? _selectedLocale;
+
+	private TextResource? _selectedTextResource;
+
+	//
+
+	private async Task OnSelectedTabIndexChanged(
+		int index)
+	{
+		_isTabBusy = true;
+
+		try
+		{
+			await ViewModel.SetSelectedTabIndexAsync(index);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
+
+	private async Task OnMakeDefault(
+		string localeKey)
+	{
+		if (!await ConfirmAsync("Do you want to make this Locale the Default for this Application?"))
+			return;
+
+		_isTabBusy = true;
+
+		try
+		{
+			await ViewModel.SetDefaultLocale(localeKey);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
+
+	private async Task OnAddLocale()
+	{
+		if (_selectedLocale is null)
+			return;
+
+		_isTabBusy = true;
+
+		try
+		{
+			await ViewModel.AddLocale(_selectedLocale.LocaleKey);
+
+			_selectedLocale = null;
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
+
+	private async Task OnRemoveLocale(
+		string localeKey)
+	{
+		if (!await ConfirmAsync("Are you sure you want to remove this Locale from the Application?"))
+			return;
+
+		_isTabBusy = true;
+
+		try
+		{
+			await ViewModel.RemoveLocale(localeKey);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
+
+	private async Task OnAddTextResource()
+	{
+		if (_selectedTextResource is null)
+			return;
+
+		_isTabBusy = true;
+
+		try
+		{
+			await ViewModel.AddTextResource(_selectedTextResource.TextKey);
+
+			_selectedTextResource = null;
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
+
+	private async Task OnRemoveTextResource(
+		string textKey)
+	{
+		if (!await ConfirmAsync("Are you sure you want to remove this Text from the Application?"))
+			return;
+
+		_isTabBusy = true;
+
+		try
+		{
+			await ViewModel.RemoveTextResource(textKey);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
 }
