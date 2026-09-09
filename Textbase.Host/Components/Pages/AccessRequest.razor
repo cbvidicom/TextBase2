@@ -2,6 +2,7 @@
 @using System.Security.Claims
 @using Textbase.Application.Features.AuthPrincipals
 @using Textbase.Domain.Enumerations
+@using Textbase.Host.Common
 @using Textbase.Infrastructure.Persistence.AuthPrincipals
 
 @inject IAuthPrincipalCommands AuthPrincipalCommands
@@ -18,17 +19,16 @@ else if (_principal is null)
 	<p>Your account is authenticated, but does not currently have access to TextBase.</p>
 
 	<RadzenTemplateForm TItem="string"
-						Data="@_request"
-						Submit="OnSubmitAsync">
+						Data="@_request">
 		<VerticalStack>
 			<RzTextAreaFormField MaxLength="1024"
 								 Name="Request"
 								 Required="true"
 								 Text="Why do you need access?"
 								 @bind-Value="@_request" />
-			<RadzenButton ButtonType="ButtonType.Submit"
-						  Disabled="@String.IsNullOrWhiteSpace(_request)"
-						  Text="Request access" />
+			<RzClickButton Disabled="@String.IsNullOrWhiteSpace(_request)"
+						   Text="Request access"
+						   Click="OnSubmitAsync" />
 		</VerticalStack>
 	</RadzenTemplateForm>
 }
@@ -82,15 +82,14 @@ else if (_principal.StatusValue == PrincipalStatus.Deactivated)
 		_principal = await AuthPrincipalQueries.ReadAsync(_entraObjectId);
 	}
 
-	private async Task OnSubmitAsync(
-		string _)
+	private async Task OnSubmitAsync()
 	{
 		if (_principal is not null || String.IsNullOrWhiteSpace(_request))
 			return;
 
 		AuthPrincipal principal = AuthPrincipalEntityFactory.Create(_entraObjectId, (int)Roles.None, (int)PrincipalStatus.Pending);
-		principal.DisplayName = LimitLength(User.FindFirstValue("name") ?? User.Identity?.Name, 128);
-		principal.EmailAddress = LimitLength(GetEmailAddress(User), 256);
+		principal.DisplayName = (User.FindFirstValue("name") ?? User.Identity?.Name).LimitLength(128);
+		principal.EmailAddress = GetEmailAddress(User).LimitLength(256);
 		principal.Request = _request.Trim();
 
 		if (await AuthPrincipalCommands.TryCreateAsync(principal))
@@ -119,11 +118,4 @@ else if (_principal.StatusValue == PrincipalStatus.Deactivated)
 
 		return null;
 	}
-
-	private static string? LimitLength(
-		string? value,
-		int maximumLength)
-		=> value is null || value.Length <= maximumLength
-		? value
-		: value[..maximumLength];
 }
