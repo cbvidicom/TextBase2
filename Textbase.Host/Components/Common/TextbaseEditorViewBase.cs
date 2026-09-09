@@ -45,6 +45,8 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 
 	protected async Task OnDelete()
 	{
-		await DeleteItemAsync(GoBackPath);
+		bool succeeded = await DeleteItemAsync();
+		if (succeeded && !String.IsNullOrWhiteSpace(GoBackPath))
+			CoreNavigationManager.NavigateTo(GoBackPath);
 	}
 }
