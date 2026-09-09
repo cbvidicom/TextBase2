@@ -13,7 +13,7 @@
 				</Router>
 			</Authorized>
 			<NotAuthorized>
-				<LayoutView Layout="typeof(AccessLayout)">
+				<LayoutView Layout="typeof(MinimalLayout)">
 					<AccessRequest User="@authenticationState.User" />
 				</LayoutView>
 			</NotAuthorized>
