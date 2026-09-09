@@ -1,0 +1,23 @@
+name: Inspect delete flow
+on:
+  push:
+    branches:
+      - fix/formality-editor-viewmodel
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - name: Inspect
+        shell: bash
+        run: |
+          mkdir -p /tmp/inspect
+          cd /tmp/inspect
+          dotnet new console --framework net10.0 --force >/dev/null
+          dotnet add package Uwn.Blazor --version 10.26.9.809 >/dev/null
+          dotnet tool install ilspycmd --tool-path /tmp/tools >/dev/null
+          DLL=$(find ~/.nuget/packages/uwn.blazor/10.26.9.809 -name Uwn.Blazor.dll | head -1)
+          /tmp/tools/ilspycmd -t 'Uwn.Blazor.Components.Abstractions.Querying.BaseEditorView`4' "$DLL"
+          /tmp/tools/ilspycmd -t 'Uwn.Blazor.Models.ViewModels.Abstractions.Querying.EditorViewModel`2' "$DLL"
