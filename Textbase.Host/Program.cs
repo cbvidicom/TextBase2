@@ -9,6 +9,7 @@ using Radzen;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Application.Features.Formalities;
+using Textbase.Application.Features.Presentations;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Api.Infrastructure;
 using Textbase.Host.Authorization;
@@ -75,6 +76,7 @@ builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
 builder.Services.AddScoped(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
 builder.Services.AddScoped(services => (IFormalityServerQueries)services.GetRequiredService<IFormalityQueries>());
+builder.Services.AddScoped(services => (IPresentationServerQueries)services.GetRequiredService<IPresentationQueries>());
 
 builder.Services
 	.AddControllersWithViews(options =>
