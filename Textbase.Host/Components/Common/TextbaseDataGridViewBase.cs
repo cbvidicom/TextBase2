@@ -26,5 +26,11 @@ public abstract class TextbaseDataGridViewBase<TViewModel, TModel, TFilter>
 
 	protected override void OnAfterRender(
 		bool firstRender)
-		=> IsInitialized = true;
+	{
+		if (!firstRender)
+			return;
+
+		IsInitialized = true;
+		StateHasChanged();
+	}
 }

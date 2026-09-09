@@ -24,8 +24,23 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 string connectionString = builder.Configuration.GetConnectionString("Textbase")
 	?? throw new InvalidOperationException("Connection string 'Textbase' is not configured.");
 
-IConfigurationSection azureAdB2C = builder.Configuration.GetSection("AzureAdB2C");
+builder.Services.Configure<CookieAuthenticationOptions>(
+	CookieAuthenticationDefaults.AuthenticationScheme,
+	options =>
+	{
+		options.Cookie.Name = "TextBase2-Auth-Cookie";
+		options.ExpireTimeSpan = TimeSpan.FromDays(30);
+		options.SlidingExpiration = true;
 
+		options.Events.OnSigningIn = context =>
+		{
+			context.Properties.IsPersistent = true;
+			context.Properties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30);
+			return Task.CompletedTask;
+		};
+	});
+
+IConfigurationSection azureAdB2C = builder.Configuration.GetSection("AzureAdB2C");
 builder.Services
 	.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
 	.AddMicrosoftIdentityWebApp(azureAdB2C)
