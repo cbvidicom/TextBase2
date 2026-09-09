@@ -1,0 +1,54 @@
+﻿@page "/presentations"
+
+@using Textbase.Application.Features.Presentations
+@using Textbase.Host.ViewModels.Presentations
+
+@inherits TextbaseDataGridViewBase<PresentationListViewModel, Presentation, PresentationFilter>
+
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="Presentation"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(Presentation.PresentationKey)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Key" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Presentation.Description)"
+								  Sortable="true"
+								  Title="Description" />
+		</Columns>
+	</RzDataGrid>
+}
+
+@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
+{
+	<RzAddButton Path="@StaticRoutes.PresentationCreate" />
+}
+
+@code {
+	public override string MainHeader => "Presentations";
+
+	protected override string EditItemRouteTemplate => StaticRoutes.PresentationEdit;
+
+	protected override Func<Presentation, object> GetKey => e => e.PresentationKey;
+}
