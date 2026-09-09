@@ -5,9 +5,9 @@ using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Enumerations;
-using Textbase.Host.ViewModels.Common;
 using Textbase.Infrastructure.Persistence.Presentations;
 using Uwn.Blazor.Models.Common;
+using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 
 namespace Textbase.Host.ViewModels.Presentations;
 
@@ -17,7 +17,7 @@ public class PresentationEditorViewModel(
 	IPresentationServerQueries presentationQueries,
 	IPresentationCommands presentationCommands,
 	IPresentationEntityFactory _presentationEntityFactory)
-	: TextbaseStringEditorViewModel<PresentationDto, Presentation>(
+	: StringEditorViewModel<PresentationDto, Presentation>(
 		presentationQueries,
 		presentationCommands,
 		presentationCommands)
