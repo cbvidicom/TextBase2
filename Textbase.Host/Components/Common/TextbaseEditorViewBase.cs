@@ -8,8 +8,8 @@ using Uwn.Common.Querying;
 namespace Textbase.Host.Components.Common;
 
 public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
-	: BaseGuidEditorView<TViewModel, TDTO, TModel, TFilter>
-	where TViewModel : GuidEditorViewModel<TDTO, TModel>
+	: BaseEditorView<TViewModel, TDTO, TModel, TFilter>
+	where TViewModel : EditorViewModel<TDTO, TModel>
 	where TDTO : class
 	where TModel : class, TDTO
 	where TFilter : QueryFilterBase, new()
@@ -22,6 +22,8 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 	protected bool CanGoBack => !String.IsNullOrWhiteSpace(GoBackPath);
 
 	protected bool CanNew => IsNewItem && !String.IsNullOrWhiteSpace(CreatePath);
+
+	protected bool CanDelete => !IsNewItem && ViewModel.DeleteAuthorization.IsAllowed;
 
 	protected override async Task AfterInitializeViewModelAsync()
 	{
@@ -40,4 +42,9 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 
 	protected Task OnSaveAndNew()
 		=> SaveItemAsync(SaveMode.SaveAndNew);
+
+	protected async Task OnDelete()
+	{
+		await DeleteItemAsync(GoBackPath);
+	}
 }
