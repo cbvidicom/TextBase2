@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -6,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Radzen;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
@@ -28,20 +26,15 @@ string connectionString = builder.Configuration.GetConnectionString("Textbase")
 
 IConfigurationSection azureAdB2C = builder.Configuration.GetSection("AzureAdB2C");
 
-AuthenticationBuilder authenticationBuilder = builder.Services.AddAuthentication(options =>
-{
-	options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-	options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-	options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-});
+builder.Services
+	.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+	.AddMicrosoftIdentityWebApp(azureAdB2C)
+	.EnableTokenAcquisitionToCallDownstreamApi()
+	.AddDistributedTokenCaches();
 
-authenticationBuilder.AddMicrosoftIdentityWebApp(azureAdB2C);
-authenticationBuilder.AddMicrosoftIdentityWebApi(azureAdB2C, JwtBearerDefaults.AuthenticationScheme);
-
-builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
-{
-	options.ResponseType = OpenIdConnectResponseType.Code;
-});
+builder.Services
+	.AddAuthentication()
+	.AddMicrosoftIdentityWebApi(azureAdB2C, JwtBearerDefaults.AuthenticationScheme);
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
