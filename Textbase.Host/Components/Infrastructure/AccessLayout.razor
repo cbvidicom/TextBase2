@@ -1,0 +1,20 @@
+﻿@inherits LayoutComponentBase
+
+<RadzenLayout>
+	<RadzenHeader>
+		<RadzenStack AlignItems="AlignItems.Center"
+					 Gap="0"
+					 Orientation="Orientation.Horizontal">
+			<RadzenLabel Text="TextBase" />
+		</RadzenStack>
+	</RadzenHeader>
+	<RadzenBody>
+		<div class="access-layout-body">
+			<RadzenCard class="access-layout-card">
+				@Body
+			</RadzenCard>
+		</div>
+	</RadzenBody>
+</RadzenLayout>
+
+<RadzenDialog />
