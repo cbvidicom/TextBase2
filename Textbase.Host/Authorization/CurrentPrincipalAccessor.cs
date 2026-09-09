@@ -4,7 +4,6 @@ using System.Security.Claims;
 using Textbase.Application.Features.AuthPrincipalClientApplications;
 using Textbase.Application.Features.AuthPrincipalLocales;
 using Textbase.Application.Features.AuthPrincipals;
-using Textbase.Domain.Enumerations;
 using Textbase.Domain.Models;
 
 namespace Textbase.Host.Authorization;
@@ -55,7 +54,7 @@ public sealed class CurrentPrincipalAccessor(
 
 		AuthPrincipal? principal = await _authPrincipalQueries.ReadAsync(entraObjectId, cancellationToken);
 
-		if (principal is null || principal.StatusValue != PrincipalStatus.Active)
+		if (principal is null || !principal.IsActive)
 			return null;
 
 		AuthPrincipalClientApplicationFilter applicationFilter = new()
