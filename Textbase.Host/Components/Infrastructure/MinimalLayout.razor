@@ -2,11 +2,17 @@
 
 <RadzenLayout>
 	<RadzenHeader>
-		<RadzenLabel Text="TextBase" />
+		<RadzenStack AlignItems="AlignItems.Center"
+					 JustifyContent="JustifyContent.Center"
+					 Gap="0"
+					 Orientation="Orientation.Horizontal">
+			<RadzenLabel Text="TextBase 2" />
+		</RadzenStack>
 	</RadzenHeader>
 	<RadzenBody>
 		<RadzenRow JustifyContent="JustifyContent.Center">
-			<RzCard Width="640px">
+			<RzCard Width="640px"
+					WidthMode="WidthMode.Exact">
 				@Body
 			</RzCard>
 		</RadzenRow>

@@ -16,7 +16,7 @@
 else if (_principal is null)
 {
 	<h1>Request access</h1>
-	<p>Your account is authenticated, but does not currently have access to TextBase.</p>
+	<p>Your account is authenticated, but does not currently have access to TextBase 2.</p>
 
 	<RadzenTemplateForm TItem="string"
 						Data="@_request">
@@ -26,9 +26,8 @@ else if (_principal is null)
 								 Required="true"
 								 Text="Why do you need access?"
 								 @bind-Value="@_request" />
-			<RzClickButton ButtonType="ButtonType.Button"
-						   Disabled="@String.IsNullOrWhiteSpace(_request)"
-						   Icon="person_add"
+			<RzClickButton Disabled="@String.IsNullOrWhiteSpace(_request)"
+						   Icon="@Icons.PersonAdd"
 						   Text="Request access"
 						   Click="OnSubmitAsync" />
 		</VerticalStack>
@@ -40,7 +39,11 @@ else if (_principal.StatusValue == PrincipalStatus.Pending)
 	<p>Your request is waiting for approval.</p>
 	@if (!String.IsNullOrWhiteSpace(_principal.Request))
 	{
-		<p><strong>Your request:</strong> @_principal.Request</p>
+		<p>
+			<strong>Your request:</strong>
+			<br />
+			<span>@_principal.Request</span>
+		</p>
 	}
 }
 else if (_principal.StatusValue == PrincipalStatus.Declined)
@@ -49,7 +52,11 @@ else if (_principal.StatusValue == PrincipalStatus.Declined)
 	<p>Your access request was declined.</p>
 	@if (!String.IsNullOrWhiteSpace(_principal.Response))
 	{
-		<p><strong>Response:</strong> @_principal.Response</p>
+		<p>
+			<strong>Reason:</strong>
+			<br />
+			<span>@_principal.Response</span>
+		</p>
 	}
 }
 else if (_principal.StatusValue == PrincipalStatus.Deactivated)
@@ -58,7 +65,11 @@ else if (_principal.StatusValue == PrincipalStatus.Deactivated)
 	<p>Your access to TextBase has been deactivated.</p>
 	@if (!String.IsNullOrWhiteSpace(_principal.Response))
 	{
-		<p><strong>Response:</strong> @_principal.Response</p>
+		<p>
+			<strong>Reason:</strong>
+			<br />
+			<span>@_principal.Response</span>
+		</p>
 	}
 }
 
@@ -77,7 +88,7 @@ else if (_principal.StatusValue == PrincipalStatus.Deactivated)
 
 		if (!Guid.TryParse(objectId, out _entraObjectId))
 		{
-			_loadError = "The authenticated account does not contain a valid Entra object ID.";
+			_loadError = "The authenticated account does not contain a valid Entra Object ID.";
 			return;
 		}
 
