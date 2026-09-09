@@ -26,7 +26,9 @@ else if (_principal is null)
 								 Required="true"
 								 Text="Why do you need access?"
 								 @bind-Value="@_request" />
-			<RzClickButton Disabled="@String.IsNullOrWhiteSpace(_request)"
+			<RzClickButton ButtonType="ButtonType.Button"
+						   Disabled="@String.IsNullOrWhiteSpace(_request)"
+						   Icon="person_add"
 						   Text="Request access"
 						   Click="OnSubmitAsync" />
 		</VerticalStack>
