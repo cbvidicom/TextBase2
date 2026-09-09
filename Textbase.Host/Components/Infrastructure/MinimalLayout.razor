@@ -1,0 +1,22 @@
+﻿@inherits LayoutComponentBase
+
+<RadzenLayout>
+	<RadzenHeader>
+		<HorizontalStack>
+			<RadzenLabel Text="TextBase" />
+		</HorizontalStack>
+	</RadzenHeader>
+	<RadzenBody>
+		<RadzenRow JustifyContent="JustifyContent.Center">
+			<RadzenColumn Size="12"
+						  SizeLG="6"
+						  SizeMD="8">
+				<RzCard>
+					@Body
+				</RzCard>
+			</RadzenColumn>
+		</RadzenRow>
+	</RadzenBody>
+</RadzenLayout>
+
+<RadzenDialog />
