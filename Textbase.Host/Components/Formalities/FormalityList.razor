@@ -1,0 +1,54 @@
+﻿@page "/formalities"
+
+@using Textbase.Application.Features.Formalities
+@using Textbase.Host.ViewModels.Formalities
+
+@inherits TextbaseDataGridViewBase<FormalityListViewModel, Formality, FormalityFilter>
+
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="Formality"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(Formality.FormalityKey)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Key" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Formality.Description)"
+								  Sortable="true"
+								  Title="Description" />
+		</Columns>
+	</RzDataGrid>
+}
+
+@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
+{
+	<RzAddButton Path="@StaticRoutes.FormalityCreate" />
+}
+
+@code {
+	public override string MainHeader => "Formalities";
+
+	protected override string EditRoute => StaticRoutes.FormalityEdit;
+
+	protected override Func<Formality, object> GetKey => e => e.FormalityKey;
+}
