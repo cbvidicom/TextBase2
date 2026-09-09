@@ -2,19 +2,13 @@
 
 <RadzenLayout>
 	<RadzenHeader>
-		<HorizontalStack>
-			<RadzenLabel Text="TextBase" />
-		</HorizontalStack>
+		<RadzenLabel Text="TextBase" />
 	</RadzenHeader>
 	<RadzenBody>
 		<RadzenRow JustifyContent="JustifyContent.Center">
-			<RadzenColumn Size="12"
-						  SizeLG="6"
-						  SizeMD="8">
-				<RzCard>
-					@Body
-				</RzCard>
-			</RadzenColumn>
+			<RzCard Width="640px">
+				@Body
+			</RzCard>
 		</RadzenRow>
 	</RadzenBody>
 </RadzenLayout>
