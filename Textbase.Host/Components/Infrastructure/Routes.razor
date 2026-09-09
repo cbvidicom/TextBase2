@@ -1,22 +1,23 @@
-﻿<AuthorizeView>
-	<Authorized>
-		<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(NotFound)">
-			<Found Context="routeData">
-				<RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
-				<FocusOnNavigate RouteData="routeData" Selector="h1" />
-			</Found>
-		</Router>
+﻿@using Textbase.Host.Authorization
+@using Textbase.Host.Components.Authorization
+
+<AuthorizeView Policy="@AuthenticationPolicy.Name">
+	<Authorized Context="authenticationState">
+		<AuthorizeView Context="authorizationState">
+			<Authorized>
+				<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(NotFound)">
+					<Found Context="routeData">
+						<RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+						<FocusOnNavigate RouteData="routeData" Selector="h1" />
+					</Found>
+				</Router>
+			</Authorized>
+			<NotAuthorized>
+				<AccessRequest User="@authenticationState.User" />
+			</NotAuthorized>
+		</AuthorizeView>
 	</Authorized>
-	<NotAuthorized Context="authenticationState">
-		@if (authenticationState.User.Identity?.IsAuthenticated == true)
-		{
-			<LayoutView Layout="typeof(MainLayout)">
-				<p>Access denied.</p>
-			</LayoutView>
-		}
-		else
-		{
-			<RedirectToSignIn />
-		}
+	<NotAuthorized>
+		<RedirectToSignIn />
 	</NotAuthorized>
 </AuthorizeView>

@@ -5,9 +5,9 @@ using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Enumerations;
-using Textbase.Host.ViewModels.Common;
 using Textbase.Infrastructure.Persistence.Formalities;
 using Uwn.Blazor.Models.Common;
+using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 
 namespace Textbase.Host.ViewModels.Formalities;
 
@@ -17,7 +17,7 @@ public class FormalityEditorViewModel(
 	IFormalityServerQueries formalityQueries,
 	IFormalityCommands formalityCommands,
 	IFormalityEntityFactory _formalityEntityFactory)
-	: TextbaseStringEditorViewModel<FormalityDto, Formality>(
+	: StringEditorViewModel<FormalityDto, Formality>(
 		formalityQueries,
 		formalityCommands,
 		formalityCommands)

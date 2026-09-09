@@ -1,0 +1,129 @@
+@using Microsoft.Identity.Web
+@using System.Security.Claims
+@using Textbase.Application.Features.AuthPrincipals
+@using Textbase.Domain.Enumerations
+@using Textbase.Infrastructure.Persistence.AuthPrincipals
+
+@inject IAuthPrincipalCommands AuthPrincipalCommands
+@inject IAuthPrincipalEntityFactory AuthPrincipalEntityFactory
+@inject IAuthPrincipalQueries AuthPrincipalQueries
+
+@if (_loadError is not null)
+{
+	<p>@_loadError</p>
+}
+else if (_principal is null)
+{
+	<h1>Request access</h1>
+	<p>Your account is authenticated, but does not currently have access to TextBase.</p>
+
+	<RadzenTemplateForm TItem="string"
+						Data="@_request"
+						Submit="OnSubmitAsync">
+		<VerticalStack>
+			<RzTextAreaFormField MaxLength="1024"
+								 Name="Request"
+								 Required="true"
+								 Text="Why do you need access?"
+								 @bind-Value="@_request" />
+			<RadzenButton ButtonType="ButtonType.Submit"
+						  Disabled="@String.IsNullOrWhiteSpace(_request)"
+						  Text="Request access" />
+		</VerticalStack>
+	</RadzenTemplateForm>
+}
+else if (_principal.StatusValue == PrincipalStatus.Pending)
+{
+	<h1>Access requested</h1>
+	<p>Your request is waiting for approval.</p>
+	@if (!String.IsNullOrWhiteSpace(_principal.Request))
+	{
+		<p><strong>Your request:</strong> @_principal.Request</p>
+	}
+}
+else if (_principal.StatusValue == PrincipalStatus.Declined)
+{
+	<h1>Access declined</h1>
+	<p>Your access request was declined.</p>
+	@if (!String.IsNullOrWhiteSpace(_principal.Response))
+	{
+		<p><strong>Response:</strong> @_principal.Response</p>
+	}
+}
+else if (_principal.StatusValue == PrincipalStatus.Deactivated)
+{
+	<h1>Access deactivated</h1>
+	<p>Your access to TextBase has been deactivated.</p>
+	@if (!String.IsNullOrWhiteSpace(_principal.Response))
+	{
+		<p><strong>Response:</strong> @_principal.Response</p>
+	}
+}
+
+@code {
+	[Parameter]
+	public required ClaimsPrincipal User { get; set; }
+
+	private Guid _entraObjectId;
+	private string? _loadError;
+	private AuthPrincipal? _principal;
+	private string _request = String.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		string? objectId = User.GetObjectId();
+
+		if (!Guid.TryParse(objectId, out _entraObjectId))
+		{
+			_loadError = "The authenticated account does not contain a valid Entra object ID.";
+			return;
+		}
+
+		_principal = await AuthPrincipalQueries.ReadAsync(_entraObjectId);
+	}
+
+	private async Task OnSubmitAsync(
+		string _)
+	{
+		if (_principal is not null || String.IsNullOrWhiteSpace(_request))
+			return;
+
+		AuthPrincipal principal = AuthPrincipalEntityFactory.Create(_entraObjectId, (int)Roles.None, (int)PrincipalStatus.Pending);
+		principal.DisplayName = LimitLength(User.FindFirstValue("name") ?? User.Identity?.Name, 128);
+		principal.EmailAddress = LimitLength(GetEmailAddress(User), 256);
+		principal.Request = _request.Trim();
+
+		if (await AuthPrincipalCommands.TryCreateAsync(principal))
+		{
+			_principal = principal;
+			return;
+		}
+
+		_principal = await AuthPrincipalQueries.ReadAsync(_entraObjectId);
+		if (_principal is null)
+			_loadError = "The access request could not be created.";
+	}
+
+	private static string? GetEmailAddress(
+		ClaimsPrincipal user)
+	{
+		string[] claimTypes = [ClaimTypes.Email, "emails", "email", "preferred_username"];
+
+		foreach (string claimType in claimTypes)
+		{
+			string? value = user.FindFirstValue(claimType);
+
+			if (!String.IsNullOrWhiteSpace(value))
+				return value;
+		}
+
+		return null;
+	}
+
+	private static string? LimitLength(
+		string? value,
+		int maximumLength)
+		=> value is null || value.Length <= maximumLength
+		? value
+		: value[..maximumLength];
+}

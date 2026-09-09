@@ -59,9 +59,12 @@ AuthorizationBase.RegisterAuthorizationServices(builder.Services);
 
 builder.Services.AddAuthorizationBuilder()
 	.SetDefaultPolicy(new AuthorizationPolicyBuilder(CookieAuthenticationDefaults.AuthenticationScheme)
-	.RequireAuthenticatedUser()
-	.AddRequirements(new ActivePrincipalRequirement())
-	.Build())
+		.RequireAuthenticatedUser()
+		.AddRequirements(new ActivePrincipalRequirement())
+		.Build())
+	.AddPolicy(AuthenticationPolicy.Name, new AuthorizationPolicyBuilder(CookieAuthenticationDefaults.AuthenticationScheme)
+		.RequireAuthenticatedUser()
+		.Build())
 	.AddPolicy(ApiAuthorizationConvention.PolicyName, policy =>
 	{
 		policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);

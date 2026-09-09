@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Components;
-using Textbase.Host.ViewModels.Common;
+using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 using Uwn.Common.Abstractions;
 using Uwn.Common.Querying;
 
@@ -7,7 +7,7 @@ namespace Textbase.Host.Components.Common;
 
 public abstract class TextbaseStringEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 	: TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
-	where TViewModel : TextbaseStringEditorViewModel<TDTO, TModel>
+	where TViewModel : StringEditorViewModel<TDTO, TModel>
 	where TDTO : class
 	where TModel : class, TDTO
 	where TFilter : QueryFilterBase, new()
