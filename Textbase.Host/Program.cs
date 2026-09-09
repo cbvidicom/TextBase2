@@ -62,6 +62,9 @@ builder.Services.AddAuthorizationBuilder()
 	.RequireAuthenticatedUser()
 	.AddRequirements(new ActivePrincipalRequirement())
 	.Build())
+	.AddPolicy(AuthenticationPolicy.Name, new AuthorizationPolicyBuilder(CookieAuthenticationDefaults.AuthenticationScheme)
+		.RequireAuthenticatedUser()
+		.Build())
 	.AddPolicy(ApiAuthorizationConvention.PolicyName, policy =>
 	{
 		policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
