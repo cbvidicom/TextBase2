@@ -14,6 +14,6 @@ public sealed partial class AuthPrincipalEntityFactory
 
 	public AuthPrincipalEntity Create(Guid entraObjectId) => Create(entraObjectId, default!, default!);
 	public AuthPrincipalEntity Create(Guid entraObjectId, int role) => Create(entraObjectId, role, default!);
-	public AuthPrincipalEntity Create(Guid entraObjectId, int role, bool isActive)
-	=> new() { EntraObjectId = entraObjectId, Role = role, IsActive = isActive };
+	public AuthPrincipalEntity Create(Guid entraObjectId, int role, int status)
+	=> new() { EntraObjectId = entraObjectId, Role = role, Status = status };
 }

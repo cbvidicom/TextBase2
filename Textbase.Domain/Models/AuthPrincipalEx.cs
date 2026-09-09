@@ -11,4 +11,11 @@ public partial class AuthPrincipal
 		get => (Roles)Role;
 		set => Role = (int)value;
 	}
+
+	[NotMapped]
+	public PrincipalStatus StatusValue
+	{
+		get => (PrincipalStatus)Status;
+		set => Status = (int)value;
+	}
 }

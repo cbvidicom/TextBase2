@@ -11,5 +11,5 @@ public partial interface IAuthPrincipalEntityFactory
 {
 	AuthPrincipalEntity Create(Guid entraObjectId);
 	AuthPrincipalEntity Create(Guid entraObjectId, int role);
-	AuthPrincipalEntity Create(Guid entraObjectId, int role, bool isActive);
+	AuthPrincipalEntity Create(Guid entraObjectId, int role, int status);
 }

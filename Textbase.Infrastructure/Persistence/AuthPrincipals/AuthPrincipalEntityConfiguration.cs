@@ -17,6 +17,8 @@ internal sealed partial class AuthPrincipalEntityConfiguration
 		builder.Property(e => e.Role).IsRequired();
 		builder.Property(e => e.DisplayName).HasMaxLength(128).IsUnicode(true);
 		builder.Property(e => e.EmailAddress).HasMaxLength(256).IsUnicode(true);
-		builder.Property(e => e.IsActive).IsRequired();
+		builder.Property(e => e.Status).IsRequired();
+		builder.Property(e => e.Request).HasMaxLength(1024).IsUnicode(true);
+		builder.Property(e => e.Response).HasMaxLength(1024).IsUnicode(true);
 	}
 }

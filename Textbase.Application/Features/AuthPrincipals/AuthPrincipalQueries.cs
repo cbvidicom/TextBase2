@@ -27,6 +27,9 @@ public sealed partial class AuthPrincipalQueries(
 			.ApplyNumericFilter(e => e.Role, filter.Role)
 			.ApplyStringFilter(e => e.DisplayName, filter.DisplayName)
 			.ApplyStringFilter(e => e.EmailAddress, filter.EmailAddress)
+			.ApplyNumericFilter(e => e.Status, filter.Status)
+			.ApplyStringFilter(e => e.Request, filter.Request)
+			.ApplyStringFilter(e => e.Response, filter.Response)
 			;
 			
 }

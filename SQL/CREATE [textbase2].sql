@@ -189,9 +189,12 @@ BEGIN
 		[Role] int NOT NULL,
 		DisplayName nvarchar(128) NULL,
 		EmailAddress nvarchar(256) NULL,
-		IsActive bit NOT NULL,
+		[Status] int NOT NULL, -- 1=Pending, 2=Active, 3=Declined, 4=Deactivated
+		Request nvarchar(1024) NULL,
+		Response nvarchar(1024) NULL,
 
-		CONSTRAINT PK_auth_Principal PRIMARY KEY (EntraObjectId)
+		CONSTRAINT PK_auth_Principal PRIMARY KEY (EntraObjectId),
+		CONSTRAINT CK_auth_Principal_Status CHECK ([Status] IN (1, 2, 3, 4))
 	)
 END
 

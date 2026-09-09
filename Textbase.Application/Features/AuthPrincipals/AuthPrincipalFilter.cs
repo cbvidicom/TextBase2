@@ -12,12 +12,18 @@ public sealed partial class AuthPrincipalFilter
 	public NumericFilter<int>? Role { get; set; }
 	public StringFilter? DisplayName { get; set; }
 	public StringFilter? EmailAddress { get; set; }
+	public NumericFilter<int>? Status { get; set; }
+	public StringFilter? Request { get; set; }
+	public StringFilter? Response { get; set; }
 	
 	public override bool IsEmpty =>
 		!GuidFilter.IsSet(EntraObjectId) &&
 		!NumericFilter.IsSet(Role) &&
 		!StringFilter.IsSet(DisplayName) &&
-		!StringFilter.IsSet(EmailAddress);
+		!StringFilter.IsSet(EmailAddress) &&
+		!NumericFilter.IsSet(Status) &&
+		!StringFilter.IsSet(Request) &&
+		!StringFilter.IsSet(Response);
 
 	public static AuthPrincipalFilter All()
 		=> All<AuthPrincipalFilter>();

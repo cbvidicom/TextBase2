@@ -8,5 +8,7 @@ public partial class AuthPrincipalDto
 	public required int Role { get; set; }
 	public string? DisplayName { get; set; }
 	public string? EmailAddress { get; set; }
-	public required bool IsActive { get; set; }
+	public required int Status { get; set; }
+	public string? Request { get; set; }
+	public string? Response { get; set; }
 }
