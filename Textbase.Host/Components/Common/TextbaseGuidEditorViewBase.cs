@@ -19,6 +19,9 @@ public abstract class TextbaseGuidEditorViewBase<TViewModel, TDTO, TModel, TFilt
 	{
 		await base.OnParametersSetAsync();
 
+		if (SuppressInitialization)
+			return;
+
 		IAsyncInitializable<Guid?> initializable = ViewModel;
 		if (ViewModel is IDelayInitialize)
 			return;

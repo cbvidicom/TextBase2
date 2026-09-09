@@ -29,7 +29,8 @@ public abstract class TextbaseStringEditorViewModel<TDTO, TModel>(
 		if (arg is not string key)
 			throw Exceptions.TypeMismatch(arg.GetType(), typeof(string));
 
-		return await _modelQueries.ReadAsync(key, cancellationToken) ?? throw Exceptions.ItemNotFound(typeof(TModel).Name, arg);
+		return await _modelQueries.ReadAsync(key, cancellationToken)
+			?? throw Exceptions.ItemNotFound(typeof(TModel).Name, arg);
 	}
 
 	protected override async Task DeleteItemAsync(
@@ -42,7 +43,9 @@ public abstract class TextbaseStringEditorViewModel<TDTO, TModel>(
 
 	private string GetItemKey()
 	{
-		object value = Item.GetType().GetProperty(KeyPropertyName)?.GetValue(Item) ?? throw Exceptions.PropertyNotFound(KeyPropertyName);
+		object value = Item.GetType().GetProperty(KeyPropertyName)?.GetValue(Item)
+			?? throw Exceptions.PropertyNotFound(KeyPropertyName);
+
 		if (value is string key)
 			return key;
 

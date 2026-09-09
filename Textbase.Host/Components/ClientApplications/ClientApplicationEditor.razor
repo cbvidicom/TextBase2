@@ -8,7 +8,7 @@
 
 @if (CanGoBack)
 {
-	<RzGoBackLink Path="@GoBackPath" />
+	<RzGoBackLink Path="@GoBackRoute" />
 }
 
 @if (IsBusy)
@@ -158,6 +158,7 @@ else if (HasAccess)
 												Style="width: 40rem;"
 												@bind-Value="@_selectedLocale" />
 								<RzClickButton ButtonStyle="ButtonStyle.Primary"
+											   Disabled="@(_selectedLocale is null)"
 											   Icon="@Icons.Add"
 											   Text="Add"
 											   Click="OnAddLocale" />
@@ -208,6 +209,7 @@ else if (HasAccess)
 												Style="width: 40rem;"
 												@bind-Value="@_selectedTextResource" />
 								<RzClickButton ButtonStyle="ButtonStyle.Primary"
+											   Disabled="@(_selectedTextResource is null)"
 											   Icon="@Icons.Add"
 											   Text="Add"
 											   Click="OnAddTextResource" />
@@ -223,7 +225,7 @@ else if (HasAccess)
 @code {
 	public override string MainHeader => IsNewItem ? "Create Application" : "Edit Application";
 
-	protected override string GoBackPath => StaticRoutes.ClientApplicationList;
+	protected override string GoBackRoute => StaticRoutes.ClientApplicationList;
 
 	protected override string CreatePath => StaticRoutes.ClientApplicationCreate;
 

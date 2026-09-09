@@ -70,7 +70,7 @@ else if (HasAccess)
 @code {
 	public override string MainHeader => "Applications";
 
-	protected override string EditRoute => StaticRoutes.ClientApplicationEdit;
+	protected override string EditItemRouteTemplate => StaticRoutes.ClientApplicationEdit;
 
 	protected override Func<ClientApplication, object> GetKey => e => e.ClientApplicationGuid;
 }

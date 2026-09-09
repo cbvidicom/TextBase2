@@ -8,7 +8,7 @@
 
 @if (CanGoBack)
 {
-	<RzGoBackLink Path="@GoBackPath" />
+	<RzGoBackLink Path="@GoBackRoute" />
 }
 
 @if (IsBusy)
@@ -25,13 +25,13 @@ else if (HasAccess)
 		<fieldset disabled="@IsReadOnly">
 			<VerticalStack>
 				<RzTextBoxFormField MinLength="1"
-									 MaxLength="16"
-									 Name="@nameof(Formality.FormalityKey)"
-									 ReadOnly="@(!IsNewItem)"
-									 Required="true"
-									 StartIcon="@Icons.Name"
-									 Text="Key"
-									 @bind-Value="@Item.FormalityKey" />
+									MaxLength="16"
+									Name="@nameof(Formality.FormalityKey)"
+									ReadOnly="@(!IsNewItem)"
+									Required="true"
+									StartIcon="@Icons.Name"
+									Text="Key"
+									@bind-Value="@Item.FormalityKey" />
 				<RzTextAreaFormField MaxLength="1024"
 									 Name="@nameof(Formality.Description)"
 									 StartIcon="@Icons.Description"
@@ -59,22 +59,21 @@ else if (HasAccess)
 										   RenderStack="false"
 										   Text="Save & New" />
 						}
+						@if (CanDelete)
+						{
+							<RzDeleteButton Click="OnDelete" />
+						}
 					</HorizontalStack>
 				}
 			</VerticalStack>
 		</fieldset>
-
-		@if (CanDelete)
-		{
-			<RzDeleteButton Click="OnDelete" />
-		}
 	</RadzenTemplateForm>
 }
 
 @code {
 	public override string MainHeader => IsNewItem ? "Create Formality" : "Edit Formality";
 
-	protected override string GoBackPath => StaticRoutes.FormalityList;
+	protected override string GoBackRoute => StaticRoutes.FormalityList;
 
 	protected override string CreatePath => StaticRoutes.FormalityCreate;
 }

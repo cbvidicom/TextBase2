@@ -19,11 +19,16 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 
 	protected virtual string? CreatePath => null;
 
-	protected bool CanGoBack => !String.IsNullOrWhiteSpace(GoBackPath);
+	protected bool CanGoBack => !String.IsNullOrWhiteSpace(GoBackRoute);
 
 	protected bool CanNew => IsNewItem && !String.IsNullOrWhiteSpace(CreatePath);
 
 	protected bool CanDelete => !IsNewItem && ViewModel.DeleteAuthorization.IsAllowed;
+
+	// This is here because OnDelete causes a re-render where OnParametersSet is called, causing a re-initialization for a deleted item
+	protected bool SuppressInitialization { get; private set; }
+
+	//
 
 	protected override async Task AfterInitializeViewModelAsync()
 	{
@@ -45,6 +50,18 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 
 	protected async Task OnDelete()
 	{
-		await DeleteItemAsync(GoBackPath);
+		SuppressInitialization = true;
+
+		bool succeeded = await DeleteItemAsync();
+
+		if (succeeded)
+		{
+			if (!String.IsNullOrWhiteSpace(GoBackRoute))
+				CoreNavigationManager.NavigateTo(GoBackRoute);
+
+			return;
+		}
+
+		SuppressInitialization = false;
 	}
 }

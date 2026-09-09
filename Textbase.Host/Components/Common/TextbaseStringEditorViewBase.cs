@@ -19,6 +19,9 @@ public abstract class TextbaseStringEditorViewBase<TViewModel, TDTO, TModel, TFi
 	{
 		await base.OnParametersSetAsync();
 
+		if (SuppressInitialization)
+			return;
+
 		IAsyncInitializable<string?> initializable = ViewModel;
 		if (ViewModel is IDelayInitialize)
 			return;

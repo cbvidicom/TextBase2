@@ -48,7 +48,7 @@ else if (HasAccess)
 @code {
 	public override string MainHeader => "Formalities";
 
-	protected override string EditRoute => StaticRoutes.FormalityEdit;
+	protected override string EditItemRouteTemplate => StaticRoutes.FormalityEdit;
 
 	protected override Func<Formality, object> GetKey => e => e.FormalityKey;
 }

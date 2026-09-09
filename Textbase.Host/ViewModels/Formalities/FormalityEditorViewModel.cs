@@ -26,6 +26,7 @@ public class FormalityEditorViewModel(
 
 	protected override string KeyPropertyName => nameof(Formality.FormalityKey);
 
+	//
 	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
 		CancellationToken cancellationToken = default)
 	{
