@@ -1,8 +1,12 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Radzen;
 using Textbase.Application.Common;
 using Textbase.Application.Features.ClientApplications;
@@ -22,9 +26,22 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 string connectionString = builder.Configuration.GetConnectionString("Textbase")
 	?? throw new InvalidOperationException("Connection string 'Textbase' is not configured.");
 
-builder.Services
-	.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-	.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAdB2C"));
+IConfigurationSection azureAdB2C = builder.Configuration.GetSection("AzureAdB2C");
+
+AuthenticationBuilder authenticationBuilder = builder.Services.AddAuthentication(options =>
+{
+	options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+	options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+});
+
+authenticationBuilder.AddMicrosoftIdentityWebApp(azureAdB2C);
+authenticationBuilder.AddMicrosoftIdentityWebApi(azureAdB2C, JwtBearerDefaults.AuthenticationScheme);
+
+builder.Services.PostConfigure<OpenIdConnectOptions>(OpenIdConnectDefaults.AuthenticationScheme, options =>
+{
+	options.ResponseType = OpenIdConnectResponseType.Code;
+});
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddHttpContextAccessor();
@@ -34,10 +51,16 @@ builder.Services.AddScoped<IAuthorizationHandler, ActivePrincipalAuthorizationHa
 AuthorizationBase.RegisterAuthorizationServices(builder.Services);
 
 builder.Services.AddAuthorizationBuilder()
-	.SetDefaultPolicy(new AuthorizationPolicyBuilder()
+	.SetDefaultPolicy(new AuthorizationPolicyBuilder(CookieAuthenticationDefaults.AuthenticationScheme)
 	.RequireAuthenticatedUser()
 	.AddRequirements(new ActivePrincipalRequirement())
-	.Build());
+	.Build())
+	.AddPolicy(ApiAuthorizationConvention.PolicyName, policy =>
+	{
+		policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
+		policy.RequireAuthenticatedUser();
+		policy.AddRequirements(new ActivePrincipalRequirement());
+	});
 
 builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
