@@ -1,0 +1,220 @@
+﻿@page "/formality"
+@page "/formality/{FormalityKey}"
+
+@using System.Security.Claims
+@using Textbase.Application.Features.Formalities
+@using Textbase.Host.Api.Authorization
+@using Textbase.Host.Authorization
+@using Textbase.Host.Enumerations
+@using Textbase.Infrastructure.Persistence.Formalities
+@using Uwn.EntityFrameworkCore.Infrastructure
+
+@inherits TextbasePageBase
+
+@inject IFormalityAuthorization Authorization
+@inject ICurrentPrincipalAccessor CurrentPrincipalAccessor
+@inject IFormalityQueries Queries
+@inject IFormalityCommands Commands
+@inject IFormalityEntityFactory EntityFactory
+
+<RzGoBackLink Path="@StaticRoutes.FormalityList" />
+
+@if (!_isInitialized || _isBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else if (_hasAccess && _item is not null)
+{
+	<RadzenTemplateForm TItem="Formality"
+						Data="@_item"
+						class="rz-mt-4 rz-mb-4">
+		<AntiforgeryToken />
+		<DataAnnotationsValidator />
+		<fieldset disabled="@_isReadOnly">
+			<VerticalStack>
+				<RzTextBoxFormField MinLength="1"
+									MaxLength="16"
+									Name="@nameof(Formality.FormalityKey)"
+									ReadOnly="@(!IsNewItem)"
+									Required="true"
+									StartIcon="@Icons.Name"
+									Text="Key"
+									@bind-Value="@_item.FormalityKey" />
+				<RzTextAreaFormField MaxLength="1024"
+									 Name="@nameof(Formality.Description)"
+									 StartIcon="@Icons.Description"
+									 Text="Description"
+									 @bind-Value="@_item.Description" />
+
+				@if (CanSave)
+				{
+					<HorizontalStack>
+						<RzSaveButton RenderStack="false"
+									  Click="OnSave" />
+						<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+									   Click="OnSaveAndGoBack"
+									   Icon="@Icons.Save"
+									   RenderStack="false"
+									   Text="Save & Go back" />
+						@if (IsNewItem)
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Info"
+										   Click="OnSaveAndNew"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & New" />
+						}
+					</HorizontalStack>
+				}
+			</VerticalStack>
+		</fieldset>
+	</RadzenTemplateForm>
+}
+
+@code {
+	[Parameter]
+	public string? FormalityKey { get; set; }
+
+	private Formality? _item;
+	private bool _hasAccess;
+	private bool _isBusy;
+	private bool _isInitialized;
+	private bool _isReadOnly;
+
+	public override string MainHeader => IsNewItem ? "Create Formality" : "Edit Formality";
+
+	private bool IsNewItem => String.IsNullOrWhiteSpace(FormalityKey);
+	private bool CanSave => _hasAccess && !_isReadOnly;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await base.OnParametersSetAsync();
+
+		_isInitialized = false;
+		_isBusy = true;
+
+		try
+		{
+			ClaimsPrincipal user = await CurrentPrincipalAccessor.GetUserAsync();
+
+			if (IsNewItem)
+			{
+				_item = EntityFactory.Create(String.Empty);
+				_hasAccess = await Authorization.CanCreateAsync(_item, user);
+				_isReadOnly = !_hasAccess;
+
+				if (!_hasAccess)
+					ShowAccessDenied(OpType.Create);
+
+				return;
+			}
+
+			_hasAccess = await Authorization.CanReadAsync(FormalityKey!, user);
+			if (!_hasAccess)
+			{
+				ShowAccessDenied(OpType.Read);
+				return;
+			}
+
+			_item = await Queries.ReadAsync(FormalityKey!);
+			if (_item is null)
+			{
+				_hasAccess = false;
+				AlertService.Show($"Formality '{FormalityKey}' was not found.", AlertStyle.Danger);
+				return;
+			}
+
+			_isReadOnly = !await Authorization.CanUpdateAsync(FormalityKey!, _item, user);
+		}
+		finally
+		{
+			_isBusy = false;
+			_isInitialized = true;
+		}
+	}
+
+	private async Task OnSave()
+	{
+		bool wasNewItem = IsNewItem;
+		string? key = await SaveAsync();
+		if (key is null || !wasNewItem)
+			return;
+
+		NavigationManager.NavigateTo(String.Format(StaticRoutes.FormalityEdit, Uri.EscapeDataString(key)));
+	}
+
+	private async Task OnSaveAndGoBack()
+	{
+		string? key = await SaveAsync();
+		if (key is not null)
+			NavigationManager.NavigateTo(StaticRoutes.FormalityList);
+	}
+
+	private async Task OnSaveAndNew()
+	{
+		string? key = await SaveAsync();
+		if (key is null)
+			return;
+
+		_item = EntityFactory.Create(String.Empty);
+		ClaimsPrincipal user = await CurrentPrincipalAccessor.GetUserAsync();
+		_hasAccess = await Authorization.CanCreateAsync(_item, user);
+		_isReadOnly = !_hasAccess;
+
+		if (!_hasAccess)
+			ShowAccessDenied(OpType.Create);
+	}
+
+	private async Task<string?> SaveAsync()
+	{
+		if (_item is null || !CanSave)
+			return null;
+
+		_isBusy = true;
+		try
+		{
+			ClaimsPrincipal user = await CurrentPrincipalAccessor.GetUserAsync();
+
+			if (IsNewItem)
+			{
+				if (!await Authorization.CanCreateAsync(_item, user))
+				{
+					ShowAccessDenied(OpType.Create);
+					return null;
+				}
+
+				CreateResult<Formality> result = await Commands.CreateAsync(_item);
+				if (!result.Succeeded)
+				{
+					AlertService.Show($"Could not create Formality. Cancel reason: {result.CancelReason}.", AlertStyle.Danger);
+					return null;
+				}
+
+				return result.Model.FormalityKey;
+			}
+
+			if (!await Authorization.CanUpdateAsync(FormalityKey!, _item, user))
+			{
+				ShowAccessDenied(OpType.Update);
+				return null;
+			}
+
+			UpdateResult updateResult = await Commands.UpdateAsync(_item);
+			if (!updateResult.Succeeded)
+			{
+				AlertService.Show($"Could not update Formality. Cancel reason: {updateResult.CancelReason}.", AlertStyle.Danger);
+				return null;
+			}
+
+			return _item.FormalityKey;
+		}
+		finally
+		{
+			_isBusy = false;
+		}
+	}
+
+	private void ShowAccessDenied(
+		OpType opType)
+		=> AlertService.Show(StaticTexts.GetPrincipalNotAuthorizedText(opType, typeof(Formality)), AlertStyle.Danger);
+}
