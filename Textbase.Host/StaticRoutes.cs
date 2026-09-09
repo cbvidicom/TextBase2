@@ -12,6 +12,10 @@ public static class StaticRoutes
 
 	public const string Home = "/";
 
+	public const string PresentationList = "/presentations";
+	public const string PresentationCreate = "/presentation";
+	public const string PresentationEdit = "/presentation/{0}";
+
 	public const string SignIn = "/MicrosoftIdentity/Account/SignIn";
 	public const string SignOut = "/MicrosoftIdentity/Account/SignOut";
 }

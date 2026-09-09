@@ -1,0 +1,79 @@
+﻿@page "/presentation"
+@page "/presentation/{Key}"
+
+@using Textbase.Application.Features.Presentations
+@using Textbase.Host.ViewModels.Presentations
+
+@inherits TextbaseStringEditorViewBase<PresentationEditorViewModel, PresentationDto, Presentation, PresentationFilter>
+
+@if (CanGoBack)
+{
+	<RzGoBackLink Path="@GoBackRoute" />
+}
+
+@if (IsBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else if (HasAccess)
+{
+	<RadzenTemplateForm TItem="Presentation"
+						Data="@Item"
+						class="rz-mt-4 rz-mb-4">
+		<AntiforgeryToken />
+		<DataAnnotationsValidator />
+		<fieldset disabled="@IsReadOnly">
+			<VerticalStack>
+				<RzTextBoxFormField MinLength="1"
+									MaxLength="16"
+									Name="@nameof(Presentation.PresentationKey)"
+									ReadOnly="@(!IsNewItem)"
+									Required="true"
+									StartIcon="@Icons.Name"
+									Text="Key"
+									@bind-Value="@Item.PresentationKey" />
+				<RzTextAreaFormField MaxLength="1024"
+									 Name="@nameof(Presentation.Description)"
+									 StartIcon="@Icons.Description"
+									 Text="Description"
+									 @bind-Value="@Item.Description" />
+
+				@if (CanSave)
+				{
+					<HorizontalStack>
+						<RzSaveButton RenderStack="false"
+									  Click="OnSave" />
+						@if (CanGoBack)
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+										   Click="OnSaveAndGoBack"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & Go back" />
+						}
+						@if (CanNew)
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Info"
+										   Click="OnSaveAndNew"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & New" />
+						}
+						@if (CanDelete)
+						{
+							<RzDeleteButton Click="OnDelete" />
+						}
+					</HorizontalStack>
+				}
+			</VerticalStack>
+		</fieldset>
+	</RadzenTemplateForm>
+}
+
+@code {
+	public override string MainHeader => IsNewItem ? "Create Presentation" : "Edit Presentation";
+
+	protected override string GoBackRoute => StaticRoutes.PresentationList;
+
+	protected override string CreatePath => StaticRoutes.PresentationCreate;
+}

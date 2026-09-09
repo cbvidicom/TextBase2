@@ -7,8 +7,6 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Radzen;
 using Textbase.Application.Common;
-using Textbase.Application.Features.ClientApplications;
-using Textbase.Application.Features.Formalities;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Api.Infrastructure;
 using Textbase.Host.Authorization;
@@ -73,8 +71,7 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddTextbaseInfrastructure(connectionString);
 builder.Services.AddTextbaseApplication(includeServerCommands: true);
-builder.Services.AddScoped(services => (IClientApplicationServerQueries)services.GetRequiredService<IClientApplicationQueries>());
-builder.Services.AddScoped(services => (IFormalityServerQueries)services.GetRequiredService<IFormalityQueries>());
+builder.Services.AddTextbaseServerQueries();
 
 builder.Services
 	.AddControllersWithViews(options =>
