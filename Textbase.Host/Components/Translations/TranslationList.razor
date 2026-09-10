@@ -23,7 +23,7 @@ else if (HasAccess)
 				SelectionMode="DataGridSelectionMode.Single"
 				LoadData="ViewModel.LoadDataAsync"
 				RowRender="OnRowRender"
-				RowSelect="OnRowSelect"
+				RowSelect="OnTranslationRowSelect"
 				class="rz-mb-4">
 		<Columns>
 			<RadzenDataGridColumn Filterable="true"
@@ -63,9 +63,18 @@ else if (HasAccess)
 
 	protected override string EditItemRouteTemplate => StaticRoutes.TranslationEdit;
 
-	protected override Func<Translation, object> GetKey => translation => String.Join('/',
-		Uri.EscapeDataString(translation.LocaleKey),
-		Uri.EscapeDataString(translation.TextKey),
-		Uri.EscapeDataString(translation.FormalityKey),
-		Uri.EscapeDataString(translation.PresentationKey));
+	protected override Func<Translation, object> GetKey => translation => translation.LocaleKey;
+
+	private void OnTranslationRowSelect(
+		Translation translation)
+	{
+		string route = String.Format(
+			StaticRoutes.TranslationEdit,
+			Uri.EscapeDataString(translation.LocaleKey),
+			Uri.EscapeDataString(translation.TextKey),
+			Uri.EscapeDataString(translation.FormalityKey),
+			Uri.EscapeDataString(translation.PresentationKey));
+
+		NavigationManager.NavigateTo(route);
+	}
 }
