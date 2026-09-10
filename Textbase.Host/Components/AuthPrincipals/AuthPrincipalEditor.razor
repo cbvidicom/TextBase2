@@ -1,4 +1,3 @@
-@page "/user"
 @page "/user/{Guid:guid}"
 
 @using Textbase.Application.Features.AuthPrincipals
@@ -29,12 +28,11 @@ else if (HasAccess)
 					<fieldset disabled="@IsReadOnly">
 						<VerticalStack>
 							<RzTextBoxFormField Name="@nameof(AuthPrincipal.EntraObjectId)"
-													ReadOnly="@(!IsNewItem)"
+													ReadOnly="true"
 													Required="true"
 													StartIcon="@Icons.Barcode"
 													Text="Entra Object ID"
-													Value="@Item.EntraObjectId.ToString()"
-													ValueChanged="OnEntraObjectIdChanged" />
+													Value="@Item.EntraObjectId.ToString()" />
 							<RzTextBoxFormField MaxLength="128"
 													Name="@nameof(AuthPrincipal.DisplayName)"
 													StartIcon="@Icons.Name"
@@ -86,14 +84,6 @@ else if (HasAccess)
 													   RenderStack="false"
 													   Text="Save & Go back" />
 									}
-									@if (CanNew)
-									{
-										<RzClickButton ButtonStyle="ButtonStyle.Info"
-													   Click="OnSaveAndNew"
-													   Icon="@Icons.Save"
-													   RenderStack="false"
-													   Text="Save & New" />
-									}
 									@if (CanDelete)
 									{
 										<RzDeleteButton Click="OnDelete" />
@@ -104,107 +94,103 @@ else if (HasAccess)
 					</fieldset>
 				</RadzenTabsItem>
 
-				@if (!IsNewItem)
-				{
-					<RadzenTabsItem Text="Applications">
-						@if (_isTabBusy)
-						{
-							<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
-						}
-						else
-						{
-							<RadzenTable class="rz-mb-4">
-								<RadzenTableHeader>
-									<RadzenTableHeaderRow>
-										<RadzenTableHeaderCell>Application</RadzenTableHeaderCell>
-										<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
-									</RadzenTableHeaderRow>
-								</RadzenTableHeader>
-								<RadzenTableBody>
-									@foreach (AuthPrincipalClientApplication assignment in ViewModel.PrincipalClientApplications.OrderBy(item => GetApplicationName(item.ClientApplicationGuid)))
-									{
-										<RadzenTableRow>
-											<RadzenTableCell><strong>@GetApplicationName(assignment.ClientApplicationGuid)</strong></RadzenTableCell>
-											<RadzenTableCell><RzDeleteButton Click="@(() => OnRemoveClientApplication(assignment.ClientApplicationGuid))" /></RadzenTableCell>
-										</RadzenTableRow>
-									}
-								</RadzenTableBody>
-							</RadzenTable>
-							<HorizontalStack>
-								<RadzenDropDown TValue="ClientApplication"
-												AllowClear="false"
-												AllowFiltering="true"
-												Data="@AvailableClientApplications"
-												FilterAsYouType="true"
-												FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-												Multiple="false"
-												TextProperty="Name"
-												Style="width: 40rem;"
-												@bind-Value="@_selectedClientApplication" />
-								<RzClickButton ButtonStyle="ButtonStyle.Primary"
-											   Disabled="@(_selectedClientApplication is null)"
-											   Icon="@Icons.Add"
-											   Text="Add"
-											   Click="OnAddClientApplication" />
-							</HorizontalStack>
-						}
-					</RadzenTabsItem>
+				<RadzenTabsItem Text="Applications">
+					@if (_isTabBusy)
+					{
+						<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+					}
+					else
+					{
+						<RadzenTable class="rz-mb-4">
+							<RadzenTableHeader>
+								<RadzenTableHeaderRow>
+									<RadzenTableHeaderCell>Application</RadzenTableHeaderCell>
+									<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
+								</RadzenTableHeaderRow>
+							</RadzenTableHeader>
+							<RadzenTableBody>
+								@foreach (AuthPrincipalClientApplication assignment in ViewModel.PrincipalClientApplications.OrderBy(item => GetApplicationName(item.ClientApplicationGuid)))
+								{
+									<RadzenTableRow>
+										<RadzenTableCell><strong>@GetApplicationName(assignment.ClientApplicationGuid)</strong></RadzenTableCell>
+										<RadzenTableCell><RzDeleteButton Click="@(() => OnRemoveClientApplication(assignment.ClientApplicationGuid))" /></RadzenTableCell>
+									</RadzenTableRow>
+								}
+							</RadzenTableBody>
+						</RadzenTable>
+						<HorizontalStack>
+							<RadzenDropDown TValue="ClientApplication"
+											AllowClear="false"
+											AllowFiltering="true"
+											Data="@AvailableClientApplications"
+											FilterAsYouType="true"
+											FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+											Multiple="false"
+											TextProperty="Name"
+											Style="width: 40rem;"
+											@bind-Value="@_selectedClientApplication" />
+							<RzClickButton ButtonStyle="ButtonStyle.Primary"
+										   Disabled="@(_selectedClientApplication is null)"
+										   Icon="@Icons.Add"
+										   Text="Add"
+										   Click="OnAddClientApplication" />
+						</HorizontalStack>
+					}
+				</RadzenTabsItem>
 
-					<RadzenTabsItem Text="Locales">
-						@if (_isTabBusy)
-						{
-							<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
-						}
-						else
-						{
-							<RadzenTable class="rz-mb-4">
-								<RadzenTableHeader>
-									<RadzenTableHeaderRow>
-										<RadzenTableHeaderCell>Locale</RadzenTableHeaderCell>
-										<RadzenTableHeaderCell>Language</RadzenTableHeaderCell>
-										<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
-									</RadzenTableHeaderRow>
-								</RadzenTableHeader>
-								<RadzenTableBody>
-									@foreach (AuthPrincipalLocale assignment in ViewModel.PrincipalLocales.OrderBy(item => item.LocaleKey))
-									{
-										<RadzenTableRow>
-											<RadzenTableCell><strong>@assignment.LocaleKey</strong></RadzenTableCell>
-											<RadzenTableCell>@ViewModel.Locales.SingleOrDefault(locale => locale.LocaleKey == assignment.LocaleKey)?.EnglishName</RadzenTableCell>
-											<RadzenTableCell><RzDeleteButton Click="@(() => OnRemoveLocale(assignment.LocaleKey))" /></RadzenTableCell>
-										</RadzenTableRow>
-									}
-								</RadzenTableBody>
-							</RadzenTable>
-							<HorizontalStack>
-								<RadzenDropDown TValue="Locale"
-												AllowClear="false"
-												AllowFiltering="true"
-												Data="@AvailableLocales"
-												FilterAsYouType="true"
-												FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
-												Multiple="false"
-												Style="width: 40rem;"
-												@bind-Value="@_selectedLocale" />
-								<RzClickButton ButtonStyle="ButtonStyle.Primary"
-											   Disabled="@(_selectedLocale is null)"
-											   Icon="@Icons.Add"
-											   Text="Add"
-											   Click="OnAddLocale" />
-							</HorizontalStack>
-						}
-					</RadzenTabsItem>
-				}
+				<RadzenTabsItem Text="Locales">
+					@if (_isTabBusy)
+					{
+						<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+					}
+					else
+					{
+						<RadzenTable class="rz-mb-4">
+							<RadzenTableHeader>
+								<RadzenTableHeaderRow>
+									<RadzenTableHeaderCell>Locale</RadzenTableHeaderCell>
+									<RadzenTableHeaderCell>Language</RadzenTableHeaderCell>
+									<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
+								</RadzenTableHeaderRow>
+							</RadzenTableHeader>
+							<RadzenTableBody>
+								@foreach (AuthPrincipalLocale assignment in ViewModel.PrincipalLocales.OrderBy(item => item.LocaleKey))
+								{
+									<RadzenTableRow>
+										<RadzenTableCell><strong>@assignment.LocaleKey</strong></RadzenTableCell>
+										<RadzenTableCell>@ViewModel.Locales.SingleOrDefault(locale => locale.LocaleKey == assignment.LocaleKey)?.EnglishName</RadzenTableCell>
+										<RadzenTableCell><RzDeleteButton Click="@(() => OnRemoveLocale(assignment.LocaleKey))" /></RadzenTableCell>
+									</RadzenTableRow>
+								}
+							</RadzenTableBody>
+						</RadzenTable>
+						<HorizontalStack>
+							<RadzenDropDown TValue="Locale"
+											AllowClear="false"
+											AllowFiltering="true"
+											Data="@AvailableLocales"
+											FilterAsYouType="true"
+											FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+											Multiple="false"
+											Style="width: 40rem;"
+											@bind-Value="@_selectedLocale" />
+							<RzClickButton ButtonStyle="ButtonStyle.Primary"
+										   Disabled="@(_selectedLocale is null)"
+										   Icon="@Icons.Add"
+										   Text="Add"
+										   Click="OnAddLocale" />
+						</HorizontalStack>
+					}
+				</RadzenTabsItem>
 			</Tabs>
 		</RadzenTabs>
 	</RadzenTemplateForm>
 }
 
 @code {
-	public override string MainHeader => IsNewItem ? "Create User" : "Edit User";
+	public override string MainHeader => "Edit User";
 
 	protected override string GoBackRoute => StaticRoutes.AuthPrincipalList;
-	protected override string CreatePath => StaticRoutes.AuthPrincipalCreate;
 
 	private bool _isTabBusy;
 	private ClientApplication? _selectedClientApplication;
@@ -230,15 +216,6 @@ else if (HasAccess)
 		bool enabled)
 	{
 		Item.RolesValue = enabled ? Item.RolesValue | role : Item.RolesValue & ~role;
-	}
-
-	private void OnEntraObjectIdChanged(
-		string? value)
-	{
-		if (Guid.TryParse(value, out Guid entraObjectId))
-		{
-			Item.EntraObjectId = entraObjectId;
-		}
 	}
 
 	private string GetApplicationName(
