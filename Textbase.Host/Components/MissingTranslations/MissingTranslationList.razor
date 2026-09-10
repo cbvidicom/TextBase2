@@ -87,11 +87,10 @@ else
 									  Title="Applications" />
 				<RadzenDataGridColumn TItem="MissingTranslation"
 									  Filterable="false"
-									  Sortable="false"
-									  Width="100px">
+									  Sortable="false">
 					<Template Context="item">
 						<span @onclick:stopPropagation="true">
-							<RzClickButton ButtonStyle="ButtonStyle.Light"
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
 											   Click="@(() => IgnoreLocale(item.LocaleKey))"
 											   Icon="@Icons.Language"
 											   RenderStack="false"
