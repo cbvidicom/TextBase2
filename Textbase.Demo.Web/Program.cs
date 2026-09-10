@@ -14,7 +14,8 @@ builder.Services.AddSingleton<ITranslationSnapshotClient>(services =>
 {
 	IHttpClientFactory httpClientFactory = services.GetRequiredService<IHttpClientFactory>();
 	string baseUrl = builder.Configuration["Textbase:BaseUrl"] ?? throw new InvalidOperationException("Textbase:BaseUrl is not configured.");
-	return new FlatTranslationsClient(baseUrl, httpClient: httpClientFactory.CreateClient());
+	RestClients clients = new(baseUrl, httpClient: httpClientFactory.CreateClient());
+	return clients.Textbase.FlatTranslationsClient;
 });
 builder.Services.AddSingleton<TextbaseTranslationProvider>();
 
