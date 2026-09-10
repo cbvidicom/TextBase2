@@ -28,6 +28,7 @@ public sealed class TranslationEditorViewModel(
 	private IReadOnlyList<Locale> _locales = [];
 
 	public Translation? Item { get; private set; }
+	public IReadOnlyList<Locale> Locales => _locales;
 	public IReadOnlyList<string> LocaleKeys { get; private set; } = [];
 	public IReadOnlyList<string> TextKeys { get; private set; } = [];
 	public IReadOnlyList<string> FormalityKeys { get; private set; } = [];
@@ -38,6 +39,18 @@ public sealed class TranslationEditorViewModel(
 	public bool IsNewItem { get; private set; }
 	public bool IsReadOnly => !CanSave;
 	public string? AccessDeniedMessage { get; private set; }
+
+	public Locale? SelectedLocale
+	{
+		get => Item is null ? null : _locales.FirstOrDefault(locale => String.Equals(locale.LocaleKey, Item.LocaleKey, StringComparison.OrdinalIgnoreCase));
+		set
+		{
+			if (Item is not null)
+			{
+				Item.LocaleKey = value?.LocaleKey ?? String.Empty;
+			}
+		}
+	}
 
 	public async Task InitializeAsync(
 		string? localeKey,
@@ -190,7 +203,7 @@ public sealed class TranslationEditorViewModel(
 		CancellationToken cancellationToken)
 	{
 		CurrentPrincipal? principal = await _currentPrincipalAccessor.GetAsync(cancellationToken);
-		HasAccess = principal is not null && _authorizationScope.HasRole(principal, Roles.Translator);
+		HasAccess = principal is not null && AuthorizationScope.HasRole(principal, Roles.Translator);
 		if (!HasAccess)
 		{
 			AccessDeniedMessage = StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, typeof(Translation));
