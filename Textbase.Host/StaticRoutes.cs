@@ -2,6 +2,10 @@
 
 public static class StaticRoutes
 {
+	public const string AuthPrincipalList = "/users";
+	public const string AuthPrincipalCreate = "/user";
+	public const string AuthPrincipalEdit = "/user/{0}";
+
 	public const string ClientApplicationList = "/client-applications";
 	public const string ClientApplicationCreate = "/client-application";
 	public const string ClientApplicationEdit = "/client-application/{0}";
