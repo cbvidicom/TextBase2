@@ -1,15 +1,15 @@
 using Textbase.Integration.Localization;
-using DM = Textbase.Domain.Models;
+using CM = Textbase.Contracts.Models;
 
 namespace Textbase.Integration.Api.Rest;
 
 public sealed partial class FlatTranslationsClient
 	: ITranslationSnapshotClient
 {
-	public async Task<IReadOnlyList<DM.FlatTranslation>> GetAsync(
+	public async Task<CM.RuntimeLocalizationSnapshotDto> GetAsync(
 		Guid clientApplicationGuid,
 		CancellationToken cancellationToken = default)
-		=> await SendToRouteAsync<IReadOnlyList<DM.FlatTranslation>>(
+		=> await SendToRouteAsync<CM.RuntimeLocalizationSnapshotDto>(
 			HttpMethod.Get,
 			ControllerName,
 			$"ClientApplication/{clientApplicationGuid}",
