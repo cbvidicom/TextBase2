@@ -18,10 +18,11 @@ public sealed partial class FlatTranslationQueries
 			from FT in dbContext.FlatTranslations.AsNoTracking()
 			join CAL in dbContext.ClientApplicationLocales.AsNoTracking() on FT.LocaleKey equals CAL.LocaleKey
 			join CATR in dbContext.ClientApplicationTextResources.AsNoTracking() on FT.TextKey equals CATR.TextKey
-			where CAL.ClientApplicationGuid == clientApplicationGuid && CATR.ClientApplicationGuid == clientApplicationGuid
+			join CA in dbContext.ClientApplications.AsNoTracking() on CAL.ClientApplicationGuid equals CA.ClientApplicationGuid
+			where CA.ClientApplicationGuid == clientApplicationGuid && CA.IsActive && CATR.ClientApplicationGuid == clientApplicationGuid
 			select FT;
 
 		List<FlatTranslationEntity> entities = await query.ToListAsync(cancellationToken);
-		return entities.Select(e => ((DM.FlatTranslation)e)).ToList();
+		return entities.Cast<DM.FlatTranslation>().ToList();
 	}
 }
