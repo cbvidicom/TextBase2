@@ -1,5 +1,12 @@
-﻿@inherits LayoutComponentBase
+﻿@using Textbase.Application.Features.AuthPrincipals
+@using Textbase.Domain.Enumerations
+@using Textbase.Host.Authorization
+
+@inherits LayoutComponentBase
 @implements IDisposable
+
+@inject IAuthPrincipalQueries AuthPrincipalQueries
+@inject ICurrentPrincipalAccessor CurrentPrincipalAccessor
 
 <CascadingValue Value="this">
 	<RadzenLayout>
@@ -17,23 +24,51 @@
 				<RadzenPanelMenuItem Icon="@Icons.Home"
 									 Path="@StaticRoutes.Home"
 									 Text="Home" />
-				<RadzenPanelMenuItem Icon="@Icons.Apps"
-									 Path="@StaticRoutes.ClientApplicationList"
-									 Text="Applications" />
+				@if (CanManageApplications)
+				{
+					<RadzenPanelMenuItem Icon="@Icons.Apps"
+										 Path="@StaticRoutes.ClientApplicationList"
+										 Text="Applications" />
+				}
 				<RadzenPanelMenuItem Icon="@Icons._3p"
 									 Path="@StaticRoutes.FormalityList"
 									 Text="Formalities" />
 				<RadzenPanelMenuItem Icon="@Icons.ShortText"
 									 Path="@StaticRoutes.PresentationList"
 									 Text="Presentations" />
-				<RadzenPanelMenuItem Icon="@Icons.ManageAccounts"
-									 Path="@StaticRoutes.AuthPrincipalList"
-									 Text="Principals" />
+				@if (CanManagePrincipals)
+				{
+					<RadzenPanelMenuItem Icon="@Icons.ManageAccounts"
+										 Path="@StaticRoutes.AuthPrincipalList"
+										 Text="Principals">
+						<Template>
+							<span class="rz-navigation-item-text">Principals</span>
+							@if (_pendingPrincipalCount > 0)
+							{
+								<RadzenBadge BadgeStyle="BadgeStyle.Danger"
+											 IsPill="true"
+											 Style="margin-inline-start: auto;"
+											 Text="@_pendingPrincipalCount.ToString()" />
+							}
+						</Template>
+					</RadzenPanelMenuItem>
+				}
 			</RadzenPanelMenu>
 		</RadzenSidebar>
 		<RadzenBody>
 			<div class="rz-p-4">
-				@Body
+				@if (String.IsNullOrWhiteSpace(_accessDeniedMessage))
+				{
+					@Body
+				}
+				else
+				{
+					<RadzenAlert AlertStyle="AlertStyle.Danger"
+								 AllowClose="false"
+								 Variant="Variant.Flat">
+						@_accessDeniedMessage
+					</RadzenAlert>
+				}
 			</div>
 		</RadzenBody>
 	</RadzenLayout>
@@ -61,13 +96,25 @@
 
 @code {
 	private string _header = String.Empty;
+	private string? _accessDeniedMessage;
 	private bool _isSidebarExpanded = true;
+	private CurrentPrincipal? _currentPrincipal;
+	private long _pendingPrincipalCount;
 
-	protected override void OnInitialized()
+	private bool CanManageApplications => _currentPrincipal is not null &&
+		(_currentPrincipal.RolesValue.HasFlag(Roles.SysAdmin) || _currentPrincipal.RolesValue.HasFlag(Roles.AppAdmin));
+
+	private bool CanManagePrincipals => _currentPrincipal?.RolesValue.HasFlag(Roles.SysAdmin) == true;
+
+	protected override async Task OnInitializedAsync()
 	{
-		base.OnInitialized();
+		await base.OnInitializedAsync();
 
 		AlertService.OnChange += OnAlertChange;
+		NavigationManager.LocationChanged += OnLocationChanged;
+
+		_currentPrincipal = await CurrentPrincipalAccessor.GetAsync();
+		await RefreshPendingPrincipalCountAsync();
 	}
 
 	public void SetHeader(
@@ -81,8 +128,49 @@
 		_ = InvokeAsync(StateHasChanged);
 	}
 
+	public void SetAccessDenied(
+		string? message)
+	{
+		if (String.Equals(_accessDeniedMessage, message, StringComparison.Ordinal))
+			return;
+
+		_accessDeniedMessage = message;
+		_ = InvokeAsync(StateHasChanged);
+	}
+
 	public void Dispose()
-		=> AlertService.OnChange -= OnAlertChange;
+	{
+		AlertService.OnChange -= OnAlertChange;
+		NavigationManager.LocationChanged -= OnLocationChanged;
+	}
+
+	private async Task RefreshPendingPrincipalCountAsync()
+	{
+		if (!CanManagePrincipals)
+		{
+			_pendingPrincipalCount = 0;
+			return;
+		}
+
+		AuthPrincipalFilter filter = AuthPrincipalFilter.All();
+		filter.Status = (int)PrincipalStatus.Pending;
+		_pendingPrincipalCount = await AuthPrincipalQueries.CountAsync(filter);
+	}
+
+	private void OnLocationChanged(
+		object? sender,
+		LocationChangedEventArgs args)
+	{
+		AlertService.Hide();
+		_accessDeniedMessage = null;
+		_ = InvokeAsync(RefreshNavigationStateAsync);
+	}
+
+	private async Task RefreshNavigationStateAsync()
+	{
+		await RefreshPendingPrincipalCountAsync();
+		StateHasChanged();
+	}
 
 	private void OnAlertChange()
 		=> _ = InvokeAsync(StateHasChanged);
