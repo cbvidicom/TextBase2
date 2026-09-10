@@ -1,6 +1,7 @@
 ﻿@using Textbase.Application.Features.AuthPrincipals
 @using Textbase.Domain.Enumerations
 @using Textbase.Host.Authorization
+@using Uwn.EntityFrameworkCore.Querying
 
 @inherits LayoutComponentBase
 @implements IDisposable
@@ -69,22 +70,21 @@
 						@_accessDeniedMessage
 					</RadzenAlert>
 				}
+				@if (AlertService.IsVisible)
+				{
+					<RadzenAlert AlertStyle="@AlertService.AlertStyle"
+								 AllowClose="@AlertService.AllowClose"
+								 Size="@AlertService.Size"
+								 Title="@AlertService.Title"
+								 Variant="@AlertService.Variant"
+								 Close="OnAlertClose">
+						@((MarkupString)AlertService.HtmlFormattedText)
+					</RadzenAlert>
+				}
 			</div>
 		</RadzenBody>
 	</RadzenLayout>
 </CascadingValue>
-
-@if (AlertService.IsVisible)
-{
-	<RadzenAlert AlertStyle="@AlertService.AlertStyle"
-				 AllowClose="@AlertService.AllowClose"
-				 Size="@AlertService.Size"
-				 Title="@AlertService.Title"
-				 Variant="@AlertService.Variant"
-				 Close="OnAlertClose">
-		@((MarkupString)AlertService.HtmlFormattedText)
-	</RadzenAlert>
-}
 
 <RadzenDialog />
 
@@ -153,7 +153,7 @@
 		}
 
 		AuthPrincipalFilter filter = AuthPrincipalFilter.All();
-		filter.Status = (int)PrincipalStatus.Pending;
+		filter.Status = FilterFactory.CreateNumericFilterFrom<int>((int)PrincipalStatus.Pending);
 		_pendingPrincipalCount = await AuthPrincipalQueries.CountAsync(filter);
 	}
 
@@ -169,6 +169,7 @@
 	private async Task RefreshNavigationStateAsync()
 	{
 		await RefreshPendingPrincipalCountAsync();
+
 		StateHasChanged();
 	}
 
