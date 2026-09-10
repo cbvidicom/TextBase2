@@ -16,8 +16,7 @@ else
 	@if (ViewModel.IgnoredLocaleKeys.Count > 0)
 	{
 		<RzCard class="rz-mb-4">
-			<HorizontalStack AlignItems="AlignItems.Center"
-							 JustifyContent="JustifyContent.SpaceBetween">
+			<HorizontalStack>
 				<RadzenText Text="@($"{ViewModel.IgnoredLocaleKeys.Count} Locale{(ViewModel.IgnoredLocaleKeys.Count == 1 ? String.Empty : "s")} {(ViewModel.IgnoredLocaleKeys.Count == 1 ? "is" : "are")} currently ignored")"
 							TextStyle="TextStyle.Subtitle2" />
 				<RzClickButton ButtonStyle="ButtonStyle.Light"
@@ -32,8 +31,7 @@ else
 				<VerticalStack class="rz-mt-3">
 					@foreach (string localeKey in ViewModel.IgnoredLocaleKeys)
 					{
-						<HorizontalStack AlignItems="AlignItems.Center"
-										 JustifyContent="JustifyContent.SpaceBetween">
+						<HorizontalStack>
 							<RadzenText Text="@localeKey" />
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
 											   Click="@(() => UnignoreLocale(localeKey))"
@@ -90,14 +88,14 @@ else
 				<RadzenDataGridColumn TItem="MissingTranslation"
 									  Filterable="false"
 									  Sortable="false"
-									  Width="170px">
+									  Width="100px">
 					<Template Context="item">
 						<span @onclick:stopPropagation="true">
-							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+							<RzClickButton ButtonStyle="ButtonStyle.Light"
 											   Click="@(() => IgnoreLocale(item.LocaleKey))"
 											   Icon="@Icons.Language"
 											   RenderStack="false"
-											   Text="Ignore this Locale for now" />
+											   Text="Ignore" />
 						</span>
 					</Template>
 				</RadzenDataGridColumn>
