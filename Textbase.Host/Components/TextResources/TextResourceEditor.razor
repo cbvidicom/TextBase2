@@ -1,0 +1,79 @@
+﻿@page "/text-resource"
+@page "/text-resource/{Key}"
+
+@using Textbase.Application.Features.TextResources
+@using Textbase.Host.ViewModels.TextResources
+
+@inherits TextbaseStringEditorViewBase<TextResourceEditorViewModel, TextResourceDto, TextResource, TextResourceFilter>
+
+@if (CanGoBack)
+{
+	<RzGoBackLink Path="@GoBackRoute" />
+}
+
+@if (IsBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else if (HasAccess)
+{
+	<RadzenTemplateForm TItem="TextResource"
+						Data="@Item"
+						class="rz-mt-4 rz-mb-4">
+		<AntiforgeryToken />
+		<DataAnnotationsValidator />
+		<fieldset disabled="@IsReadOnly">
+			<VerticalStack>
+				<RzTextBoxFormField MinLength="1"
+									MaxLength="128"
+									Name="@nameof(TextResource.TextKey)"
+									ReadOnly="@(!IsNewItem)"
+									Required="true"
+									StartIcon="@Icons.Name"
+									Text="Key"
+									@bind-Value="@Item.TextKey" />
+				<RzTextAreaFormField MaxLength="1024"
+									 Name="@nameof(TextResource.Description)"
+									 StartIcon="@Icons.Description"
+									 Text="Description"
+									 @bind-Value="@Item.Description" />
+
+				@if (CanSave)
+				{
+					<HorizontalStack>
+						<RzSaveButton RenderStack="false"
+									  Click="OnSave" />
+						@if (CanGoBack)
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+										   Click="OnSaveAndGoBack"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & Go back" />
+						}
+						@if (CanNew)
+						{
+							<RzClickButton ButtonStyle="ButtonStyle.Info"
+										   Click="OnSaveAndNew"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & New" />
+						}
+						@if (CanDelete)
+						{
+							<RzDeleteButton Click="OnDelete" />
+						}
+					</HorizontalStack>
+				}
+			</VerticalStack>
+		</fieldset>
+	</RadzenTemplateForm>
+}
+
+@code {
+	public override string MainHeader => IsNewItem ? "Create Text Resource" : "Edit Text Resource";
+
+	protected override string GoBackRoute => StaticRoutes.TextResourceList;
+
+	protected override string CreatePath => StaticRoutes.TextResourceCreate;
+}
