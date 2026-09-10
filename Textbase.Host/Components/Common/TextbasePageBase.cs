@@ -7,7 +7,7 @@ public abstract class TextbasePageBase
 	: ComponentBase
 {
 	[CascadingParameter]
-	private MainLayout MainLayout { get; set; } = default!;
+	protected MainLayout MainLayout { get; set; } = default!;
 
 	public abstract string MainHeader { get; }
 
@@ -17,4 +17,17 @@ public abstract class TextbasePageBase
 
 		MainLayout.SetHeader(MainHeader);
 	}
+
+	protected void InitializeView(
+		bool hasAccess,
+		string? accessDeniedMessage = null)
+		=> TextbaseViewHelper.Initialize(MainLayout, MainHeader, hasAccess, accessDeniedMessage);
+}
+
+public abstract class TextbasePageBase<TViewModel>
+	: TextbasePageBase
+	where TViewModel : class
+{
+	[Inject]
+	protected TViewModel ViewModel { get; set; } = default!;
 }
