@@ -8,7 +8,8 @@ using Uwn.EntityFrameworkCore.Querying;
 namespace Textbase.Host.Api.Authorization;
 
 public sealed class TranslationAuthorization(
-	AuthorizationScope scope)
+	AuthorizationScope scope,
+	ITranslationServerQueries _translationQueries)
 	: AuthorizationBase(scope)
 	, ITranslationAuthorization
 {
@@ -22,7 +23,8 @@ public sealed class TranslationAuthorization(
 		string localeKey,
 		string textKey,
 		string formalityKey,
-		string presentationKey, ClaimsPrincipal user,
+		string presentationKey,
+		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
 		=> await CanAccessAsync(localeKey, textKey, cancellationToken);
 
@@ -44,7 +46,8 @@ public sealed class TranslationAuthorization(
 		string formalityKey,
 		string presentationKey,
 		TranslationDto dto,
-		ClaimsPrincipal user, CancellationToken cancellationToken = default)
+		ClaimsPrincipal user,
+		CancellationToken cancellationToken = default)
 		=> await CanAccessAsync(localeKey, textKey, cancellationToken) && await CanAccessAsync(dto.LocaleKey, dto.TextKey, cancellationToken);
 
 	public async ValueTask<bool> CanDeleteAsync(
@@ -54,7 +57,7 @@ public sealed class TranslationAuthorization(
 		string presentationKey,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
-		=> await CanAccessAsync(localeKey, textKey, cancellationToken);
+		=> await CanAccessAsync(localeKey, textKey, cancellationToken) && !await _translationQueries.HasActiveApplicationAsync(localeKey, textKey, cancellationToken);
 
 	private async ValueTask<bool> CanAccessAsync(
 		string localeKey,
