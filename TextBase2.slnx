@@ -1,7 +1,6 @@
 <Solution>
   <Folder Name="/Documents/">
     <File Path="Documents/README.md" />
-    <File Path="Documents/TODO.md" />
   </Folder>
   <Folder Name="/SQL/">
     <File Path="SQL/CREATE [textbase2].sql" />

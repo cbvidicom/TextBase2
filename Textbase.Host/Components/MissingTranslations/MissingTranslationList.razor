@@ -28,16 +28,16 @@ else
 
 			@if (_showIgnoredLocales)
 			{
-				<VerticalStack class="rz-mt-3">
+				<VerticalStack>
 					@foreach (string localeKey in ViewModel.IgnoredLocaleKeys)
 					{
 						<HorizontalStack>
 							<RadzenText Text="@localeKey" />
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-											   Click="@(() => UnignoreLocale(localeKey))"
-											   Icon="@Icons.Language"
-											   RenderStack="false"
-											   Text="Un-ignore" />
+										   Click="@(() => UnignoreLocale(localeKey))"
+										   Icon="@Icons.Language"
+										   RenderStack="false"
+										   Text="Un-ignore" />
 						</HorizontalStack>
 					}
 				</VerticalStack>
@@ -91,10 +91,10 @@ else
 					<Template Context="item">
 						<span @onclick:stopPropagation="true">
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-											   Click="@(() => IgnoreLocale(item.LocaleKey))"
-											   Icon="@Icons.Language"
-											   RenderStack="false"
-											   Text="Ignore" />
+										   Click="@(() => IgnoreLocale(item.LocaleKey))"
+										   Icon="@Icons.Globe2Cancel"
+										   RenderStack="false"
+										   Text="Ignore" />
 						</span>
 					</Template>
 				</RadzenDataGridColumn>

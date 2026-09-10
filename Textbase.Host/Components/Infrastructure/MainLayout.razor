@@ -63,6 +63,11 @@
 						</Template>
 					</RadzenPanelMenuItem>
 				}
+				<RadzenText TextStyle="TextStyle.Caption"
+							Text="Current user:"
+							class="rz-mx-4" />
+				<RadzenText Text="@_currentPrincipal?.DisplayName"
+							class="rz-mx-4" />
 			</RadzenPanelMenu>
 		</RadzenSidebar>
 		<RadzenBody>

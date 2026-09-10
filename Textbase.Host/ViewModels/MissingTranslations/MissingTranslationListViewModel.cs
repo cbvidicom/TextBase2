@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Options;
 using Textbase.Application.Features.Locales;
 using Textbase.Application.Features.Translations;
+using Textbase.Domain.Models;
 using Textbase.Host.Authorization;
 using Uwn.Blazor.Models.Common;
 
