@@ -1,4 +1,6 @@
+using System.Text.Json;
 using Microsoft.Extensions.Options;
+using Microsoft.JSInterop;
 using Textbase.Application.Features.Locales;
 using Textbase.Application.Features.Translations;
 using Textbase.Domain.Models;
@@ -9,12 +11,14 @@ namespace Textbase.Host.ViewModels.MissingTranslations;
 
 public sealed class MissingTranslationListViewModel(
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
+	IJSRuntime _jsRuntime,
 	ILocaleQueries _localeQueries,
 	IOptions<QueryingOptions> _queryingOptions,
 	ITranslationServerQueries _translationQueries)
 {
 	private readonly HashSet<string> _ignoredLocaleKeys = new(StringComparer.OrdinalIgnoreCase);
 	private IReadOnlyList<MissingTranslation> _allItems = [];
+	private Guid? _entraObjectId;
 	private IReadOnlyDictionary<string, string?> _parentLocaleKeys = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 
 	public IReadOnlyList<MissingTranslation> Items { get; private set; } = [];
@@ -27,10 +31,13 @@ public sealed class MissingTranslationListViewModel(
 		CurrentPrincipal? principal = await _currentPrincipalAccessor.GetAsync(cancellationToken);
 		if (principal is null)
 		{
+			_entraObjectId = null;
 			_allItems = [];
 			Items = [];
 			return;
 		}
+
+		_entraObjectId = principal.EntraObjectId;
 
 		IReadOnlyList<Locale> locales = await _localeQueries.ListAllItemsAsync(cancellationToken);
 		_parentLocaleKeys = locales.ToDictionary(locale => locale.LocaleKey, locale => locale.ParentLocaleKey, StringComparer.OrdinalIgnoreCase);
@@ -42,23 +49,67 @@ public sealed class MissingTranslationListViewModel(
 		ApplyIgnoredLocales();
 	}
 
-	public void IgnoreLocale(
-		string localeKey)
+	public async Task LoadIgnoredLocalesAsync(
+		CancellationToken cancellationToken = default)
+	{
+		if (_entraObjectId is null)
+		{
+			return;
+		}
+
+		string? json = await _jsRuntime.InvokeAsync<string?>("localStorage.getItem", cancellationToken, GetStorageKey(_entraObjectId.Value));
+		_ignoredLocaleKeys.Clear();
+
+		if (!String.IsNullOrWhiteSpace(json))
+		{
+			try
+			{
+				string[]? localeKeys = JsonSerializer.Deserialize<string[]>(json);
+				if (localeKeys is not null)
+				{
+					foreach (string localeKey in localeKeys)
+					{
+						if (_parentLocaleKeys.ContainsKey(localeKey))
+						{
+							_ignoredLocaleKeys.Add(localeKey);
+						}
+					}
+				}
+			}
+			catch (JsonException)
+			{
+				// Ignore invalid browser data and replace it on the next change.
+			}
+		}
+
+		ApplyIgnoredLocales();
+	}
+
+	public async Task IgnoreLocaleAsync(
+		string localeKey,
+		CancellationToken cancellationToken = default)
 	{
 		_ignoredLocaleKeys.RemoveWhere(ignoredLocaleKey => IsDescendantOf(ignoredLocaleKey, localeKey));
 		_ignoredLocaleKeys.Add(localeKey);
 		ApplyIgnoredLocales();
+		await SaveIgnoredLocalesAsync(cancellationToken);
 	}
 
-	public void UnignoreLocale(
-		string localeKey)
+	public async Task UnignoreLocaleAsync(
+		string localeKey,
+		CancellationToken cancellationToken = default)
 	{
 		_ignoredLocaleKeys.Remove(localeKey);
 		ApplyIgnoredLocales();
+		await SaveIgnoredLocalesAsync(cancellationToken);
 	}
 
 	private void ApplyIgnoredLocales()
 		=> Items = [.. _allItems.Where(item => !_ignoredLocaleKeys.Any(ignoredLocaleKey => IsDescendantOf(item.LocaleKey, ignoredLocaleKey)))];
+
+	private static string GetStorageKey(
+		Guid entraObjectId)
+		=> $"TextBase2.MissingTranslations.IgnoredLocales.{entraObjectId:D}";
 
 	private bool IsDescendantOf(
 		string localeKey,
@@ -81,5 +132,17 @@ public sealed class MissingTranslationListViewModel(
 		}
 
 		return false;
+	}
+
+	private async Task SaveIgnoredLocalesAsync(
+		CancellationToken cancellationToken)
+	{
+		if (_entraObjectId is null)
+		{
+			return;
+		}
+
+		string json = JsonSerializer.Serialize(IgnoredLocaleKeys);
+		await _jsRuntime.InvokeVoidAsync("localStorage.setItem", cancellationToken, GetStorageKey(_entraObjectId.Value), json);
 	}
 }
