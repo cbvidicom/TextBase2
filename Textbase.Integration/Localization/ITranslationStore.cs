@@ -1,13 +1,13 @@
-using DM = Textbase.Domain.Models;
+using CM = Textbase.Contracts.Models;
 
 namespace Textbase.Integration.Localization;
 
 public interface ITranslationStore
 {
-	ValueTask<IReadOnlyCollection<DM.FlatTranslation>> GetAsync(
+	ValueTask<CM.RuntimeLocalizationSnapshotDto?> GetAsync(
 		CancellationToken cancellationToken = default);
 
 	ValueTask SetAsync(
-		IReadOnlyCollection<DM.FlatTranslation> translations,
+		CM.RuntimeLocalizationSnapshotDto snapshot,
 		CancellationToken cancellationToken = default);
 }
