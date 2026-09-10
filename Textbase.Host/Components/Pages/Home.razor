@@ -5,7 +5,6 @@
 @inherits TextbasePageBase
 
 @inject MissingTranslationViewModel ViewModel
-@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
@@ -133,7 +132,7 @@ else
 	private void OnRowSelect(
 		MissingTranslation item)
 	{
-		string route = $"{StaticRoutes.TranslationCreate}?localeKey={Uri.EscapeDataString(item.LocaleKey)}&textKey={Uri.EscapeDataString(item.TextKey)}";
+		string route = String.Format(StaticRoutes.TranslationCreateWithSelection, Uri.EscapeDataString(item.LocaleKey), Uri.EscapeDataString(item.TextKey));
 		NavigationManager.NavigateTo(route);
 	}
 
@@ -149,7 +148,9 @@ else
 	{
 		ViewModel.UnignoreLocale(localeKey);
 		if (ViewModel.IgnoredLocaleKeys.Count == 0)
+		{
 			_showIgnoredLocales = false;
+		}
 	}
 
 	private void ToggleIgnoredLocales()
