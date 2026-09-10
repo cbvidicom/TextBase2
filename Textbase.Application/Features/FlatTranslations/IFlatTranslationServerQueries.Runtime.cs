@@ -1,10 +1,10 @@
-using DM = Textbase.Domain.Models;
+using CM = Textbase.Contracts.Models;
 
 namespace Textbase.Application.Features.FlatTranslations;
 
 public interface IFlatTranslationRuntimeQueries
 {
-	Task<IReadOnlyList<DM.FlatTranslation>> ListForClientApplicationAsync(
+	Task<CM.RuntimeLocalizationSnapshotDto?> GetClientApplicationSnapshotAsync(
 		Guid clientApplicationGuid,
 		CancellationToken cancellationToken = default);
 }
