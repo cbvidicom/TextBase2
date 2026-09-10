@@ -84,7 +84,11 @@ else
 	private void OnRowSelect(
 		MissingTranslation item)
 	{
-		string route = String.Format(StaticRoutes.TranslationCreateWithSelection, Uri.EscapeDataString(item.LocaleKey), Uri.EscapeDataString(item.TextKey));
+		string route = String.Format(
+			StaticRoutes.TranslationCreateWithSelectionAndReturnTo,
+			Uri.EscapeDataString(item.LocaleKey),
+			Uri.EscapeDataString(item.TextKey),
+			Uri.EscapeDataString(StaticRoutes.Home));
 		NavigationManager.NavigateTo(route);
 	}
 }
