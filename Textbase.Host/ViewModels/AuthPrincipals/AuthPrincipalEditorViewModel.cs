@@ -54,15 +54,11 @@ public class AuthPrincipalEditorViewModel(
 		Guid clientApplicationGuid)
 	{
 		if (PrincipalClientApplications.Any(item => item.ClientApplicationGuid == clientApplicationGuid))
-		{
 			return;
-		}
 
 		AuthPrincipalClientApplication item = _authPrincipalClientApplicationEntityFactory.Create(Item.EntraObjectId, clientApplicationGuid);
 		if (await _authPrincipalClientApplicationCommands.TryCreateAsync(item))
-		{
 			await LoadClientApplicationsAsync();
-		}
 	}
 
 	public async Task RemoveClientApplicationAsync(
@@ -70,24 +66,18 @@ public class AuthPrincipalEditorViewModel(
 	{
 		bool deleted = await _authPrincipalClientApplicationCommands.TryDeleteAsync(Item.EntraObjectId, clientApplicationGuid);
 		if (deleted)
-		{
 			PrincipalClientApplications = [.. PrincipalClientApplications.Where(item => item.ClientApplicationGuid != clientApplicationGuid)];
-		}
 	}
 
 	public async Task AddLocaleAsync(
 		string localeKey)
 	{
 		if (PrincipalLocales.Any(item => item.LocaleKey == localeKey))
-		{
 			return;
-		}
 
 		AuthPrincipalLocale item = _authPrincipalLocaleEntityFactory.Create(Item.EntraObjectId, localeKey);
 		if (await _authPrincipalLocaleCommands.TryCreateAsync(item))
-		{
 			await LoadLocalesAsync();
-		}
 	}
 
 	public async Task RemoveLocaleAsync(
@@ -95,9 +85,7 @@ public class AuthPrincipalEditorViewModel(
 	{
 		bool deleted = await _authPrincipalLocaleCommands.TryDeleteAsync(Item.EntraObjectId, localeKey);
 		if (deleted)
-		{
 			PrincipalLocales = [.. PrincipalLocales.Where(item => item.LocaleKey != localeKey)];
-		}
 	}
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
@@ -105,9 +93,7 @@ public class AuthPrincipalEditorViewModel(
 		CancellationToken cancellationToken = default)
 	{
 		if (key is not Guid entraObjectId)
-		{
 			return ViewAuthorizationResult.Denied();
-		}
 
 		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool isAuthorized = await _authorization.CanReadAsync(entraObjectId, user, cancellationToken);
@@ -129,18 +115,6 @@ public class AuthPrincipalEditorViewModel(
 			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Update, ModelType));
 	}
 
-	protected override async Task<ViewAuthorizationResult> AuthorizeDeleteAsync(
-		AuthPrincipal item,
-		CancellationToken cancellationToken = default)
-	{
-		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
-		bool isAuthorized = await _authorization.CanDeleteAsync(item.EntraObjectId, user, cancellationToken);
-
-		return isAuthorized
-			? ViewAuthorizationResult.Authorized
-			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Delete, ModelType));
-	}
-
 	private async Task LoadClientApplicationsAsync()
 	{
 		AuthPrincipalClientApplicationFilter filter = AuthPrincipalClientApplicationFilter.All();
@@ -148,9 +122,7 @@ public class AuthPrincipalEditorViewModel(
 		PrincipalClientApplications = await _authPrincipalClientApplicationQueries.ListItemsAsync(filter);
 
 		if (!ClientApplications.Any())
-		{
 			ClientApplications = await _clientApplicationQueries.ListAllItemsAsync();
-		}
 	}
 
 	private async Task LoadLocalesAsync()
@@ -160,8 +132,6 @@ public class AuthPrincipalEditorViewModel(
 		PrincipalLocales = await _authPrincipalLocaleQueries.ListItemsAsync(filter);
 
 		if (!Locales.Any())
-		{
 			Locales = await _localeQueries.ListAllItemsAsync();
-		}
 	}
 }
