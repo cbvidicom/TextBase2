@@ -35,7 +35,9 @@ else
 		bool firstRender)
 	{
 		if (!firstRender)
+		{
 			return;
+		}
 
 		string[] browserLanguages = await JS.InvokeAsync<string[]>("textbaseDemo.getBrowserLanguages");
 		await LocalizationSession.InitializeAsync(browserLanguages);
