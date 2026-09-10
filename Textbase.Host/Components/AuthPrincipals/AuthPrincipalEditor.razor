@@ -1,0 +1,337 @@
+@page "/user"
+@page "/user/{Guid:guid}"
+
+@using Textbase.Application.Features.AuthPrincipals
+@using Textbase.Domain.Enumerations
+@using Textbase.Host.ViewModels.AuthPrincipals
+
+@inherits TextbaseGuidEditorViewBase<AuthPrincipalEditorViewModel, AuthPrincipalDto, AuthPrincipal, AuthPrincipalFilter>
+
+@if (CanGoBack)
+{
+	<RzGoBackLink Path="@GoBackRoute" />
+}
+
+@if (IsBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else if (HasAccess)
+{
+	<RadzenTemplateForm TItem="AuthPrincipal"
+						Data="@Item"
+						class="rz-mt-4 rz-mb-4">
+		<AntiforgeryToken />
+		<DataAnnotationsValidator />
+		<RadzenTabs SelectedIndexChanged="OnSelectedTabIndexChanged">
+			<Tabs>
+				<RadzenTabsItem Text="Base">
+					<fieldset disabled="@IsReadOnly">
+						<VerticalStack>
+							<RzTextBoxFormField Name="@nameof(AuthPrincipal.EntraObjectId)"
+													ReadOnly="@(!IsNewItem)"
+													Required="true"
+													StartIcon="@Icons.Barcode"
+													Text="Entra Object ID"
+													Value="@Item.EntraObjectId.ToString()"
+													ValueChanged="OnEntraObjectIdChanged" />
+							<RzTextBoxFormField MaxLength="128"
+													Name="@nameof(AuthPrincipal.DisplayName)"
+													StartIcon="@Icons.Name"
+													Text="Display Name"
+													@bind-Value="@Item.DisplayName" />
+							<RzTextBoxFormField MaxLength="256"
+													Name="@nameof(AuthPrincipal.EmailAddress)"
+													StartIcon="@Icons.Email"
+													Text="Email Address"
+													@bind-Value="@Item.EmailAddress" />
+							<RzDropDownFormField TValue="PrincipalStatus"
+												 EnumType="@typeof(PrincipalStatus)"
+												 Name="@nameof(AuthPrincipal.Status)"
+												 Required="true"
+												 Text="Status"
+												 @bind-Value="@Item.StatusValue" />
+							<RzSwitchFormField Name="SysAdminRole"
+											   Text="System Administrator"
+											   @bind-Value="@IsSysAdmin" />
+							<RzSwitchFormField Name="AppAdminRole"
+											   Text="Application Administrator"
+											   @bind-Value="@IsAppAdmin" />
+							<RzSwitchFormField Name="TranslatorRole"
+											   Text="Translator"
+											   @bind-Value="@IsTranslator" />
+							<RzSwitchFormField Name="ConsumerRole"
+											   Text="Consumer"
+											   @bind-Value="@IsConsumer" />
+							<RzTextAreaFormField MaxLength="1024"
+												 Name="@nameof(AuthPrincipal.Request)"
+												 ReadOnly="true"
+												 Text="Access Request"
+												 @bind-Value="@Item.Request" />
+							<RzTextAreaFormField MaxLength="1024"
+												 Name="@nameof(AuthPrincipal.Response)"
+												 Text="Response / Reason"
+												 @bind-Value="@Item.Response" />
+
+							@if (CanSave)
+							{
+								<HorizontalStack>
+									<RzSaveButton RenderStack="false"
+												  Click="OnSave" />
+									@if (CanGoBack)
+									{
+										<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+													   Click="OnSaveAndGoBack"
+													   Icon="@Icons.Save"
+													   RenderStack="false"
+													   Text="Save & Go back" />
+									}
+									@if (CanNew)
+									{
+										<RzClickButton ButtonStyle="ButtonStyle.Info"
+													   Click="OnSaveAndNew"
+													   Icon="@Icons.Save"
+													   RenderStack="false"
+													   Text="Save & New" />
+									}
+									@if (CanDelete)
+									{
+										<RzDeleteButton Click="OnDelete" />
+									}
+								</HorizontalStack>
+							}
+						</VerticalStack>
+					</fieldset>
+				</RadzenTabsItem>
+
+				@if (!IsNewItem)
+				{
+					<RadzenTabsItem Text="Applications">
+						@if (_isTabBusy)
+						{
+							<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+						}
+						else
+						{
+							<RadzenTable class="rz-mb-4">
+								<RadzenTableHeader>
+									<RadzenTableHeaderRow>
+										<RadzenTableHeaderCell>Application</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
+									</RadzenTableHeaderRow>
+								</RadzenTableHeader>
+								<RadzenTableBody>
+									@foreach (AuthPrincipalClientApplication assignment in ViewModel.PrincipalClientApplications.OrderBy(item => GetApplicationName(item.ClientApplicationGuid)))
+									{
+										<RadzenTableRow>
+											<RadzenTableCell><strong>@GetApplicationName(assignment.ClientApplicationGuid)</strong></RadzenTableCell>
+											<RadzenTableCell><RzDeleteButton Click="@(() => OnRemoveClientApplication(assignment.ClientApplicationGuid))" /></RadzenTableCell>
+										</RadzenTableRow>
+									}
+								</RadzenTableBody>
+							</RadzenTable>
+							<HorizontalStack>
+								<RadzenDropDown TValue="ClientApplication"
+												AllowClear="false"
+												AllowFiltering="true"
+												Data="@AvailableClientApplications"
+												FilterAsYouType="true"
+												FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+												Multiple="false"
+												TextProperty="Name"
+												Style="width: 40rem;"
+												@bind-Value="@_selectedClientApplication" />
+								<RzClickButton ButtonStyle="ButtonStyle.Primary"
+											   Disabled="@(_selectedClientApplication is null)"
+											   Icon="@Icons.Add"
+											   Text="Add"
+											   Click="OnAddClientApplication" />
+							</HorizontalStack>
+						}
+					</RadzenTabsItem>
+
+					<RadzenTabsItem Text="Locales">
+						@if (_isTabBusy)
+						{
+							<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+						}
+						else
+						{
+							<RadzenTable class="rz-mb-4">
+								<RadzenTableHeader>
+									<RadzenTableHeaderRow>
+										<RadzenTableHeaderCell>Locale</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Language</RadzenTableHeaderCell>
+										<RadzenTableHeaderCell>Options</RadzenTableHeaderCell>
+									</RadzenTableHeaderRow>
+								</RadzenTableHeader>
+								<RadzenTableBody>
+									@foreach (AuthPrincipalLocale assignment in ViewModel.PrincipalLocales.OrderBy(item => item.LocaleKey))
+									{
+										<RadzenTableRow>
+											<RadzenTableCell><strong>@assignment.LocaleKey</strong></RadzenTableCell>
+											<RadzenTableCell>@ViewModel.Locales.SingleOrDefault(locale => locale.LocaleKey == assignment.LocaleKey)?.EnglishName</RadzenTableCell>
+											<RadzenTableCell><RzDeleteButton Click="@(() => OnRemoveLocale(assignment.LocaleKey))" /></RadzenTableCell>
+										</RadzenTableRow>
+									}
+								</RadzenTableBody>
+							</RadzenTable>
+							<HorizontalStack>
+								<RadzenDropDown TValue="Locale"
+												AllowClear="false"
+												AllowFiltering="true"
+												Data="@AvailableLocales"
+												FilterAsYouType="true"
+												FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+												Multiple="false"
+												Style="width: 40rem;"
+												@bind-Value="@_selectedLocale" />
+								<RzClickButton ButtonStyle="ButtonStyle.Primary"
+											   Disabled="@(_selectedLocale is null)"
+											   Icon="@Icons.Add"
+											   Text="Add"
+											   Click="OnAddLocale" />
+							</HorizontalStack>
+						}
+					</RadzenTabsItem>
+				}
+			</Tabs>
+		</RadzenTabs>
+	</RadzenTemplateForm>
+}
+
+@code {
+	public override string MainHeader => IsNewItem ? "Create User" : "Edit User";
+
+	protected override string GoBackRoute => StaticRoutes.AuthPrincipalList;
+	protected override string CreatePath => StaticRoutes.AuthPrincipalCreate;
+
+	private bool _isTabBusy;
+	private ClientApplication? _selectedClientApplication;
+	private Locale? _selectedLocale;
+
+	private IEnumerable<ClientApplication> AvailableClientApplications => ViewModel.ClientApplications.Where(application =>
+		!ViewModel.PrincipalClientApplications.Any(assignment => assignment.ClientApplicationGuid == application.ClientApplicationGuid));
+
+	private IEnumerable<Locale> AvailableLocales => ViewModel.Locales.Where(locale =>
+		!ViewModel.PrincipalLocales.Any(assignment => assignment.LocaleKey == locale.LocaleKey));
+
+	private bool IsSysAdmin { get => HasRole(Roles.SysAdmin); set => SetRole(Roles.SysAdmin, value); }
+	private bool IsAppAdmin { get => HasRole(Roles.AppAdmin); set => SetRole(Roles.AppAdmin, value); }
+	private bool IsTranslator { get => HasRole(Roles.Translator); set => SetRole(Roles.Translator, value); }
+	private bool IsConsumer { get => HasRole(Roles.Consumer); set => SetRole(Roles.Consumer, value); }
+
+	private bool HasRole(
+		Roles role)
+		=> Item.RolesValue.HasFlag(role);
+
+	private void SetRole(
+		Roles role,
+		bool enabled)
+	{
+		Item.RolesValue = enabled ? Item.RolesValue | role : Item.RolesValue & ~role;
+	}
+
+	private void OnEntraObjectIdChanged(
+		string? value)
+	{
+		if (Guid.TryParse(value, out Guid entraObjectId))
+		{
+			Item.EntraObjectId = entraObjectId;
+		}
+	}
+
+	private string GetApplicationName(
+		Guid clientApplicationGuid)
+		=> ViewModel.ClientApplications.SingleOrDefault(application => application.ClientApplicationGuid == clientApplicationGuid)?.Name ?? clientApplicationGuid.ToString();
+
+	private async Task OnSelectedTabIndexChanged(
+		int index)
+	{
+		_isTabBusy = true;
+		try
+		{
+			await ViewModel.SetSelectedTabIndexAsync(index);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isTabBusy = false;
+		}
+	}
+
+	private async Task OnAddClientApplication()
+	{
+		if (_selectedClientApplication is null)
+		{
+			return;
+		}
+
+		try
+		{
+			await ViewModel.AddClientApplicationAsync(_selectedClientApplication.ClientApplicationGuid);
+			_selectedClientApplication = null;
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+	}
+
+	private async Task OnRemoveClientApplication(
+		Guid clientApplicationGuid)
+	{
+		if (!await ConfirmAsync("Do you want to remove this Application from the User?"))
+		{
+			return;
+		}
+
+		try
+		{
+			await ViewModel.RemoveClientApplicationAsync(clientApplicationGuid);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+	}
+
+	private async Task OnAddLocale()
+	{
+		if (_selectedLocale is null)
+		{
+			return;
+		}
+
+		try
+		{
+			await ViewModel.AddLocaleAsync(_selectedLocale.LocaleKey);
+			_selectedLocale = null;
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+	}
+
+	private async Task OnRemoveLocale(
+		string localeKey)
+	{
+		if (!await ConfirmAsync("Do you want to remove this Locale from the User?"))
+		{
+			return;
+		}
+
+		try
+		{
+			await ViewModel.RemoveLocaleAsync(localeKey);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+	}
+}
