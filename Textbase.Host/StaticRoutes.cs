@@ -15,6 +15,9 @@ public static class StaticRoutes
 
 	public const string Home = "/";
 
+	public const string LocaleList = "/locales";
+	public const string LocaleEdit = "/locale/{0}";
+
 	public const string PresentationList = "/presentations";
 	public const string PresentationCreate = "/presentation";
 	public const string PresentationEdit = "/presentation/{0}";

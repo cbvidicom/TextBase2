@@ -1,0 +1,78 @@
+﻿@page "/locale/{Key}"
+
+@using Textbase.Application.Features.Locales
+@using Textbase.Host.ViewModels.Locales
+
+@inherits TextbaseStringEditorViewBase<LocaleEditorViewModel, LocaleDto, Locale, LocaleFilter>
+
+@if (CanGoBack)
+{
+	<RzGoBackLink Path="@GoBackRoute" />
+}
+
+@if (IsBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else if (HasAccess)
+{
+	<RadzenTemplateForm TItem="Locale"
+						Data="@Item"
+						class="rz-mt-4 rz-mb-4">
+		<VerticalStack>
+			<RzTextBoxFormField Name="@nameof(Locale.LocaleKey)"
+								ReadOnly="true"
+								StartIcon="@Icons.Language"
+								Text="Locale"
+								Value="@Item.LocaleKey" />
+			<RzTextBoxFormField Name="@nameof(Locale.ParentLocaleKey)"
+								ReadOnly="true"
+								Text="Parent Locale"
+								Value="@Item.ParentLocaleKey" />
+			<RzTextBoxFormField Name="@nameof(Locale.NativeName)"
+								ReadOnly="true"
+								StartIcon="@Icons.Name"
+								Text="Native Name"
+								Value="@Item.NativeName" />
+			<RzTextBoxFormField Name="@nameof(Locale.EnglishName)"
+								ReadOnly="true"
+								StartIcon="@Icons.Name"
+								Text="English Name"
+								Value="@Item.EnglishName" />
+			<RzTextBoxFormField Name="@nameof(Locale.LanguageIso2)"
+								ReadOnly="true"
+								Text="Language ISO 2"
+								Value="@Item.LanguageIso2" />
+			<RzTextBoxFormField Name="@nameof(Locale.LanguageIso3)"
+								ReadOnly="true"
+								Text="Language ISO 3"
+								Value="@Item.LanguageIso3" />
+			<RzTextBoxFormField Name="@nameof(Locale.LanguageIsoN)"
+								ReadOnly="true"
+								Text="Language ISO Numeric"
+								Value="@Item.LanguageIsoN?.ToString()" />
+			<RzTextBoxFormField Name="@nameof(Locale.LanguageLCID)"
+								ReadOnly="true"
+								Text="Language LCID"
+								Value="@Item.LanguageLCID?.ToString()" />
+			<RzTextBoxFormField Name="@nameof(Locale.LanguageWinApi)"
+								ReadOnly="true"
+								Text="Language WinAPI"
+								Value="@Item.LanguageWinApi" />
+			<RzTextBoxFormField Name="@nameof(Locale.CountryIso2)"
+								ReadOnly="true"
+								Text="Country ISO 2"
+								Value="@Item.CountryIso2" />
+			<RzTextBoxFormField Name="@nameof(Locale.CountryIso3)"
+								ReadOnly="true"
+								Text="Country ISO 3"
+								Value="@Item.CountryIso3" />
+		</VerticalStack>
+	</RadzenTemplateForm>
+}
+
+@code {
+	public override string MainHeader => "Locale";
+
+	protected override string GoBackRoute => StaticRoutes.LocaleList;
+}
