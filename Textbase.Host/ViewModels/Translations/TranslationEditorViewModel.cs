@@ -5,6 +5,7 @@ using Textbase.Application.Features.Presentations;
 using Textbase.Application.Features.TextResources;
 using Textbase.Application.Features.Translations;
 using Textbase.Domain.Enumerations;
+using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Enumerations;
