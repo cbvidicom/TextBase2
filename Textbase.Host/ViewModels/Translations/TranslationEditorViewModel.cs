@@ -105,7 +105,7 @@ public sealed class TranslationEditorViewModel(
 			return;
 		}
 
-		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync(cancellationToken);
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		bool succeeded;
 
 		if (IsNewItem)
@@ -115,7 +115,7 @@ public sealed class TranslationEditorViewModel(
 				throw new UnauthorizedAccessException(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, typeof(Translation)));
 			}
 
-			succeeded = await _translationCommands.TryCreateAsync(Item, cancellationToken);
+			succeeded = await _translationCommands.TryCreateAsync(Item);
 		}
 		else
 		{
@@ -124,7 +124,7 @@ public sealed class TranslationEditorViewModel(
 				throw new UnauthorizedAccessException(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Update, typeof(Translation)));
 			}
 
-			succeeded = await _translationCommands.TryUpdateAsync(Item, cancellationToken);
+			succeeded = await _translationCommands.TryUpdateAsync(Item);
 		}
 
 		if (!succeeded)
@@ -142,7 +142,7 @@ public sealed class TranslationEditorViewModel(
 			return;
 		}
 
-		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync(cancellationToken);
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		CanDelete = await _translationAuthorization.CanDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey, user, cancellationToken);
 	}
 
@@ -154,14 +154,14 @@ public sealed class TranslationEditorViewModel(
 			return;
 		}
 
-		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync(cancellationToken);
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		if (!await _translationAuthorization.CanDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey, user, cancellationToken))
 		{
 			CanDelete = false;
-			return;
+			throw new UnauthorizedAccessException(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Delete, typeof(Translation)));
 		}
 
-		bool succeeded = await _translationCommands.TryDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey, cancellationToken);
+		bool succeeded = await _translationCommands.TryDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey);
 		if (!succeeded)
 		{
 			throw new InvalidOperationException("Deleting Translation failed.");
@@ -208,7 +208,7 @@ public sealed class TranslationEditorViewModel(
 			return;
 		}
 
-		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync(cancellationToken);
+		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		HasAccess = await _translationAuthorization.CanReadAsync(localeKey, textKey, formalityKey, presentationKey, user, cancellationToken);
 		if (!HasAccess)
 		{
@@ -216,7 +216,7 @@ public sealed class TranslationEditorViewModel(
 			return;
 		}
 
-		Item = await _translationQueries.ReadAsync(localeKey, textKey, formalityKey, presentationKey, cancellationToken);
+		Item = await _translationQueries.ReadAsync(localeKey, textKey, formalityKey, presentationKey);
 		if (Item is null)
 		{
 			throw new KeyNotFoundException("Translation not found.");
