@@ -85,10 +85,11 @@ else
 		MissingTranslation item)
 	{
 		string route = String.Format(
-			StaticRoutes.TranslationCreateWithSelectionAndReturnTo,
+			StaticRoutes.TranslationCreateWithSelection,
 			Uri.EscapeDataString(item.LocaleKey),
-			Uri.EscapeDataString(item.TextKey),
-			Uri.EscapeDataString(StaticRoutes.Home));
+			Uri.EscapeDataString(item.TextKey)) +
+			"?returnTo=" +
+			Uri.EscapeDataString(StaticRoutes.Home);
 		NavigationManager.NavigateTo(route);
 	}
 }

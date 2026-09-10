@@ -273,12 +273,13 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 		if (GetReturnRoute() == StaticRoutes.Home)
 		{
 			return String.Format(
-				StaticRoutes.TranslationEditWithReturnTo,
+				StaticRoutes.TranslationEdit,
 				Uri.EscapeDataString(translation.LocaleKey),
 				Uri.EscapeDataString(translation.TextKey),
 				Uri.EscapeDataString(translation.FormalityKey),
-				Uri.EscapeDataString(translation.PresentationKey),
-				Uri.EscapeDataString(StaticRoutes.Home));
+				Uri.EscapeDataString(translation.PresentationKey)) +
+				"?returnTo=" +
+				Uri.EscapeDataString(StaticRoutes.Home);
 		}
 
 		return String.Format(
