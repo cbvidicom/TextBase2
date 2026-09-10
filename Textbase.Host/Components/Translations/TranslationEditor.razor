@@ -4,11 +4,13 @@
 @using System.Security.Claims
 @using Textbase.Application.Features.Translations
 @using Textbase.Domain.Enumerations
+@using Textbase.Host.Api.Authorization
 @using Textbase.Host.Authorization
 @using Textbase.Host.Enumerations
 @using Textbase.Host.ViewModels.Translations
 @using Textbase.Infrastructure.Persistence.Translations
 
+@inject AuthorizationScope AuthorizationScope
 @inject ICurrentPrincipalAccessor CurrentPrincipalAccessor
 @inject ITranslationAuthorization TranslationAuthorization
 @inject ITranslationCommands TranslationCommands
