@@ -16,31 +16,26 @@ else
 	@if (ViewModel.IgnoredLocaleKeys.Count > 0)
 	{
 		<RzCard class="rz-mb-4">
-			<HorizontalStack>
-				<RadzenText Text="@($"{ViewModel.IgnoredLocaleKeys.Count} Locale{(ViewModel.IgnoredLocaleKeys.Count == 1 ? String.Empty : "s")} {(ViewModel.IgnoredLocaleKeys.Count == 1 ? "is" : "are")} currently ignored")"
-							TextStyle="TextStyle.Subtitle2" />
-				<RzClickButton ButtonStyle="ButtonStyle.Light"
-							   Click="ToggleIgnoredLocales"
-							   Icon="@(_showIgnoredLocales ? Icons.ExpandLess : Icons.ExpandMore)"
-							   RenderStack="false"
-							   Text="@(_showIgnoredLocales ? "Hide" : "Show")" />
-			</HorizontalStack>
+			<RadzenText Text="@($"{ViewModel.IgnoredLocaleKeys.Count} Locale{(ViewModel.IgnoredLocaleKeys.Count == 1 ? String.Empty : "s")} {(ViewModel.IgnoredLocaleKeys.Count == 1 ? "is" : "are")} currently ignored")"
+						TextStyle="TextStyle.Subtitle2" />
+			<a href="#"
+			   @onclick="ToggleIgnoredLocales"
+			   @onclick:preventDefault="true">@(_showIgnoredLocales ? "Hide ignored Locales" : "Show ignored Locales")</a>
 
 			@if (_showIgnoredLocales)
 			{
-				<VerticalStack>
+				<div class="rz-mt-2">
 					@foreach (string localeKey in ViewModel.IgnoredLocaleKeys)
 					{
-						<HorizontalStack>
-							<RadzenText Text="@localeKey" />
-							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="@(() => UnignoreLocale(localeKey))"
-										   Icon="@Icons.Language"
-										   RenderStack="false"
-										   Text="Un-ignore" />
-						</HorizontalStack>
+						<div>
+							<strong>@localeKey</strong>
+							<span> · </span>
+							<a href="#"
+							   @onclick="@(() => UnignoreLocaleAsync(localeKey))"
+							   @onclick:preventDefault="true">Un-ignore</a>
+						</div>
 					}
-				</VerticalStack>
+				</div>
 			}
 		</RzCard>
 	}
@@ -76,7 +71,17 @@ else
 									  Property="@nameof(MissingTranslation.LocaleKey)"
 									  Sortable="true"
 									  SortOrder="SortOrder.Ascending"
-									  Title="Locale" />
+									  Title="Locale">
+					<Template Context="item">
+						<span>@item.LocaleKey</span>
+						<span> · </span>
+						<a href="#"
+						   title="Ignore this Locale for now"
+						   @onclick="@(() => IgnoreLocaleAsync(item.LocaleKey))"
+						   @onclick:preventDefault="true"
+						   @onclick:stopPropagation="true">Ignore</a>
+					</Template>
+				</RadzenDataGridColumn>
 				<RadzenDataGridColumn Filterable="true"
 									  Property="@nameof(MissingTranslation.TextKey)"
 									  Sortable="true"
@@ -85,19 +90,6 @@ else
 									  Property="@nameof(MissingTranslation.Applications)"
 									  Sortable="true"
 									  Title="Applications" />
-				<RadzenDataGridColumn TItem="MissingTranslation"
-									  Filterable="false"
-									  Sortable="false">
-					<Template Context="item">
-						<span @onclick:stopPropagation="true">
-							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="@(() => IgnoreLocale(item.LocaleKey))"
-										   Icon="@Icons.Globe2Cancel"
-										   RenderStack="false"
-										   Text="Ignore" />
-						</span>
-					</Template>
-				</RadzenDataGridColumn>
 			</Columns>
 		</RadzenDataGrid>
 	}
@@ -127,6 +119,26 @@ else
 		}
 	}
 
+	protected override async Task OnAfterRenderAsync(
+		bool firstRender)
+	{
+		await base.OnAfterRenderAsync(firstRender);
+		if (!firstRender)
+		{
+			return;
+		}
+
+		try
+		{
+			await ViewModel.LoadIgnoredLocalesAsync();
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+	}
+
 	private void OnRowSelect(
 		MissingTranslation item)
 	{
@@ -134,20 +146,34 @@ else
 		NavigationManager.NavigateTo(route);
 	}
 
-	private void IgnoreLocale(
+	private async Task IgnoreLocaleAsync(
 		string localeKey)
 	{
-		ViewModel.IgnoreLocale(localeKey);
-		_showIgnoredLocales = false;
+		try
+		{
+			await ViewModel.IgnoreLocaleAsync(localeKey);
+			_showIgnoredLocales = false;
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
 	}
 
-	private void UnignoreLocale(
+	private async Task UnignoreLocaleAsync(
 		string localeKey)
 	{
-		ViewModel.UnignoreLocale(localeKey);
-		if (ViewModel.IgnoredLocaleKeys.Count == 0)
+		try
 		{
-			_showIgnoredLocales = false;
+			await ViewModel.UnignoreLocaleAsync(localeKey);
+			if (ViewModel.IgnoredLocaleKeys.Count == 0)
+			{
+				_showIgnoredLocales = false;
+			}
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
 		}
 	}
 
