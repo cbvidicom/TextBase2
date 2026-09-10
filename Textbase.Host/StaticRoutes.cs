@@ -29,7 +29,9 @@ public static class StaticRoutes
 	public const string TranslationList = "/translations";
 	public const string TranslationCreate = "/translation";
 	public const string TranslationCreateWithSelection = "/translation/{0}/{1}";
+	public const string TranslationCreateWithSelectionAndReturnTo = "/translation/{0}/{1}?returnTo={2}";
 	public const string TranslationEdit = "/translation/{0}/{1}/{2}/{3}";
+	public const string TranslationEditWithReturnTo = "/translation/{0}/{1}/{2}/{3}?returnTo={4}";
 
 	public const string SignIn = "/MicrosoftIdentity/Account/SignIn";
 	public const string SignOut = "/MicrosoftIdentity/Account/SignOut";
