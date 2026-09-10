@@ -1,0 +1,54 @@
+﻿@page "/text-resources"
+
+@using Textbase.Application.Features.TextResources
+@using Textbase.Host.ViewModels.TextResources
+
+@inherits TextbaseDataGridViewBase<TextResourceListViewModel, TextResource, TextResourceFilter>
+
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="TextResource"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(TextResource.TextKey)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Key" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(TextResource.Description)"
+								  Sortable="true"
+								  Title="Description" />
+		</Columns>
+	</RzDataGrid>
+}
+
+@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
+{
+	<RzAddButton Path="@StaticRoutes.TextResourceCreate" />
+}
+
+@code {
+	public override string MainHeader => "Text Resources";
+
+	protected override string EditItemRouteTemplate => StaticRoutes.TextResourceEdit;
+
+	protected override Func<TextResource, object> GetKey => e => e.TextKey;
+}

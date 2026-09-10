@@ -22,6 +22,10 @@ public static class StaticRoutes
 	public const string PresentationCreate = "/presentation";
 	public const string PresentationEdit = "/presentation/{0}";
 
+	public const string TextResourceList = "/text-resources";
+	public const string TextResourceCreate = "/text-resource";
+	public const string TextResourceEdit = "/text-resource/{0}";
+
 	public const string SignIn = "/MicrosoftIdentity/Account/SignIn";
 	public const string SignOut = "/MicrosoftIdentity/Account/SignOut";
 }
