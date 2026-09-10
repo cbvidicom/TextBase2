@@ -154,6 +154,10 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 	[Parameter]
 	public string? PresentationKey { get; set; }
 
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "returnTo")]
+	public string? ReturnTo { get; set; }
+
 	private bool _isBusy = true;
 	private bool _canGoBack = true;
 
@@ -203,7 +207,7 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 
 			if (goBack)
 			{
-				NavigationManager.NavigateTo(StaticRoutes.TranslationList);
+				NavigationManager.NavigateTo(GetReturnRoute());
 				return;
 			}
 
@@ -263,12 +267,28 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 		}
 	}
 
-	private static string GetEditRoute(
+	private string GetEditRoute(
 		Translation translation)
-		=> String.Format(
+	{
+		if (GetReturnRoute() == StaticRoutes.Home)
+		{
+			return String.Format(
+				StaticRoutes.TranslationEditWithReturnTo,
+				Uri.EscapeDataString(translation.LocaleKey),
+				Uri.EscapeDataString(translation.TextKey),
+				Uri.EscapeDataString(translation.FormalityKey),
+				Uri.EscapeDataString(translation.PresentationKey),
+				Uri.EscapeDataString(StaticRoutes.Home));
+		}
+
+		return String.Format(
 			StaticRoutes.TranslationEdit,
 			Uri.EscapeDataString(translation.LocaleKey),
 			Uri.EscapeDataString(translation.TextKey),
 			Uri.EscapeDataString(translation.FormalityKey),
 			Uri.EscapeDataString(translation.PresentationKey));
+	}
+
+	private string GetReturnRoute()
+		=> String.Equals(ReturnTo, StaticRoutes.Home, StringComparison.Ordinal) ? StaticRoutes.Home : StaticRoutes.TranslationList;
 }
