@@ -1,22 +1,22 @@
-using DM = Textbase.Domain.Models;
+using CM = Textbase.Contracts.Models;
 
 namespace Textbase.Integration.Localization;
 
 public sealed class InMemoryTranslationStore
 	: ITranslationStore
 {
-	private IReadOnlyCollection<DM.FlatTranslation> _translations = [];
+	private CM.RuntimeLocalizationSnapshotDto? _snapshot;
 
-	public ValueTask<IReadOnlyCollection<DM.FlatTranslation>> GetAsync(
+	public ValueTask<CM.RuntimeLocalizationSnapshotDto?> GetAsync(
 		CancellationToken cancellationToken = default)
-		=> ValueTask.FromResult(_translations);
+		=> ValueTask.FromResult(_snapshot);
 
 	public ValueTask SetAsync(
-		IReadOnlyCollection<DM.FlatTranslation> translations,
+		CM.RuntimeLocalizationSnapshotDto snapshot,
 		CancellationToken cancellationToken = default)
 	{
-		ArgumentNullException.ThrowIfNull(translations);
-		_translations = translations;
+		ArgumentNullException.ThrowIfNull(snapshot);
+		_snapshot = snapshot;
 		return ValueTask.CompletedTask;
 	}
 }
