@@ -16,7 +16,9 @@ public sealed partial class FlatTranslationQueries
 
 		bool isActive = await dbContext.ClientApplications.AsNoTracking().AnyAsync(CA => CA.ClientApplicationGuid == clientApplicationGuid && CA.IsActive, cancellationToken);
 		if (!isActive)
+		{
 			return null;
+		}
 
 		List<string> supportedLocaleKeys = await dbContext.ClientApplicationLocales.AsNoTracking()
 			.Where(CAL => CAL.ClientApplicationGuid == clientApplicationGuid)
@@ -29,7 +31,9 @@ public sealed partial class FlatTranslationQueries
 			.SingleOrDefaultAsync(cancellationToken);
 
 		if (defaultLocaleKey is null)
+		{
 			return null;
+		}
 
 		IQueryable<FlatTranslationEntity> query =
 			from FT in dbContext.FlatTranslations.AsNoTracking()
