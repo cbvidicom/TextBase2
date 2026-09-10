@@ -34,7 +34,7 @@ public abstract class TextbaseEditorViewBase<TViewModel, TDTO, TModel, TFilter>
 	{
 		await base.AfterInitializeViewModelAsync();
 
-		TextbaseViewHelper.Initialize(MainLayout, CoreAlertService, MainHeader, HasAccess, AccessDeniedMessage);
+		TextbaseViewHelper.Initialize(MainLayout, MainHeader, HasAccess, AccessDeniedMessage);
 	}
 
 	//
