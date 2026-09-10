@@ -55,6 +55,13 @@ else if (_hasAccess && _item is not null)
 										 StartIcon="@Icons.Language"
 										 Text="Locale"
 										 @bind-Value="@_item.LocaleKey" />
+					@if (!String.IsNullOrWhiteSpace(SelectedParentLocaleKey))
+					{
+						<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+										   Click="SelectParentLocale"
+										   RenderStack="false"
+										   Text="Select parent" />
+					}
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
 										 AllowFiltering="true"
@@ -167,7 +174,14 @@ else if (_hasAccess && _item is not null)
 	[Parameter]
 	public string? PresentationKey { get; set; }
 
+	[SupplyParameterFromQuery(Name = "localeKey")]
+	public string? InitialLocaleKey { get; set; }
+
+	[SupplyParameterFromQuery(Name = "textKey")]
+	public string? InitialTextKey { get; set; }
+
 	private Translation? _item;
+	private IReadOnlyList<Locale> _locales = [];
 	private IReadOnlyList<string> _localeKeys = [];
 	private IReadOnlyList<string> _textKeys = [];
 	private IReadOnlyList<string> _formalityKeys = [];
@@ -180,6 +194,18 @@ else if (_hasAccess && _item is not null)
 	private bool _isNewItem;
 	private bool _canGoBack = true;
 	private string? _accessDeniedMessage;
+
+	private string? SelectedParentLocaleKey
+	{
+		get
+		{
+			if (_item is null)
+				return null;
+
+			string? parentLocaleKey = _locales.FirstOrDefault(locale => String.Equals(locale.LocaleKey, _item.LocaleKey, StringComparison.OrdinalIgnoreCase))?.ParentLocaleKey;
+			return parentLocaleKey is not null && _localeKeys.Contains(parentLocaleKey, StringComparer.OrdinalIgnoreCase) ? parentLocaleKey : null;
+		}
+	}
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -223,9 +249,11 @@ else if (_hasAccess && _item is not null)
 
 		await LoadKeyValuesAsync(principal!);
 
+		string localeKey = !String.IsNullOrWhiteSpace(InitialLocaleKey) && _localeKeys.Contains(InitialLocaleKey, StringComparer.OrdinalIgnoreCase) ? InitialLocaleKey : String.Empty;
+		string textKey = !String.IsNullOrWhiteSpace(InitialTextKey) && _textKeys.Contains(InitialTextKey, StringComparer.OrdinalIgnoreCase) ? InitialTextKey : String.Empty;
 		string formalityKey = _formalityKeys.FirstOrDefault(key => String.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) ?? _formalityKeys.FirstOrDefault() ?? String.Empty;
 		string presentationKey = _presentationKeys.FirstOrDefault(key => String.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) ?? _presentationKeys.FirstOrDefault() ?? String.Empty;
-		_item = TranslationEntityFactory.Create(String.Empty, String.Empty, formalityKey, presentationKey, String.Empty);
+		_item = TranslationEntityFactory.Create(localeKey, textKey, formalityKey, presentationKey, String.Empty);
 		_canSave = true;
 	}
 
@@ -269,10 +297,17 @@ else if (_hasAccess && _item is not null)
 			textResources = [.. textResources.Where(textResource => permittedTextKeys.Contains(textResource.TextKey, StringComparer.OrdinalIgnoreCase))];
 		}
 
+		_locales = locales;
 		_localeKeys = [.. locales.Select(locale => locale.LocaleKey).Order(StringComparer.OrdinalIgnoreCase)];
 		_textKeys = [.. textResources.Select(textResource => textResource.TextKey).Order(StringComparer.OrdinalIgnoreCase)];
 		_formalityKeys = [.. (await FormalityQueries.ListAllItemsAsync()).Select(formality => formality.FormalityKey).Order(StringComparer.OrdinalIgnoreCase)];
 		_presentationKeys = [.. (await PresentationQueries.ListAllItemsAsync()).Select(presentation => presentation.PresentationKey).Order(StringComparer.OrdinalIgnoreCase)];
+	}
+
+	private void SelectParentLocale()
+	{
+		if (_item is not null && !String.IsNullOrWhiteSpace(SelectedParentLocaleKey))
+			_item.LocaleKey = SelectedParentLocaleKey;
 	}
 
 	private Task OnSave()
