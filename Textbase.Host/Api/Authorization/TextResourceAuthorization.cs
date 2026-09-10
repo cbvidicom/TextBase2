@@ -8,7 +8,8 @@ using Uwn.EntityFrameworkCore.Querying;
 namespace Textbase.Host.Api.Authorization;
 
 public sealed class TextResourceAuthorization(
-	AuthorizationScope scope)
+	AuthorizationScope scope,
+	ITextResourceServerQueries _textResourceQueries)
 	: AuthorizationBase(scope)
 	, ITextResourceAuthorization
 {
@@ -52,7 +53,7 @@ public sealed class TextResourceAuthorization(
 		string textKey,
 		ClaimsPrincipal user,
 		CancellationToken cancellationToken = default)
-		=> await CanAccessAsync(textKey, cancellationToken);
+		=> await CanAccessAsync(textKey, cancellationToken) && !await _textResourceQueries.HasActiveApplicationAsync(textKey, cancellationToken);
 
 	private async ValueTask<bool> CanAccessAsync(
 		string textKey,
