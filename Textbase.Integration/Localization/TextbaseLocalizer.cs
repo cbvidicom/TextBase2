@@ -1,4 +1,4 @@
-using DM = Textbase.Domain.Models;
+using CM = Textbase.Contracts.Models;
 
 namespace Textbase.Integration.Localization;
 
@@ -9,13 +9,13 @@ public sealed class TextbaseLocalizer(
 	private IReadOnlyDictionary<TranslationKey, string> _translations = new Dictionary<TranslationKey, string>();
 
 	public void SetTranslations(
-		IEnumerable<DM.FlatTranslation> translations)
+		IEnumerable<CM.FlatTranslationDto> translations)
 	{
 		ArgumentNullException.ThrowIfNull(translations);
 
 		_translations = translations.ToDictionary(
-		t => new TranslationKey(t.TextKey, t.LocaleKey, t.FormalityKey, t.PresentationKey),
-		t => t.Value);
+		T => new TranslationKey(T.TextKey, T.LocaleKey, T.FormalityKey, T.PresentationKey),
+		T => T.Value);
 	}
 
 	public string GetLocalisedText(
