@@ -1,0 +1,71 @@
+@page "/translations"
+
+@using Textbase.Application.Features.Translations
+@using Textbase.Host.ViewModels.Translations
+
+@inherits TextbaseDataGridViewBase<TranslationListViewModel, Translation, TranslationFilter>
+
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="Translation"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(Translation.LocaleKey)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Locale" />
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(Translation.TextKey)"
+								  Sortable="true"
+								  Title="Text" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Translation.FormalityKey)"
+								  Sortable="true"
+								  Title="Formality" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Translation.PresentationKey)"
+								  Sortable="true"
+								  Title="Presentation" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Translation.Value)"
+								  Sortable="true"
+								  Title="Value" />
+		</Columns>
+	</RzDataGrid>
+}
+
+@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
+{
+	<RzAddButton Path="@StaticRoutes.TranslationCreate" />
+}
+
+@code {
+	public override string MainHeader => "Translations";
+
+	protected override string EditItemRouteTemplate => StaticRoutes.TranslationEdit;
+
+	protected override Func<Translation, object> GetKey => translation => String.Join('/',
+		Uri.EscapeDataString(translation.LocaleKey),
+		Uri.EscapeDataString(translation.TextKey),
+		Uri.EscapeDataString(translation.FormalityKey),
+		Uri.EscapeDataString(translation.PresentationKey));
+}
