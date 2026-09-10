@@ -2,27 +2,18 @@
 @page "/translation/{LocaleKey}/{TextKey}/{FormalityKey}/{PresentationKey}"
 
 @using System.Security.Claims
-@using Textbase.Application.Features.Formalities
-@using Textbase.Application.Features.Locales
-@using Textbase.Application.Features.Presentations
-@using Textbase.Application.Features.TextResources
 @using Textbase.Application.Features.Translations
 @using Textbase.Domain.Enumerations
-@using Textbase.Host.Api.Authorization
 @using Textbase.Host.Authorization
 @using Textbase.Host.Enumerations
+@using Textbase.Host.ViewModels.Translations
 @using Textbase.Infrastructure.Persistence.Translations
 
-@inject AuthorizationScope AuthorizationScope
 @inject ICurrentPrincipalAccessor CurrentPrincipalAccessor
-@inject IFormalityQueries FormalityQueries
-@inject ILocaleQueries LocaleQueries
-@inject IPresentationQueries PresentationQueries
-@inject ITextResourceQueries TextResourceQueries
 @inject ITranslationAuthorization TranslationAuthorization
 @inject ITranslationCommands TranslationCommands
-@inject ITranslationEntityFactory TranslationEntityFactory
 @inject ITranslationQueries TranslationQueries
+@inject TranslationEditorViewModel ViewModel
 
 @if (_canGoBack)
 {
@@ -47,7 +38,7 @@ else if (_hasAccess && _item is not null)
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
 										 AllowFiltering="true"
-										 Data="@_localeKeys"
+										 Data="@ViewModel.LocaleKeys"
 										 FilterAsYouType="true"
 										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
 										 Name="@nameof(Translation.LocaleKey)"
@@ -55,17 +46,17 @@ else if (_hasAccess && _item is not null)
 										 StartIcon="@Icons.Language"
 										 Text="Locale"
 										 @bind-Value="@_item.LocaleKey" />
-					@if (!String.IsNullOrWhiteSpace(SelectedParentLocaleKey))
+					@if (!String.IsNullOrWhiteSpace(ViewModel.GetParentLocaleKey(_item.LocaleKey)))
 					{
 						<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="SelectParentLocale"
+										   Click="@(() => ViewModel.SelectParentLocale(_item))"
 										   RenderStack="false"
 										   Text="Select parent" />
 					}
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
 										 AllowFiltering="true"
-										 Data="@_textKeys"
+										 Data="@ViewModel.TextKeys"
 										 FilterAsYouType="true"
 										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
 										 Name="@nameof(Translation.TextKey)"
@@ -76,7 +67,7 @@ else if (_hasAccess && _item is not null)
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
 										 AllowFiltering="true"
-										 Data="@_formalityKeys"
+										 Data="@ViewModel.FormalityKeys"
 										 FilterAsYouType="true"
 										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
 										 Name="@nameof(Translation.FormalityKey)"
@@ -87,7 +78,7 @@ else if (_hasAccess && _item is not null)
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
 										 AllowFiltering="true"
-										 Data="@_presentationKeys"
+										 Data="@ViewModel.PresentationKeys"
 										 FilterAsYouType="true"
 										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
 										 Name="@nameof(Translation.PresentationKey)"
@@ -181,11 +172,6 @@ else if (_hasAccess && _item is not null)
 	public string? InitialTextKey { get; set; }
 
 	private Translation? _item;
-	private IReadOnlyList<Locale> _locales = [];
-	private IReadOnlyList<string> _localeKeys = [];
-	private IReadOnlyList<string> _textKeys = [];
-	private IReadOnlyList<string> _formalityKeys = [];
-	private IReadOnlyList<string> _presentationKeys = [];
 	private bool _isBusy = true;
 	private bool _hasAccess;
 	private bool _isReadOnly;
@@ -194,18 +180,6 @@ else if (_hasAccess && _item is not null)
 	private bool _isNewItem;
 	private bool _canGoBack = true;
 	private string? _accessDeniedMessage;
-
-	private string? SelectedParentLocaleKey
-	{
-		get
-		{
-			if (_item is null)
-				return null;
-
-			string? parentLocaleKey = _locales.FirstOrDefault(locale => String.Equals(locale.LocaleKey, _item.LocaleKey, StringComparison.OrdinalIgnoreCase))?.ParentLocaleKey;
-			return parentLocaleKey is not null && _localeKeys.Contains(parentLocaleKey, StringComparer.OrdinalIgnoreCase) ? parentLocaleKey : null;
-		}
-	}
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -247,13 +221,7 @@ else if (_hasAccess && _item is not null)
 			return;
 		}
 
-		await LoadKeyValuesAsync(principal!);
-
-		string localeKey = !String.IsNullOrWhiteSpace(InitialLocaleKey) && _localeKeys.Contains(InitialLocaleKey, StringComparer.OrdinalIgnoreCase) ? InitialLocaleKey : String.Empty;
-		string textKey = !String.IsNullOrWhiteSpace(InitialTextKey) && _textKeys.Contains(InitialTextKey, StringComparer.OrdinalIgnoreCase) ? InitialTextKey : String.Empty;
-		string formalityKey = _formalityKeys.FirstOrDefault(key => String.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) ?? _formalityKeys.FirstOrDefault() ?? String.Empty;
-		string presentationKey = _presentationKeys.FirstOrDefault(key => String.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) ?? _presentationKeys.FirstOrDefault() ?? String.Empty;
-		_item = TranslationEntityFactory.Create(localeKey, textKey, formalityKey, presentationKey, String.Empty);
+		_item = await ViewModel.CreateNewItemAsync(principal!, InitialLocaleKey, InitialTextKey);
 		_canSave = true;
 	}
 
@@ -280,34 +248,6 @@ else if (_hasAccess && _item is not null)
 
 		_canSave = await TranslationAuthorization.CanUpdateAsync(LocaleKey, TextKey, FormalityKey, PresentationKey, _item, user);
 		_canDelete = await TranslationAuthorization.CanDeleteAsync(LocaleKey, TextKey, FormalityKey, PresentationKey, user);
-	}
-
-	private async Task LoadKeyValuesAsync(
-		CurrentPrincipal principal)
-	{
-		IReadOnlyList<Locale> locales = await LocaleQueries.ListAllItemsAsync();
-		IReadOnlyList<TextResource> textResources = await TextResourceQueries.ListAllItemsAsync();
-
-		if (principal.HasLocaleRestrictions)
-			locales = [.. locales.Where(locale => principal.LocaleKeys.Contains(locale.LocaleKey, StringComparer.OrdinalIgnoreCase))];
-
-		if (principal.HasApplicationRestrictions || principal.HasLocaleRestrictions)
-		{
-			IReadOnlyCollection<string> permittedTextKeys = await AuthorizationScope.GetPermittedTextKeysAsync(principal, CancellationToken.None);
-			textResources = [.. textResources.Where(textResource => permittedTextKeys.Contains(textResource.TextKey, StringComparer.OrdinalIgnoreCase))];
-		}
-
-		_locales = locales;
-		_localeKeys = [.. locales.Select(locale => locale.LocaleKey).Order(StringComparer.OrdinalIgnoreCase)];
-		_textKeys = [.. textResources.Select(textResource => textResource.TextKey).Order(StringComparer.OrdinalIgnoreCase)];
-		_formalityKeys = [.. (await FormalityQueries.ListAllItemsAsync()).Select(formality => formality.FormalityKey).Order(StringComparer.OrdinalIgnoreCase)];
-		_presentationKeys = [.. (await PresentationQueries.ListAllItemsAsync()).Select(presentation => presentation.PresentationKey).Order(StringComparer.OrdinalIgnoreCase)];
-	}
-
-	private void SelectParentLocale()
-	{
-		if (_item is not null && !String.IsNullOrWhiteSpace(SelectedParentLocaleKey))
-			_item.LocaleKey = SelectedParentLocaleKey;
 	}
 
 	private Task OnSave()
