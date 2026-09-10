@@ -37,6 +37,7 @@ else
 							<RadzenText Text="@localeKey" />
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
 											   Click="@(() => UnignoreLocale(localeKey))"
+											   Icon="@Icons.Language"
 											   RenderStack="false"
 											   Text="Un-ignore" />
 						</HorizontalStack>
@@ -94,6 +95,7 @@ else
 						<span @onclick:stopPropagation="true">
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
 											   Click="@(() => IgnoreLocale(item.LocaleKey))"
+											   Icon="@Icons.Language"
 											   RenderStack="false"
 											   Text="Ignore this Locale for now" />
 						</span>
