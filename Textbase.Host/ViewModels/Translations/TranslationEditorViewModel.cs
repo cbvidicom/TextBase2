@@ -43,23 +43,36 @@ public sealed class TranslationEditorViewModel(
 		string? textKey,
 		string? formalityKey,
 		string? presentationKey,
-		string? initialLocaleKey,
-		string? initialTextKey,
 		CancellationToken cancellationToken = default)
 	{
 		Item = null;
 		CanSave = false;
 		CanDelete = false;
 		AccessDeniedMessage = null;
-		IsNewItem = String.IsNullOrWhiteSpace(localeKey) && String.IsNullOrWhiteSpace(textKey) && String.IsNullOrWhiteSpace(formalityKey) && String.IsNullOrWhiteSpace(presentationKey);
 
-		if (IsNewItem)
+		bool hasLocaleKey = !String.IsNullOrWhiteSpace(localeKey);
+		bool hasTextKey = !String.IsNullOrWhiteSpace(textKey);
+		bool hasFormalityKey = !String.IsNullOrWhiteSpace(formalityKey);
+		bool hasPresentationKey = !String.IsNullOrWhiteSpace(presentationKey);
+		bool isCreateRoute = !hasFormalityKey && !hasPresentationKey && hasLocaleKey == hasTextKey;
+		bool isEditRoute = hasLocaleKey && hasTextKey && hasFormalityKey && hasPresentationKey;
+
+		if (!isCreateRoute && !isEditRoute)
 		{
-			await InitializeNewItemAsync(initialLocaleKey, initialTextKey, cancellationToken);
+			HasAccess = false;
+			IsNewItem = false;
+			AccessDeniedMessage = "Invalid Translation key.";
 			return;
 		}
 
-		await InitializeExistingItemAsync(localeKey, textKey, formalityKey, presentationKey, cancellationToken);
+		IsNewItem = isCreateRoute;
+		if (IsNewItem)
+		{
+			await InitializeNewItemAsync(localeKey, textKey, cancellationToken);
+			return;
+		}
+
+		await InitializeExistingItemAsync(localeKey!, textKey!, formalityKey!, presentationKey!, cancellationToken);
 	}
 
 	public string? GetParentLocaleKey(
@@ -89,12 +102,10 @@ public sealed class TranslationEditorViewModel(
 	}
 
 	public async Task CreateNewItemAsync(
-		string? initialLocaleKey,
-		string? initialTextKey,
 		CancellationToken cancellationToken = default)
 	{
 		IsNewItem = true;
-		await InitializeNewItemAsync(initialLocaleKey, initialTextKey, cancellationToken);
+		await InitializeNewItemAsync(null, null, cancellationToken);
 	}
 
 	public async Task SaveAsync(
@@ -146,19 +157,19 @@ public sealed class TranslationEditorViewModel(
 		CanDelete = await _translationAuthorization.CanDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey, user, cancellationToken);
 	}
 
-	public async Task DeleteAsync(
+	public async Task<bool> DeleteAsync(
 		CancellationToken cancellationToken = default)
 	{
 		if (Item is null || IsNewItem)
 		{
-			return;
+			return false;
 		}
 
 		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		if (!await _translationAuthorization.CanDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey, user, cancellationToken))
 		{
 			CanDelete = false;
-			throw new UnauthorizedAccessException(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Delete, typeof(Translation)));
+			return false;
 		}
 
 		bool succeeded = await _translationCommands.TryDeleteAsync(Item.LocaleKey, Item.TextKey, Item.FormalityKey, Item.PresentationKey);
@@ -166,6 +177,8 @@ public sealed class TranslationEditorViewModel(
 		{
 			throw new InvalidOperationException("Deleting Translation failed.");
 		}
+
+		return true;
 	}
 
 	private async Task InitializeNewItemAsync(
@@ -195,19 +208,12 @@ public sealed class TranslationEditorViewModel(
 	}
 
 	private async Task InitializeExistingItemAsync(
-		string? localeKey,
-		string? textKey,
-		string? formalityKey,
-		string? presentationKey,
+		string localeKey,
+		string textKey,
+		string formalityKey,
+		string presentationKey,
 		CancellationToken cancellationToken)
 	{
-		if (String.IsNullOrWhiteSpace(localeKey) || String.IsNullOrWhiteSpace(textKey) || String.IsNullOrWhiteSpace(formalityKey) || String.IsNullOrWhiteSpace(presentationKey))
-		{
-			HasAccess = false;
-			AccessDeniedMessage = "Invalid Translation key.";
-			return;
-		}
-
 		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
 		HasAccess = await _translationAuthorization.CanReadAsync(localeKey, textKey, formalityKey, presentationKey, user, cancellationToken);
 		if (!HasAccess)
