@@ -1,0 +1,65 @@
+﻿@page "/locales"
+
+@using Textbase.Application.Features.Locales
+@using Textbase.Host.ViewModels.Locales
+
+@inherits TextbaseDataGridViewBase<LocaleListViewModel, Locale, LocaleFilter>
+
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="Locale"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(Locale.LocaleKey)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Locale" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Locale.NativeName)"
+								  Sortable="true"
+								  Title="Native Name" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Locale.EnglishName)"
+								  Sortable="true"
+								  Title="English Name" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Locale.ParentLocaleKey)"
+								  Sortable="true"
+								  Title="Parent" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Locale.LanguageIso2)"
+								  Sortable="true"
+								  Title="Language ISO 2" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(Locale.CountryIso2)"
+								  Sortable="true"
+								  Title="Country ISO 2" />
+		</Columns>
+	</RzDataGrid>
+}
+
+@code {
+	public override string MainHeader => "Locales";
+
+	protected override string EditItemRouteTemplate => StaticRoutes.LocaleEdit;
+
+	protected override Func<Locale, object> GetKey => e => e.LocaleKey;
+}
