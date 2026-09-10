@@ -58,11 +58,6 @@ else if (HasAccess)
 	</RzDataGrid>
 }
 
-@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
-{
-	<RzAddButton Path="@StaticRoutes.AuthPrincipalCreate" />
-}
-
 @code {
 	public override string MainHeader => "Users";
 
