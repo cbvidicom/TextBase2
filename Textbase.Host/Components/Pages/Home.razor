@@ -1,13 +1,79 @@
 ﻿@page "/"
 
+@using Textbase.Host.ViewModels.MissingTranslations
+
 @inherits TextbasePageBase
+
+@inject MissingTranslationViewModel ViewModel
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+@if (_isBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (ViewModel.Items.Count == 0)
+{
+	<RadzenAlert AlertStyle="AlertStyle.Success"
+				 AllowClose="false"
+				 Variant="Variant.Flat">
+		No translations are missing for your applications.
+	</RadzenAlert>
+}
+else
+{
+	<RadzenAlert AlertStyle="AlertStyle.Warning"
+				 AllowClose="false"
+				 Variant="Variant.Flat"
+				 class="rz-mb-4">
+		@ViewModel.Items.Count missing translation@(ViewModel.Items.Count == 1 ? String.Empty : "s") found.
+	</RadzenAlert>
 
-Welcome to your new app.
+	<RadzenDataGrid TItem="MissingTranslation"
+					AllowFiltering="true"
+					AllowPaging="true"
+					AllowSorting="true"
+					Data="@ViewModel.Items"
+					PageSize="25">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(MissingTranslation.LocaleKey)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Locale" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(MissingTranslation.TextKey)"
+								  Sortable="true"
+								  Title="Text" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(MissingTranslation.Applications)"
+								  Sortable="true"
+								  Title="Applications" />
+		</Columns>
+	</RadzenDataGrid>
+}
 
 @code {
-	public override string MainHeader => "Home";
+	private bool _isBusy = true;
+
+	public override string MainHeader => "Missing Translations";
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		try
+		{
+			await ViewModel.LoadAsync();
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isBusy = false;
+		}
+	}
 }
