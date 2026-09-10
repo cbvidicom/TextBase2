@@ -1,0 +1,72 @@
+@page "/users"
+
+@using Textbase.Application.Features.AuthPrincipals
+@using Textbase.Host.ViewModels.AuthPrincipals
+
+@inherits TextbaseDataGridViewBase<AuthPrincipalListViewModel, AuthPrincipal, AuthPrincipalFilter>
+
+@if (!IsInitialized)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else if (HasAccess)
+{
+	<RzDataGrid @ref="Grid"
+				TItem="AuthPrincipal"
+				AllowFiltering="true"
+				AllowPaging="true"
+				AllowSorting="true"
+				Count="@ViewModel.ItemCount"
+				Data="@ViewModel.Data"
+				IsLoading="@IsBusy"
+				PageSize="@ViewModel.PageSize"
+				SelectionMode="DataGridSelectionMode.Single"
+				LoadData="ViewModel.LoadDataAsync"
+				RowRender="OnRowRender"
+				RowSelect="OnRowSelect"
+				class="rz-mb-4">
+		<Columns>
+			<RadzenDataGridColumn Filterable="true"
+								  Frozen="true"
+								  Property="@nameof(AuthPrincipal.DisplayName)"
+								  Sortable="true"
+								  SortOrder="SortOrder.Ascending"
+								  Title="Name" />
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(AuthPrincipal.EmailAddress)"
+								  Sortable="true"
+								  Title="Email" />
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="true"
+								  Title="Status">
+				<Template Context="principal">
+					@principal.StatusValue
+				</Template>
+			</RadzenDataGridColumn>
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="true"
+								  Title="Roles">
+				<Template Context="principal">
+					@principal.RolesValue
+				</Template>
+			</RadzenDataGridColumn>
+			<RadzenDataGridColumn Filterable="true"
+								  Property="@nameof(AuthPrincipal.Request)"
+								  Sortable="false"
+								  Title="Request" />
+		</Columns>
+	</RzDataGrid>
+}
+
+@if (HasAccess && ViewModel.CreateAuthorization.IsAllowed)
+{
+	<RzAddButton Path="@StaticRoutes.AuthPrincipalCreate" />
+}
+
+@code {
+	public override string MainHeader => "Users";
+
+	protected override string EditItemRouteTemplate => StaticRoutes.AuthPrincipalEdit;
+
+	protected override Func<AuthPrincipal, object> GetKey => e => e.EntraObjectId;
+}
