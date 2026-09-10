@@ -1,0 +1,400 @@
+@page "/translation"
+@page "/translation/{LocaleKey}/{TextKey}/{FormalityKey}/{PresentationKey}"
+
+@using System.Security.Claims
+@using Textbase.Application.Features.Formalities
+@using Textbase.Application.Features.Locales
+@using Textbase.Application.Features.Presentations
+@using Textbase.Application.Features.TextResources
+@using Textbase.Application.Features.Translations
+@using Textbase.Domain.Enumerations
+@using Textbase.Host.Api.Authorization
+@using Textbase.Host.Authorization
+@using Textbase.Host.Enumerations
+@using Textbase.Infrastructure.Persistence.Translations
+
+@inject AuthorizationScope AuthorizationScope
+@inject ICurrentPrincipalAccessor CurrentPrincipalAccessor
+@inject IFormalityQueries FormalityQueries
+@inject ILocaleQueries LocaleQueries
+@inject IPresentationQueries PresentationQueries
+@inject ITextResourceQueries TextResourceQueries
+@inject ITranslationAuthorization TranslationAuthorization
+@inject ITranslationCommands TranslationCommands
+@inject ITranslationEntityFactory TranslationEntityFactory
+@inject ITranslationQueries TranslationQueries
+
+@if (_canGoBack)
+{
+	<RzGoBackLink Path="@StaticRoutes.TranslationList" />
+}
+
+@if (_isBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Form" />
+}
+else if (_hasAccess && _item is not null)
+{
+	<RadzenTemplateForm TItem="Translation"
+						Data="@_item"
+						class="rz-mt-4 rz-mb-4">
+		<AntiforgeryToken />
+		<DataAnnotationsValidator />
+		<fieldset disabled="@_isReadOnly">
+			<VerticalStack>
+				@if (_isNewItem)
+				{
+					<RzDropDownFormField TValue="string"
+										 AllowClear="false"
+										 AllowFiltering="true"
+										 Data="@_localeKeys"
+										 FilterAsYouType="true"
+										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+										 Name="@nameof(Translation.LocaleKey)"
+										 Required="true"
+										 StartIcon="@Icons.Language"
+										 Text="Locale"
+										 @bind-Value="@_item.LocaleKey" />
+					<RzDropDownFormField TValue="string"
+										 AllowClear="false"
+										 AllowFiltering="true"
+										 Data="@_textKeys"
+										 FilterAsYouType="true"
+										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+										 Name="@nameof(Translation.TextKey)"
+										 Required="true"
+										 StartIcon="@Icons.Description"
+										 Text="Text"
+										 @bind-Value="@_item.TextKey" />
+					<RzDropDownFormField TValue="string"
+										 AllowClear="false"
+										 AllowFiltering="true"
+										 Data="@_formalityKeys"
+										 FilterAsYouType="true"
+										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+										 Name="@nameof(Translation.FormalityKey)"
+										 Required="true"
+										 StartIcon="@Icons._3p"
+										 Text="Formality"
+										 @bind-Value="@_item.FormalityKey" />
+					<RzDropDownFormField TValue="string"
+										 AllowClear="false"
+										 AllowFiltering="true"
+										 Data="@_presentationKeys"
+										 FilterAsYouType="true"
+										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+										 Name="@nameof(Translation.PresentationKey)"
+										 Required="true"
+										 StartIcon="@Icons.ShortText"
+										 Text="Presentation"
+										 @bind-Value="@_item.PresentationKey" />
+				}
+				else
+				{
+					<RzTextBoxFormField Name="@nameof(Translation.LocaleKey)"
+										ReadOnly="true"
+										StartIcon="@Icons.Language"
+										Text="Locale"
+										Value="@_item.LocaleKey" />
+					<RzTextBoxFormField Name="@nameof(Translation.TextKey)"
+										ReadOnly="true"
+										StartIcon="@Icons.Description"
+										Text="Text"
+										Value="@_item.TextKey" />
+					<RzTextBoxFormField Name="@nameof(Translation.FormalityKey)"
+										ReadOnly="true"
+										StartIcon="@Icons._3p"
+										Text="Formality"
+										Value="@_item.FormalityKey" />
+					<RzTextBoxFormField Name="@nameof(Translation.PresentationKey)"
+										ReadOnly="true"
+										StartIcon="@Icons.ShortText"
+										Text="Presentation"
+										Value="@_item.PresentationKey" />
+				}
+
+				<RzTextAreaFormField Name="@nameof(Translation.Value)"
+									 Required="true"
+									 StartIcon="@Icons.Description"
+									 Text="Value"
+									 @bind-Value="@_item.Value" />
+
+				@if (_canSave || _canDelete)
+				{
+					<HorizontalStack>
+						@if (_canSave)
+						{
+							<RzSaveButton RenderStack="false"
+											  Click="OnSave" />
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+										   Click="OnSaveAndGoBack"
+										   Icon="@Icons.Save"
+										   RenderStack="false"
+										   Text="Save & Go back" />
+							@if (_isNewItem)
+							{
+								<RzClickButton ButtonStyle="ButtonStyle.Info"
+											   Click="OnSaveAndNew"
+											   Icon="@Icons.Save"
+											   RenderStack="false"
+											   Text="Save & New" />
+							}
+						}
+						@if (_canDelete)
+						{
+							<RzDeleteButton Click="OnDelete" />
+						}
+					</HorizontalStack>
+				}
+			</VerticalStack>
+		</fieldset>
+	</RadzenTemplateForm>
+}
+
+@code {
+	[CascadingParameter]
+	private MainLayout MainLayout { get; set; } = default!;
+
+	[Parameter]
+	public string? LocaleKey { get; set; }
+
+	[Parameter]
+	public string? TextKey { get; set; }
+
+	[Parameter]
+	public string? FormalityKey { get; set; }
+
+	[Parameter]
+	public string? PresentationKey { get; set; }
+
+	private Translation? _item;
+	private IReadOnlyList<string> _localeKeys = [];
+	private IReadOnlyList<string> _textKeys = [];
+	private IReadOnlyList<string> _formalityKeys = [];
+	private IReadOnlyList<string> _presentationKeys = [];
+	private bool _isBusy = true;
+	private bool _hasAccess;
+	private bool _isReadOnly;
+	private bool _canSave;
+	private bool _canDelete;
+	private bool _isNewItem;
+	private bool _canGoBack = true;
+	private string? _accessDeniedMessage;
+
+	protected override async Task OnParametersSetAsync()
+	{
+		await base.OnParametersSetAsync();
+
+		_isBusy = true;
+		_item = null;
+		_canSave = false;
+		_canDelete = false;
+		_accessDeniedMessage = null;
+		_isNewItem = String.IsNullOrWhiteSpace(LocaleKey) && String.IsNullOrWhiteSpace(TextKey) && String.IsNullOrWhiteSpace(FormalityKey) && String.IsNullOrWhiteSpace(PresentationKey);
+
+		try
+		{
+			if (_isNewItem)
+				await InitializeNewItemAsync();
+			else
+				await InitializeExistingItemAsync();
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isReadOnly = !_canSave;
+			TextbaseViewHelper.Initialize(MainLayout, _isNewItem ? "Create Translation" : "Edit Translation", _hasAccess, _accessDeniedMessage);
+			_isBusy = false;
+		}
+	}
+
+	private async Task InitializeNewItemAsync()
+	{
+		CurrentPrincipal? principal = await CurrentPrincipalAccessor.GetAsync();
+		_hasAccess = principal is not null && AuthorizationScope.HasRole(principal, Roles.Translator);
+		if (!_hasAccess)
+		{
+			_accessDeniedMessage = StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, typeof(Translation));
+			return;
+		}
+
+		await LoadKeyValuesAsync(principal!);
+
+		string formalityKey = _formalityKeys.FirstOrDefault(key => String.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) ?? _formalityKeys.FirstOrDefault() ?? String.Empty;
+		string presentationKey = _presentationKeys.FirstOrDefault(key => String.Equals(key, "Default", StringComparison.OrdinalIgnoreCase)) ?? _presentationKeys.FirstOrDefault() ?? String.Empty;
+		_item = TranslationEntityFactory.Create(String.Empty, String.Empty, formalityKey, presentationKey, String.Empty);
+		_canSave = true;
+	}
+
+	private async Task InitializeExistingItemAsync()
+	{
+		if (String.IsNullOrWhiteSpace(LocaleKey) || String.IsNullOrWhiteSpace(TextKey) || String.IsNullOrWhiteSpace(FormalityKey) || String.IsNullOrWhiteSpace(PresentationKey))
+		{
+			_hasAccess = false;
+			_accessDeniedMessage = "Invalid Translation key.";
+			return;
+		}
+
+		ClaimsPrincipal user = await CurrentPrincipalAccessor.GetUserAsync();
+		_hasAccess = await TranslationAuthorization.CanReadAsync(LocaleKey, TextKey, FormalityKey, PresentationKey, user);
+		if (!_hasAccess)
+		{
+			_accessDeniedMessage = StaticTexts.GetPrincipalNotAuthorizedText(OpType.Read, typeof(Translation));
+			return;
+		}
+
+		_item = await TranslationQueries.ReadAsync(LocaleKey, TextKey, FormalityKey, PresentationKey);
+		if (_item is null)
+			throw new KeyNotFoundException("Translation not found.");
+
+		_canSave = await TranslationAuthorization.CanUpdateAsync(LocaleKey, TextKey, FormalityKey, PresentationKey, _item, user);
+		_canDelete = await TranslationAuthorization.CanDeleteAsync(LocaleKey, TextKey, FormalityKey, PresentationKey, user);
+	}
+
+	private async Task LoadKeyValuesAsync(
+		CurrentPrincipal principal)
+	{
+		IReadOnlyList<Locale> locales = await LocaleQueries.ListAllItemsAsync();
+		IReadOnlyList<TextResource> textResources = await TextResourceQueries.ListAllItemsAsync();
+
+		if (principal.HasLocaleRestrictions)
+			locales = [.. locales.Where(locale => principal.LocaleKeys.Contains(locale.LocaleKey, StringComparer.OrdinalIgnoreCase))];
+
+		if (principal.HasApplicationRestrictions || principal.HasLocaleRestrictions)
+		{
+			IReadOnlyCollection<string> permittedTextKeys = await AuthorizationScope.GetPermittedTextKeysAsync(principal, CancellationToken.None);
+			textResources = [.. textResources.Where(textResource => permittedTextKeys.Contains(textResource.TextKey, StringComparer.OrdinalIgnoreCase))];
+		}
+
+		_localeKeys = [.. locales.Select(locale => locale.LocaleKey).Order(StringComparer.OrdinalIgnoreCase)];
+		_textKeys = [.. textResources.Select(textResource => textResource.TextKey).Order(StringComparer.OrdinalIgnoreCase)];
+		_formalityKeys = [.. (await FormalityQueries.ListAllItemsAsync()).Select(formality => formality.FormalityKey).Order(StringComparer.OrdinalIgnoreCase)];
+		_presentationKeys = [.. (await PresentationQueries.ListAllItemsAsync()).Select(presentation => presentation.PresentationKey).Order(StringComparer.OrdinalIgnoreCase)];
+	}
+
+	private Task OnSave()
+		=> SaveAsync(false, false);
+
+	private Task OnSaveAndGoBack()
+		=> SaveAsync(true, false);
+
+	private Task OnSaveAndNew()
+		=> SaveAsync(false, true);
+
+	private async Task SaveAsync(
+		bool goBack,
+		bool createNew)
+	{
+		if (_item is null || !HasValidKey(_item))
+			return;
+
+		_isBusy = true;
+		try
+		{
+			ClaimsPrincipal user = await CurrentPrincipalAccessor.GetUserAsync();
+			bool succeeded;
+
+			if (_isNewItem)
+			{
+				if (!await TranslationAuthorization.CanCreateAsync(_item, user))
+				{
+					AlertService.Show(new UnauthorizedAccessException(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, typeof(Translation))));
+					return;
+				}
+
+				succeeded = await TranslationCommands.TryCreateAsync(_item);
+			}
+			else
+			{
+				if (!await TranslationAuthorization.CanUpdateAsync(LocaleKey!, TextKey!, FormalityKey!, PresentationKey!, _item, user))
+				{
+					AlertService.Show(new UnauthorizedAccessException(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Update, typeof(Translation))));
+					return;
+				}
+
+				succeeded = await TranslationCommands.TryUpdateAsync(_item);
+			}
+
+			if (!succeeded)
+				throw new InvalidOperationException("Saving Translation failed.");
+
+			if (goBack)
+			{
+				NavigationManager.NavigateTo(StaticRoutes.TranslationList);
+				return;
+			}
+
+			if (createNew)
+			{
+				await InitializeNewItemAsync();
+				return;
+			}
+
+			if (_isNewItem)
+				NavigationManager.NavigateTo(GetEditRoute(_item));
+			else
+				_canDelete = await TranslationAuthorization.CanDeleteAsync(_item.LocaleKey, _item.TextKey, _item.FormalityKey, _item.PresentationKey, user);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isBusy = false;
+		}
+	}
+
+	private async Task OnDelete()
+	{
+		if (_item is null || _isNewItem)
+			return;
+
+		bool? confirmed = await DialogService.Confirm("Are you sure you want to delete this Translation?", "Delete Translation");
+		if (confirmed != true)
+			return;
+
+		_isBusy = true;
+		try
+		{
+			ClaimsPrincipal user = await CurrentPrincipalAccessor.GetUserAsync();
+			if (!await TranslationAuthorization.CanDeleteAsync(_item.LocaleKey, _item.TextKey, _item.FormalityKey, _item.PresentationKey, user))
+			{
+				_canDelete = false;
+				return;
+			}
+
+			bool succeeded = await TranslationCommands.TryDeleteAsync(_item.LocaleKey, _item.TextKey, _item.FormalityKey, _item.PresentationKey);
+			if (!succeeded)
+				throw new InvalidOperationException("Deleting Translation failed.");
+
+			NavigationManager.NavigateTo(StaticRoutes.TranslationList);
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isBusy = false;
+		}
+	}
+
+	private static bool HasValidKey(
+		Translation translation)
+		=> !String.IsNullOrWhiteSpace(translation.LocaleKey) &&
+			!String.IsNullOrWhiteSpace(translation.TextKey) &&
+			!String.IsNullOrWhiteSpace(translation.FormalityKey) &&
+			!String.IsNullOrWhiteSpace(translation.PresentationKey);
+
+	private static string GetEditRoute(
+		Translation translation)
+		=> String.Format(StaticRoutes.TranslationEdit, String.Join('/',
+			Uri.EscapeDataString(translation.LocaleKey),
+			Uri.EscapeDataString(translation.TextKey),
+			Uri.EscapeDataString(translation.FormalityKey),
+			Uri.EscapeDataString(translation.PresentationKey)));
+}

@@ -4,6 +4,7 @@ using Textbase.Application.Features.ClientApplications;
 using Textbase.Application.Features.Formalities;
 using Textbase.Application.Features.Presentations;
 using Textbase.Application.Features.TextResources;
+using Textbase.Application.Features.Translations;
 
 namespace Textbase.Application.Common;
 
@@ -17,6 +18,7 @@ public static class ServerQueryServiceCollectionExtensions
 		services.AddScoped(services => (IFormalityServerQueries)services.GetRequiredService<IFormalityQueries>());
 		services.AddScoped(services => (IPresentationServerQueries)services.GetRequiredService<IPresentationQueries>());
 		services.AddScoped(services => (ITextResourceServerQueries)services.GetRequiredService<ITextResourceQueries>());
+		services.AddScoped(services => (ITranslationServerQueries)services.GetRequiredService<ITranslationQueries>());
 
 		return services;
 	}
