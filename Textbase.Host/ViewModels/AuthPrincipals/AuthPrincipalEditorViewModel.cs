@@ -5,14 +5,12 @@ using Textbase.Application.Features.AuthPrincipals;
 using Textbase.Application.Features.ClientApplications;
 using Textbase.Application.Features.Locales;
 using Textbase.Contracts.Models;
-using Textbase.Domain.Enumerations;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
 using Textbase.Host.Enumerations;
 using Textbase.Infrastructure.Persistence.AuthPrincipalClientApplications;
 using Textbase.Infrastructure.Persistence.AuthPrincipalLocales;
-using Textbase.Infrastructure.Persistence.AuthPrincipals;
 using Uwn.Blazor.Models.Common;
 using Uwn.Blazor.Models.ViewModels.Abstractions.Querying;
 
@@ -23,7 +21,6 @@ public class AuthPrincipalEditorViewModel(
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
 	IAuthPrincipalQueries authPrincipalQueries,
 	IAuthPrincipalCommands authPrincipalCommands,
-	IAuthPrincipalEntityFactory _authPrincipalEntityFactory,
 	IAuthPrincipalClientApplicationQueries _authPrincipalClientApplicationQueries,
 	IAuthPrincipalClientApplicationCommands _authPrincipalClientApplicationCommands,
 	IAuthPrincipalClientApplicationEntityFactory _authPrincipalClientApplicationEntityFactory,
@@ -103,18 +100,6 @@ public class AuthPrincipalEditorViewModel(
 		}
 	}
 
-	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
-		CancellationToken cancellationToken = default)
-	{
-		AuthPrincipal principal = _authPrincipalEntityFactory.Create(Guid.Empty, (int)Roles.None, (int)PrincipalStatus.Pending);
-		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
-		bool isAuthorized = await _authorization.CanCreateAsync(principal, user, cancellationToken);
-
-		return isAuthorized
-			? ViewAuthorizationResult.Authorized
-			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Create, ModelType));
-	}
-
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
 		object key,
 		CancellationToken cancellationToken = default)
@@ -154,13 +139,6 @@ public class AuthPrincipalEditorViewModel(
 		return isAuthorized
 			? ViewAuthorizationResult.Authorized
 			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Delete, ModelType));
-	}
-
-	protected override Task<AuthPrincipal> CreateNewItemAsync(
-		CancellationToken cancellationToken = default)
-	{
-		AuthPrincipal principal = _authPrincipalEntityFactory.Create(Guid.Empty, (int)Roles.None, (int)PrincipalStatus.Pending);
-		return Task.FromResult(principal);
 	}
 
 	private async Task LoadClientApplicationsAsync()
