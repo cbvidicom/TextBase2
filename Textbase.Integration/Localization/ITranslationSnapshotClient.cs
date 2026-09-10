@@ -1,10 +1,10 @@
-using DM = Textbase.Domain.Models;
+using CM = Textbase.Contracts.Models;
 
 namespace Textbase.Integration.Localization;
 
 public interface ITranslationSnapshotClient
 {
-	Task<IReadOnlyList<DM.FlatTranslation>> GetAsync(
+	Task<CM.RuntimeLocalizationSnapshotDto> GetAsync(
 		Guid clientApplicationGuid,
 		CancellationToken cancellationToken = default);
 }
