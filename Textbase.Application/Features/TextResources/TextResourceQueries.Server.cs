@@ -23,4 +23,17 @@ public sealed partial class TextResourceQueries
 
 		return counts.ToDictionary(count => count.TextKey);
 	}
+
+	public async Task<bool> HasActiveApplicationAsync(
+		string textKey,
+		CancellationToken cancellationToken = default)
+	{
+		await using TextbaseDbContext dbContext = await _DbContextFactory.CreateDbContextAsync(cancellationToken);
+
+		return await dbContext.ClientApplicationTextResources.AnyAsync(
+			clientApplicationTextResource => clientApplicationTextResource.TextKey == textKey &&
+				dbContext.ClientApplications.Any(clientApplication =>
+					clientApplication.ClientApplicationGuid == clientApplicationTextResource.ClientApplicationGuid && clientApplication.IsActive),
+			cancellationToken);
+	}
 }
