@@ -18,7 +18,7 @@ A **Translation** is a localised value for a **Text Resource** and **Locale**, w
 
 A **Client Application** is an application using TextBase 2.
 
-A **Principal** is a user, authenticated using vidicom's Azure AD B2C Tenet.
+A **Principal** is a user, authenticated using vidicom's Azure AD B2C Tenant.
 
 ## Database Tables
 

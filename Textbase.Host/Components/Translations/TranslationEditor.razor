@@ -1,4 +1,4 @@
-@page "/translation"
+﻿@page "/translation"
 @page "/translation/{LocaleKey}/{TextKey}"
 @page "/translation/{LocaleKey}/{TextKey}/{FormalityKey}/{PresentationKey}"
 
@@ -40,9 +40,10 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 										 @bind-Value="@ViewModel.SelectedLocale" />
 					@if (!String.IsNullOrWhiteSpace(ViewModel.GetParentLocaleKey(ViewModel.Item.LocaleKey)))
 					{
-						<a href="#"
+						<a class="rz-ml-4"
+						   href="#"
 						   @onclick="ViewModel.SelectParentLocale"
-						   @onclick:preventDefault="true">Select parent (@ViewModel.GetParentLocaleKey(ViewModel.Item.LocaleKey))</a>
+						   @onclick:preventDefault="true">↑ Select parent (@ViewModel.GetParentLocaleKey(ViewModel.Item.LocaleKey))</a>
 					}
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
@@ -114,7 +115,7 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 						@if (ViewModel.CanSave)
 						{
 							<RzSaveButton RenderStack="false"
-											  Click="OnSave" />
+										  Click="OnSave" />
 							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
 										   Click="OnSaveAndGoBack"
 										   Icon="@Icons.Save"
