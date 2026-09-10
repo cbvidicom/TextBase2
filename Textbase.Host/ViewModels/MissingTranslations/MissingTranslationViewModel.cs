@@ -1,12 +1,13 @@
-using Microsoft.EntityFrameworkCore;
+using Textbase.Application.Features.Locales;
+using Textbase.Application.Features.Translations;
 using Textbase.Host.Authorization;
-using Textbase.Infrastructure.Persistence;
 
 namespace Textbase.Host.ViewModels.MissingTranslations;
 
 public sealed class MissingTranslationViewModel(
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
-	IDbContextFactory<TextbaseDbContext> _dbContextFactory)
+	ILocaleQueries _localeQueries,
+	ITranslationServerQueries _translationQueries)
 {
 	private readonly HashSet<string> _ignoredLocaleKeys = new(StringComparer.OrdinalIgnoreCase);
 	private IReadOnlyList<MissingTranslation> _allItems = [];
@@ -26,41 +27,12 @@ public sealed class MissingTranslationViewModel(
 			return;
 		}
 
-		await using TextbaseDbContext dbContext = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+		IReadOnlyList<Locale> locales = await _localeQueries.ListAllItemsAsync(cancellationToken);
+		_parentLocaleKeys = locales.ToDictionary(locale => locale.LocaleKey, locale => locale.ParentLocaleKey, StringComparer.OrdinalIgnoreCase);
 
-		_parentLocaleKeys = await dbContext.Locales.ToDictionaryAsync(locale => locale.LocaleKey, locale => locale.ParentLocaleKey, StringComparer.OrdinalIgnoreCase, cancellationToken);
-
-		IQueryable<MissingTranslationRequirement> query =
-			from clientApplication in dbContext.ClientApplications
-			join clientApplicationLocale in dbContext.ClientApplicationLocales on clientApplication.ClientApplicationGuid equals clientApplicationLocale.ClientApplicationGuid
-			join clientApplicationTextResource in dbContext.ClientApplicationTextResources on clientApplication.ClientApplicationGuid equals clientApplicationTextResource.ClientApplicationGuid
-			where clientApplication.IsActive &&
-				!dbContext.FlatTranslations.Any(flatTranslation =>
-					flatTranslation.LocaleKey == clientApplicationLocale.LocaleKey &&
-					flatTranslation.TextKey == clientApplicationTextResource.TextKey &&
-					flatTranslation.FormalityKey == "Default" &&
-					flatTranslation.PresentationKey == "Default")
-			select new MissingTranslationRequirement(
-				clientApplication.ClientApplicationGuid,
-				clientApplication.Name,
-				clientApplicationLocale.LocaleKey,
-				clientApplicationTextResource.TextKey);
-
-		if (principal.HasApplicationRestrictions)
-		{
-			Guid[] clientApplicationGuids = [.. principal.ClientApplicationGuids];
-			query = query.Where(requirement => clientApplicationGuids.Contains(requirement.ClientApplicationGuid));
-		}
-
-		if (principal.HasLocaleRestrictions)
-		{
-			string[] localeKeys = [.. principal.LocaleKeys];
-			query = query.Where(requirement => localeKeys.Contains(requirement.LocaleKey));
-		}
-
-		List<MissingTranslationRequirement> requirements = await query
-			.Distinct()
-			.ToListAsync(cancellationToken);
+		IReadOnlyCollection<Guid>? clientApplicationGuids = principal.HasApplicationRestrictions ? principal.ClientApplicationGuids : null;
+		IReadOnlyCollection<string>? localeKeys = principal.HasLocaleRestrictions ? principal.LocaleKeys : null;
+		IReadOnlyList<MissingTranslationRequirement> requirements = await _translationQueries.ListMissingTranslationsAsync(clientApplicationGuids, localeKeys, cancellationToken);
 
 		_allItems = [.. requirements
 			.GroupBy(requirement => new { requirement.LocaleKey, requirement.TextKey })
@@ -102,18 +74,16 @@ public sealed class MissingTranslationViewModel(
 		while (!String.IsNullOrWhiteSpace(currentLocaleKey) && visitedLocaleKeys.Add(currentLocaleKey))
 		{
 			if (String.Equals(currentLocaleKey, ancestorLocaleKey, StringComparison.OrdinalIgnoreCase))
+			{
 				return true;
+			}
 
 			if (!_parentLocaleKeys.TryGetValue(currentLocaleKey, out currentLocaleKey))
+			{
 				return false;
+			}
 		}
 
 		return false;
 	}
-
-	private sealed record MissingTranslationRequirement(
-		Guid ClientApplicationGuid,
-		string ClientApplicationName,
-		string LocaleKey,
-		string TextKey);
 }
