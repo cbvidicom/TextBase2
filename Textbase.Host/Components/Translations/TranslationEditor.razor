@@ -27,24 +27,22 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 			<VerticalStack>
 				@if (ViewModel.IsNewItem)
 				{
-					<RzDropDownFormField TValue="string"
+					<RzDropDownFormField TValue="Locale"
 										 AllowClear="false"
 										 AllowFiltering="true"
-										 Data="@ViewModel.LocaleKeys"
+										 Data="@ViewModel.Locales"
 										 FilterAsYouType="true"
 										 FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
 										 Name="@nameof(Translation.LocaleKey)"
 										 Required="true"
 										 StartIcon="@Icons.Language"
 										 Text="Locale"
-										 @bind-Value="@ViewModel.Item.LocaleKey" />
+										 @bind-Value="@ViewModel.SelectedLocale" />
 					@if (!String.IsNullOrWhiteSpace(ViewModel.GetParentLocaleKey(ViewModel.Item.LocaleKey)))
 					{
-						<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="ViewModel.SelectParentLocale"
-										   Icon="@Icons.Language"
-										   RenderStack="false"
-										   Text="Select parent" />
+						<a href="#"
+						   @onclick="ViewModel.SelectParentLocale"
+						   @onclick:preventDefault="true">Select parent (@ViewModel.GetParentLocaleKey(ViewModel.Item.LocaleKey))</a>
 					}
 					<RzDropDownFormField TValue="string"
 										 AllowClear="false"
