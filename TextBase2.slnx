@@ -8,6 +8,7 @@
   <Project Path="Textbase.Application/Textbase.Application.csproj" />
   <Project Path="Textbase.Cli/Textbase.Cli.csproj" />
   <Project Path="Textbase.Contracts/Textbase.Contracts.csproj" />
+  <Project Path="Textbase.Demo.Web/Textbase.Demo.Web.csproj" />
   <Project Path="Textbase.Domain/Textbase.Domain.csproj" />
   <Project Path="Textbase.Host/Textbase.Host.csproj" />
   <Project Path="Textbase.Infrastructure/Textbase.Infrastructure.csproj" />
