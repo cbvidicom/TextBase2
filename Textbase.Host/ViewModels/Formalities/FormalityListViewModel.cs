@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Radzen;
+using System.Security.Claims;
 using Textbase.Application.Features.Formalities;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
@@ -13,11 +14,13 @@ namespace Textbase.Host.ViewModels.Formalities;
 public class FormalityListViewModel(
 	IFormalityAuthorization _authorization,
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
-	IFormalityQueries formalityQueries,
+	IFormalityServerQueries formalityQueries,
 	IFormalityEntityFactory _formalityEntityFactory)
 	: DataGridViewModel<Formality, FormalityFilter>(formalityQueries)
 {
 	private readonly Type ModelType = typeof(Formality);
+
+	private IReadOnlyDictionary<string, int>? _referenceCounts;
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
 		CancellationToken cancellationToken = default)
@@ -54,5 +57,32 @@ public class FormalityListViewModel(
 		return canList
 			? ViewAuthorizationResult.Authorized
 			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.List, ModelType));
+	}
+
+	protected override async Task AfterLoadDataAsync(
+		LoadDataArgs args)
+	{
+		if (Data is null)
+		{
+			_referenceCounts = null;
+			return;
+		}
+
+		Dictionary<string, int> referenceCounts = [];
+		foreach (string key in Data.Select(f => f.FormalityKey))
+			referenceCounts[key] = await formalityQueries.GetReferenceCountAsync(key);
+
+		_referenceCounts = referenceCounts;
+	}
+
+	public int GetReferenceCount(
+		string formalityKey)
+	{
+		if (_referenceCounts is null)
+			return 0;
+
+		return _referenceCounts.TryGetValue(formalityKey, out int value)
+			? value
+			: 0;
 	}
 }

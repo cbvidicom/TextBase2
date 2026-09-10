@@ -36,10 +36,14 @@ public class AuthPrincipalEditorViewModel(
 {
 	private readonly Type ModelType = typeof(AuthPrincipal);
 
+	//
+
 	public IReadOnlyList<ClientApplication> ClientApplications { get; private set; } = [];
 	public IReadOnlyList<AuthPrincipalClientApplication> PrincipalClientApplications { get; private set; } = [];
 	public IReadOnlyList<Locale> Locales { get; private set; } = [];
 	public IReadOnlyList<AuthPrincipalLocale> PrincipalLocales { get; private set; } = [];
+
+	//
 
 	public Task SetSelectedTabIndexAsync(
 		int index)
@@ -88,8 +92,9 @@ public class AuthPrincipalEditorViewModel(
 			PrincipalLocales = [.. PrincipalLocales.Where(item => item.LocaleKey != localeKey)];
 	}
 
-	protected override Task<ViewAuthorizationResult> AuthorizeDeleteAsync(
-		AuthPrincipal item,
+	//
+
+	protected override Task<ViewAuthorizationResult> AuthorizeCreateAsync(
 		CancellationToken cancellationToken = default)
 		=> Task.FromResult(ViewAuthorizationResult.Denied());
 
@@ -119,6 +124,17 @@ public class AuthPrincipalEditorViewModel(
 			? ViewAuthorizationResult.Authorized
 			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.Update, ModelType));
 	}
+
+	protected override Task<ViewAuthorizationResult> AuthorizeDeleteAsync(
+		AuthPrincipal item,
+		CancellationToken cancellationToken = default)
+		=> Task.FromResult(ViewAuthorizationResult.Denied());
+
+	protected override Task<AuthPrincipal> CreateNewItemAsync(
+		CancellationToken cancellationToken = default)
+		=> throw new NotSupportedException();
+
+	//
 
 	private async Task LoadClientApplicationsAsync()
 	{

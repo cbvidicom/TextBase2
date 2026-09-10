@@ -15,8 +15,7 @@ namespace Textbase.Host.ViewModels.ClientApplications;
 public class ClientApplicationListViewModel(
 	IClientApplicationAuthorization _authorization,
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
-	IClientApplicationQueries clientApplicationQueries,
-	IClientApplicationServerQueries _clientApplicationServerQueries,
+	IClientApplicationServerQueries clientApplicationQueries,
 	IClientApplicationEntityFactory _clientApplicationEntityFactory)
 	: DataGridViewModel<ClientApplication, ClientApplicationFilter>(
 		clientApplicationQueries)
@@ -68,7 +67,7 @@ public class ClientApplicationListViewModel(
 	{
 		_referenceCounts = Data is null
 			? null
-			: await _clientApplicationServerQueries.GetReferenceCountsAsync([.. Data.Select(clientApplication => clientApplication.ClientApplicationGuid)]);
+			: await clientApplicationQueries.GetReferenceCountsAsync([.. Data.Select(clientApplication => clientApplication.ClientApplicationGuid)]);
 	}
 
 	public override DataGridRowStyle GetItemStyle(

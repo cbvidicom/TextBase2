@@ -10,7 +10,7 @@
 		<PackageReference Include="Microsoft.Identity.Web" Version="4.14.2" />
 		<PackageReference Include="Microsoft.Identity.Web.UI" Version="4.14.2" />
 		<PackageReference Include="Radzen.Blazor" Version="11.3.2" />
-		<PackageReference Include="Uwn.Blazor" Version="10.26.9.912" />
+		<PackageReference Include="Uwn.Blazor" Version="10.26.9.913" />
 	</ItemGroup>
 
 	<ItemGroup>

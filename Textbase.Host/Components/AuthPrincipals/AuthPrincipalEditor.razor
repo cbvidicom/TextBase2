@@ -1,4 +1,4 @@
-@page "/user/{Guid:guid}"
+@page "/principal/{Guid:guid}"
 
 @using Textbase.Application.Features.AuthPrincipals
 @using Textbase.Domain.Enumerations
@@ -28,25 +28,26 @@ else if (HasAccess)
 					<fieldset disabled="@IsReadOnly">
 						<VerticalStack>
 							<RzTextBoxFormField Name="@nameof(AuthPrincipal.EntraObjectId)"
-													ReadOnly="true"
-													Required="true"
-													StartIcon="@Icons.Barcode"
-													Text="Entra Object ID"
-													Value="@Item.EntraObjectId.ToString()" />
+												ReadOnly="true"
+												Required="true"
+												StartIcon="@Icons.Barcode"
+												Text="Entra Object ID"
+												Value="@Item.EntraObjectId.ToString()" />
 							<RzTextBoxFormField MaxLength="128"
-													Name="@nameof(AuthPrincipal.DisplayName)"
-													StartIcon="@Icons.Name"
-													Text="Display Name"
-													@bind-Value="@Item.DisplayName" />
+												Name="@nameof(AuthPrincipal.DisplayName)"
+												StartIcon="@Icons.Name"
+												Text="Display Name"
+												@bind-Value="@Item.DisplayName" />
 							<RzTextBoxFormField MaxLength="256"
-													Name="@nameof(AuthPrincipal.EmailAddress)"
-													StartIcon="@Icons.Email"
-													Text="Email Address"
-													@bind-Value="@Item.EmailAddress" />
+												Name="@nameof(AuthPrincipal.EmailAddress)"
+												StartIcon="@Icons.Email"
+												Text="Email Address"
+												@bind-Value="@Item.EmailAddress" />
 							<RzDropDownFormField TValue="PrincipalStatus"
 												 EnumType="@typeof(PrincipalStatus)"
 												 Name="@nameof(AuthPrincipal.Status)"
 												 Required="true"
+												 StartIcon="@Icons.Policy"
 												 Text="Status"
 												 @bind-Value="@Item.StatusValue" />
 							<RzSwitchFormField Name="SysAdminRole"

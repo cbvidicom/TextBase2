@@ -1,4 +1,4 @@
-@page "/users"
+@page "/principals"
 
 @using Textbase.Application.Features.AuthPrincipals
 @using Textbase.Host.ViewModels.AuthPrincipals
@@ -52,10 +52,6 @@ else if (HasAccess)
 					@principal.RolesValue
 				</Template>
 			</RadzenDataGridColumn>
-			<RadzenDataGridColumn Filterable="true"
-								  Property="@nameof(AuthPrincipal.Request)"
-								  Sortable="false"
-								  Title="Request" />
 			<RadzenDataGridColumn Filterable="false"
 								  Sortable="false"
 								  Title="Applications">

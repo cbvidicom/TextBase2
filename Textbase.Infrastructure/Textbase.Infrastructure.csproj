@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Uwn.EntityFrameworkCore" Version="10.26.9.912" />
+		<PackageReference Include="Uwn.EntityFrameworkCore" Version="10.26.9.913" />
 	</ItemGroup>
 
 	<ItemGroup>

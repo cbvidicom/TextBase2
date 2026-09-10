@@ -1,6 +1,7 @@
 using Radzen;
 using System.Security.Claims;
 using Textbase.Application.Features.AuthPrincipals;
+using Textbase.Domain.Enumerations;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
 using Textbase.Host.Authorization;
@@ -14,13 +15,18 @@ namespace Textbase.Host.ViewModels.AuthPrincipals;
 public class AuthPrincipalListViewModel(
 	IAuthPrincipalAuthorization _authorization,
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
-	IAuthPrincipalQueries authPrincipalQueries,
-	IAuthPrincipalServerQueries _authPrincipalServerQueries)
+	IAuthPrincipalServerQueries authPrincipalQueries)
 	: DataGridViewModel<AuthPrincipal, AuthPrincipalFilter>(authPrincipalQueries)
 {
 	private readonly Type ModelType = typeof(AuthPrincipal);
 
 	private IReadOnlyDictionary<Guid, AuthPrincipalReferenceCounts>? _referenceCounts;
+
+	//
+
+	protected override Task<ViewAuthorizationResult> AuthorizeCreateAsync(
+		CancellationToken cancellationToken = default)
+		=> Task.FromResult(ViewAuthorizationResult.Denied());
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
 		CancellationToken cancellationToken = default)
@@ -52,12 +58,21 @@ public class AuthPrincipalListViewModel(
 	{
 		_referenceCounts = Data is null
 			? null
-			: await _authPrincipalServerQueries.GetReferenceCountsAsync([.. Data.Select(principal => principal.EntraObjectId)]);
+			: await authPrincipalQueries.GetReferenceCountsAsync([.. Data.Select(principal => principal.EntraObjectId)]);
 	}
 
 	public override DataGridRowStyle GetItemStyle(
 		AuthPrincipal item)
-		=> item.IsActive ? DataGridRowStyle.Base : DataGridRowStyle.Danger;
+		=> item.StatusValue switch
+		{
+			PrincipalStatus.Pending => DataGridRowStyle.Warning,
+			PrincipalStatus.Active => DataGridRowStyle.Base,
+			PrincipalStatus.Declined => DataGridRowStyle.Danger,
+			PrincipalStatus.Deactivated => DataGridRowStyle.Danger,
+			_ => DataGridRowStyle.Base
+		};
+
+	//
 
 	public int GetClientApplicationCount(
 		Guid entraObjectId)

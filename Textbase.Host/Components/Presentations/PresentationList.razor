@@ -36,6 +36,13 @@ else if (HasAccess)
 								  Property="@nameof(Presentation.Description)"
 								  Sortable="true"
 								  Title="Description" />
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="false"
+								  Title="References">
+				<Template Context="presentation">
+					@ViewModel.GetReferenceCount(presentation.PresentationKey)
+				</Template>
+			</RadzenDataGridColumn>
 		</Columns>
 	</RzDataGrid>
 }

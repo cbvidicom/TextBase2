@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Radzen;
+using System.Security.Claims;
 using Textbase.Application.Features.Presentations;
 using Textbase.Domain.Models;
 using Textbase.Host.Api.Authorization;
@@ -13,11 +14,13 @@ namespace Textbase.Host.ViewModels.Presentations;
 public class PresentationListViewModel(
 	IPresentationAuthorization _authorization,
 	ICurrentPrincipalAccessor _currentPrincipalAccessor,
-	IPresentationQueries presentationQueries,
+	IPresentationServerQueries presentationQueries,
 	IPresentationEntityFactory _presentationEntityFactory)
 	: DataGridViewModel<Presentation, PresentationFilter>(presentationQueries)
 {
 	private readonly Type ModelType = typeof(Presentation);
+
+	private IReadOnlyDictionary<string, int>? _referenceCounts;
 
 	protected override async Task<ViewAuthorizationResult> AuthorizeCreateAsync(
 		CancellationToken cancellationToken = default)
@@ -54,5 +57,32 @@ public class PresentationListViewModel(
 		return canList
 			? ViewAuthorizationResult.Authorized
 			: ViewAuthorizationResult.Denied(StaticTexts.GetPrincipalNotAuthorizedText(OpType.List, ModelType));
+	}
+
+	protected override async Task AfterLoadDataAsync(
+		LoadDataArgs args)
+	{
+		if (Data is null)
+		{
+			_referenceCounts = null;
+			return;
+		}
+
+		Dictionary<string, int> referenceCounts = [];
+		foreach (string key in Data.Select(p => p.PresentationKey))
+			referenceCounts[key] = await presentationQueries.GetReferenceCountAsync(key);
+
+		_referenceCounts = referenceCounts;
+	}
+
+	public int GetReferenceCount(
+		string presentationKey)
+	{
+		if (_referenceCounts is null)
+			return 0;
+
+		return _referenceCounts.TryGetValue(presentationKey, out int value)
+			? value
+			: 0;
 	}
 }
