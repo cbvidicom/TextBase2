@@ -36,6 +36,27 @@ else if (HasAccess)
 								  Property="@nameof(TextResource.Description)"
 								  Sortable="true"
 								  Title="Description" />
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="false"
+								  Title="Applications">
+				<Template Context="textResource">
+					@ViewModel.GetClientApplicationCount(textResource.TextKey)
+				</Template>
+			</RadzenDataGridColumn>
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="false"
+								  Title="Locales">
+				<Template Context="textResource">
+					@ViewModel.GetLocaleCount(textResource.TextKey)
+				</Template>
+			</RadzenDataGridColumn>
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="false"
+								  Title="Translations">
+				<Template Context="textResource">
+					@ViewModel.GetTranslationCount(textResource.TextKey)
+				</Template>
+			</RadzenDataGridColumn>
 		</Columns>
 	</RzDataGrid>
 }
