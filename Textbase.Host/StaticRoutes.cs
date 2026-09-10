@@ -26,6 +26,10 @@ public static class StaticRoutes
 	public const string TextResourceCreate = "/text-resource";
 	public const string TextResourceEdit = "/text-resource/{0}";
 
+	public const string TranslationList = "/translations";
+	public const string TranslationCreate = "/translation";
+	public const string TranslationEdit = "/translation/{0}";
+
 	public const string SignIn = "/MicrosoftIdentity/Account/SignIn";
 	public const string SignOut = "/MicrosoftIdentity/Account/SignOut";
 }
