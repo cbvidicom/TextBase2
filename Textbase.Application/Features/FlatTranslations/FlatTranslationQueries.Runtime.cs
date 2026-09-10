@@ -18,12 +18,16 @@ public sealed partial class FlatTranslationQueries
 		if (!isActive)
 			return null;
 
-		List<(string LocaleKey, bool IsDefault)> locales = await dbContext.ClientApplicationLocales.AsNoTracking()
+		List<string> supportedLocaleKeys = await dbContext.ClientApplicationLocales.AsNoTracking()
 			.Where(CAL => CAL.ClientApplicationGuid == clientApplicationGuid)
-			.Select(CAL => new ValueTuple<string, bool>(CAL.LocaleKey, CAL.IsDefault))
+			.Select(CAL => CAL.LocaleKey)
 			.ToListAsync(cancellationToken);
 
-		string? defaultLocaleKey = locales.Where(L => L.IsDefault).Select(L => L.LocaleKey).SingleOrDefault();
+		string? defaultLocaleKey = await dbContext.ClientApplicationLocales.AsNoTracking()
+			.Where(CAL => CAL.ClientApplicationGuid == clientApplicationGuid && CAL.IsDefault)
+			.Select(CAL => CAL.LocaleKey)
+			.SingleOrDefaultAsync(cancellationToken);
+
 		if (defaultLocaleKey is null)
 			return null;
 
@@ -34,13 +38,13 @@ public sealed partial class FlatTranslationQueries
 			where CAL.ClientApplicationGuid == clientApplicationGuid && CATR.ClientApplicationGuid == clientApplicationGuid
 			select FT;
 
-		List<CM.FlatTranslationDto> translations = await query.Cast<CM.FlatTranslationDto>().ToListAsync(cancellationToken);
+		List<FlatTranslationEntity> entities = await query.ToListAsync(cancellationToken);
 
 		return new CM.RuntimeLocalizationSnapshotDto
 		{
 			DefaultLocaleKey = defaultLocaleKey,
-			SupportedLocaleKeys = locales.Select(L => L.LocaleKey).ToList(),
-			Translations = translations
+			SupportedLocaleKeys = supportedLocaleKeys,
+			Translations = entities.Cast<CM.FlatTranslationDto>().ToList()
 		};
 	}
 }
