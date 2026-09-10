@@ -13,38 +13,6 @@
 }
 else
 {
-	@if (ViewModel.IgnoredLocaleKeys.Count > 0)
-	{
-		<RzCard class="rz-mb-4">
-			<HorizontalStack>
-				<RadzenText Text="@($"{ViewModel.IgnoredLocaleKeys.Count} Locale{(ViewModel.IgnoredLocaleKeys.Count == 1 ? String.Empty : "s")} {(ViewModel.IgnoredLocaleKeys.Count == 1 ? "is" : "are")} currently ignored")"
-							TextStyle="TextStyle.Subtitle2" />
-				<RzClickButton ButtonStyle="ButtonStyle.Light"
-							   Click="ToggleIgnoredLocales"
-							   Icon="@(_showIgnoredLocales ? Icons.ExpandLess : Icons.ExpandMore)"
-							   RenderStack="false"
-							   Text="@(_showIgnoredLocales ? "Hide" : "Show")" />
-			</HorizontalStack>
-
-			@if (_showIgnoredLocales)
-			{
-				<VerticalStack>
-					@foreach (string localeKey in ViewModel.IgnoredLocaleKeys)
-					{
-						<HorizontalStack>
-							<RadzenText Text="@localeKey" />
-							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="@(() => UnignoreLocale(localeKey))"
-										   Icon="@Icons.Language"
-										   RenderStack="false"
-										   Text="Un-ignore" />
-						</HorizontalStack>
-					}
-				</VerticalStack>
-			}
-		</RzCard>
-	}
-
 	@if (ViewModel.Items.Count == 0)
 	{
 		<RadzenAlert AlertStyle="AlertStyle.Success"
@@ -85,19 +53,6 @@ else
 									  Property="@nameof(MissingTranslation.Applications)"
 									  Sortable="true"
 									  Title="Applications" />
-				<RadzenDataGridColumn TItem="MissingTranslation"
-									  Filterable="false"
-									  Sortable="false">
-					<Template Context="item">
-						<span @onclick:stopPropagation="true">
-							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
-										   Click="@(() => IgnoreLocale(item.LocaleKey))"
-										   Icon="@Icons.Globe2Cancel"
-										   RenderStack="false"
-										   Text="Ignore" />
-						</span>
-					</Template>
-				</RadzenDataGridColumn>
 			</Columns>
 		</RadzenDataGrid>
 	}
@@ -105,7 +60,6 @@ else
 
 @code {
 	private bool _isBusy = true;
-	private bool _showIgnoredLocales;
 
 	public override string MainHeader => "Missing Translations";
 
@@ -133,24 +87,4 @@ else
 		string route = String.Format(StaticRoutes.TranslationCreateWithSelection, Uri.EscapeDataString(item.LocaleKey), Uri.EscapeDataString(item.TextKey));
 		NavigationManager.NavigateTo(route);
 	}
-
-	private void IgnoreLocale(
-		string localeKey)
-	{
-		ViewModel.IgnoreLocale(localeKey);
-		_showIgnoredLocales = false;
-	}
-
-	private void UnignoreLocale(
-		string localeKey)
-	{
-		ViewModel.UnignoreLocale(localeKey);
-		if (ViewModel.IgnoredLocaleKeys.Count == 0)
-		{
-			_showIgnoredLocales = false;
-		}
-	}
-
-	private void ToggleIgnoredLocales()
-		=> _showIgnoredLocales = !_showIgnoredLocales;
 }
