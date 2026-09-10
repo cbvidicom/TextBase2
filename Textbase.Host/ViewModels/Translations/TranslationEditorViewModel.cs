@@ -108,12 +108,12 @@ public sealed class TranslationEditorViewModel(
 		await InitializeNewItemAsync(null, null, cancellationToken);
 	}
 
-	public async Task SaveAsync(
+	public async Task<bool> SaveAsync(
 		CancellationToken cancellationToken = default)
 	{
 		if (Item is null || !HasValidKey(Item))
 		{
-			return;
+			return false;
 		}
 
 		ClaimsPrincipal user = await _currentPrincipalAccessor.GetUserAsync();
@@ -142,6 +142,8 @@ public sealed class TranslationEditorViewModel(
 		{
 			throw new InvalidOperationException("Saving Translation failed.");
 		}
+
+		return true;
 	}
 
 	public async Task RefreshDeleteAuthorizationAsync(
