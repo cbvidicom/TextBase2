@@ -1,0 +1,52 @@
+@page "/"
+@inject DemoLocalizationSession LocalizationSession
+@inject TextbaseContext TextbaseContext
+@inject ITextbaseLocalizer Localizer
+@inject IJSRuntime JS
+
+<PageTitle>TextBase2 Demo</PageTitle>
+
+<h1>TextBase2 Demo</h1>
+
+@if (!_initialized)
+{
+	<p>Loading translations...</p>
+}
+else
+{
+	<p>Current locale: <strong>@TextbaseContext.LocaleKey</strong></p>
+
+	<label for="textKey">Text key</label>
+	<input id="textKey" @bind="_textKey" />
+	<button @onclick="Localize">Localize</button>
+
+	@if (_value is not null)
+	{
+		<p>Result: <strong>@_value</strong></p>
+	}
+}
+
+@code {
+	private bool _initialized;
+	private string _textKey = String.Empty;
+	private string? _value;
+
+	protected override async Task OnAfterRenderAsync(
+		bool firstRender)
+	{
+		if (!firstRender)
+		{
+			return;
+		}
+
+		string[] browserLanguages = await JS.InvokeAsync<string[]>("textbaseDemo.getBrowserLanguages");
+		await LocalizationSession.InitializeAsync(browserLanguages);
+		_initialized = true;
+		StateHasChanged();
+	}
+
+	private void Localize()
+	{
+		_value = Localizer.GetLocalisedText(_textKey);
+	}
+}
