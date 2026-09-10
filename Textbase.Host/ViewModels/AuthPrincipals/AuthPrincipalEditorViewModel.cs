@@ -88,6 +88,11 @@ public class AuthPrincipalEditorViewModel(
 			PrincipalLocales = [.. PrincipalLocales.Where(item => item.LocaleKey != localeKey)];
 	}
 
+	protected override Task<ViewAuthorizationResult> AuthorizeDeleteAsync(
+		AuthPrincipal item,
+		CancellationToken cancellationToken = default)
+		=> Task.FromResult(ViewAuthorizationResult.Denied());
+
 	protected override async Task<ViewAuthorizationResult> AuthorizeReadAsync(
 		object key,
 		CancellationToken cancellationToken = default)
