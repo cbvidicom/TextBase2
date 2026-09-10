@@ -37,6 +37,7 @@ else if (HasAccess)
 								  Sortable="true"
 								  Title="Email" />
 			<RadzenDataGridColumn Filterable="false"
+								  Property="@nameof(AuthPrincipal.Status)"
 								  Sortable="true"
 								  Title="Status">
 				<Template Context="principal">
@@ -44,6 +45,7 @@ else if (HasAccess)
 				</Template>
 			</RadzenDataGridColumn>
 			<RadzenDataGridColumn Filterable="false"
+								  Property="@nameof(AuthPrincipal.Role)"
 								  Sortable="true"
 								  Title="Roles">
 				<Template Context="principal">
@@ -54,6 +56,20 @@ else if (HasAccess)
 								  Property="@nameof(AuthPrincipal.Request)"
 								  Sortable="false"
 								  Title="Request" />
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="false"
+								  Title="Applications">
+				<Template Context="principal">
+					@ViewModel.GetClientApplicationCount(principal.EntraObjectId)
+				</Template>
+			</RadzenDataGridColumn>
+			<RadzenDataGridColumn Filterable="false"
+								  Sortable="false"
+								  Title="Locales">
+				<Template Context="principal">
+					@ViewModel.GetLocaleCount(principal.EntraObjectId)
+				</Template>
+			</RadzenDataGridColumn>
 		</Columns>
 	</RzDataGrid>
 }
