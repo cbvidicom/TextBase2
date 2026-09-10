@@ -1,0 +1,157 @@
+﻿@page "/"
+
+@using Textbase.Application.Features.Translations
+@using Textbase.Host.ViewModels.MissingTranslations
+
+@inherits TextbasePageBase<MissingTranslationListViewModel>
+
+<PageTitle>Home</PageTitle>
+
+@if (_isBusy)
+{
+	<RzLoadingIndicator IndicatorVariant="IndicatorVariant.Table" />
+}
+else
+{
+	@if (ViewModel.IgnoredLocaleKeys.Count > 0)
+	{
+		<RzCard class="rz-mb-4">
+			<HorizontalStack AlignItems="AlignItems.Center"
+							 JustifyContent="JustifyContent.SpaceBetween">
+				<RadzenText Text="@($"{ViewModel.IgnoredLocaleKeys.Count} Locale{(ViewModel.IgnoredLocaleKeys.Count == 1 ? String.Empty : "s")} {(ViewModel.IgnoredLocaleKeys.Count == 1 ? "is" : "are")} currently ignored")"
+							TextStyle="TextStyle.Subtitle2" />
+				<RzClickButton ButtonStyle="ButtonStyle.Light"
+							   Click="ToggleIgnoredLocales"
+							   Icon="@(_showIgnoredLocales ? Icons.ExpandLess : Icons.ExpandMore)"
+							   RenderStack="false"
+							   Text="@(_showIgnoredLocales ? "Hide" : "Show")" />
+			</HorizontalStack>
+
+			@if (_showIgnoredLocales)
+			{
+				<VerticalStack class="rz-mt-3">
+					@foreach (string localeKey in ViewModel.IgnoredLocaleKeys)
+					{
+						<HorizontalStack AlignItems="AlignItems.Center"
+										 JustifyContent="JustifyContent.SpaceBetween">
+							<RadzenText Text="@localeKey" />
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+											   Click="@(() => UnignoreLocale(localeKey))"
+											   RenderStack="false"
+											   Text="Un-ignore" />
+						</HorizontalStack>
+					}
+				</VerticalStack>
+			}
+		</RzCard>
+	}
+
+	@if (ViewModel.Items.Count == 0)
+	{
+		<RadzenAlert AlertStyle="AlertStyle.Success"
+					 AllowClose="false"
+					 Variant="Variant.Flat">
+			No translations are missing for your applications.
+		</RadzenAlert>
+	}
+	else
+	{
+		<RadzenAlert AlertStyle="AlertStyle.Warning"
+					 AllowClose="false"
+					 Variant="Variant.Flat"
+					 class="rz-mb-4">
+			@ViewModel.Items.Count missing translation@(ViewModel.Items.Count == 1 ? String.Empty : "s") found.
+		</RadzenAlert>
+
+		<RadzenDataGrid TItem="MissingTranslation"
+						AllowFiltering="true"
+						AllowPaging="true"
+						AllowSorting="true"
+						Data="@ViewModel.Items"
+						PageSize="@ViewModel.PageSize"
+						SelectionMode="DataGridSelectionMode.Single"
+						RowSelect="OnRowSelect">
+			<Columns>
+				<RadzenDataGridColumn Filterable="true"
+									  Frozen="true"
+									  Property="@nameof(MissingTranslation.LocaleKey)"
+									  Sortable="true"
+									  SortOrder="SortOrder.Ascending"
+									  Title="Locale" />
+				<RadzenDataGridColumn Filterable="true"
+									  Property="@nameof(MissingTranslation.TextKey)"
+									  Sortable="true"
+									  Title="Text" />
+				<RadzenDataGridColumn Filterable="true"
+									  Property="@nameof(MissingTranslation.Applications)"
+									  Sortable="true"
+									  Title="Applications" />
+				<RadzenDataGridColumn TItem="MissingTranslation"
+									  Filterable="false"
+									  Sortable="false"
+									  Width="170px">
+					<Template Context="item">
+						<span @onclick:stopPropagation="true">
+							<RzClickButton ButtonStyle="ButtonStyle.Secondary"
+											   Click="@(() => IgnoreLocale(item.LocaleKey))"
+											   RenderStack="false"
+											   Text="Ignore this Locale for now" />
+						</span>
+					</Template>
+				</RadzenDataGridColumn>
+			</Columns>
+		</RadzenDataGrid>
+	}
+}
+
+@code {
+	private bool _isBusy = true;
+	private bool _showIgnoredLocales;
+
+	public override string MainHeader => "Missing Translations";
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		try
+		{
+			await ViewModel.LoadAsync();
+		}
+		catch (Exception ex)
+		{
+			AlertService.Show(ex);
+		}
+		finally
+		{
+			_isBusy = false;
+		}
+	}
+
+	private void OnRowSelect(
+		MissingTranslation item)
+	{
+		string route = String.Format(StaticRoutes.TranslationCreateWithSelection, Uri.EscapeDataString(item.LocaleKey), Uri.EscapeDataString(item.TextKey));
+		NavigationManager.NavigateTo(route);
+	}
+
+	private void IgnoreLocale(
+		string localeKey)
+	{
+		ViewModel.IgnoreLocale(localeKey);
+		_showIgnoredLocales = false;
+	}
+
+	private void UnignoreLocale(
+		string localeKey)
+	{
+		ViewModel.UnignoreLocale(localeKey);
+		if (ViewModel.IgnoredLocaleKeys.Count == 0)
+		{
+			_showIgnoredLocales = false;
+		}
+	}
+
+	private void ToggleIgnoredLocales()
+		=> _showIgnoredLocales = !_showIgnoredLocales;
+}
