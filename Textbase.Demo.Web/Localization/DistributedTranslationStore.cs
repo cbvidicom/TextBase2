@@ -9,7 +9,7 @@ public sealed class DistributedTranslationStore(
 	IDistributedCache cache)
 	: ITranslationStore
 {
-	private const string CacheKey = "Textbase.Demo.Web:RuntimeLocalizationSnapshot";
+	private static readonly string CacheKey = $"Textbase:RuntimeLocalizationSnapshot:{DemoLocalizationSession.ClientApplicationGuid:D}";
 
 	public async ValueTask<CM.RuntimeLocalizationSnapshotDto?> GetAsync(
 		CancellationToken cancellationToken = default)
