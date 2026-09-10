@@ -196,7 +196,10 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 		try
 		{
 			bool wasNewItem = ViewModel.IsNewItem;
-			await ViewModel.SaveAsync();
+			if (!await ViewModel.SaveAsync())
+			{
+				return;
+			}
 
 			if (goBack)
 			{
