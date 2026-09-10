@@ -1,10 +1,11 @@
 @page "/translation"
+@page "/translation/{LocaleKey}/{TextKey}"
 @page "/translation/{LocaleKey}/{TextKey}/{FormalityKey}/{PresentationKey}"
 
 @using Textbase.Application.Features.Translations
 @using Textbase.Host.ViewModels.Translations
 
-@inject TranslationEditorViewModel ViewModel
+@inherits TextbasePageBase<TranslationEditorViewModel>
 
 @if (_canGoBack)
 {
@@ -141,9 +142,6 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 }
 
 @code {
-	[CascadingParameter]
-	private MainLayout MainLayout { get; set; } = default!;
-
 	[Parameter]
 	public string? LocaleKey { get; set; }
 
@@ -156,14 +154,10 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 	[Parameter]
 	public string? PresentationKey { get; set; }
 
-	[SupplyParameterFromQuery(Name = "localeKey")]
-	public string? InitialLocaleKey { get; set; }
-
-	[SupplyParameterFromQuery(Name = "textKey")]
-	public string? InitialTextKey { get; set; }
-
 	private bool _isBusy = true;
 	private bool _canGoBack = true;
+
+	public override string MainHeader => ViewModel.IsNewItem ? "Create Translation" : "Edit Translation";
 
 	protected override async Task OnParametersSetAsync()
 	{
@@ -172,7 +166,7 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 
 		try
 		{
-			await ViewModel.InitializeAsync(LocaleKey, TextKey, FormalityKey, PresentationKey, InitialLocaleKey, InitialTextKey);
+			await ViewModel.InitializeAsync(LocaleKey, TextKey, FormalityKey, PresentationKey);
 		}
 		catch (Exception ex)
 		{
@@ -180,7 +174,7 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 		}
 		finally
 		{
-			TextbaseViewHelper.Initialize(MainLayout, ViewModel.IsNewItem ? "Create Translation" : "Edit Translation", ViewModel.HasAccess, ViewModel.AccessDeniedMessage);
+			InitializeView(ViewModel.HasAccess, ViewModel.AccessDeniedMessage);
 			_isBusy = false;
 		}
 	}
@@ -198,11 +192,6 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 		bool goBack,
 		bool createNew)
 	{
-		if (ViewModel.Item is null || !HasValidKey(ViewModel.Item))
-		{
-			return;
-		}
-
 		_isBusy = true;
 		try
 		{
@@ -217,11 +206,11 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 
 			if (createNew)
 			{
-				await ViewModel.CreateNewItemAsync(InitialLocaleKey, InitialTextKey);
+				await ViewModel.CreateNewItemAsync();
 				return;
 			}
 
-			if (wasNewItem)
+			if (wasNewItem && ViewModel.Item is not null)
 			{
 				NavigationManager.NavigateTo(GetEditRoute(ViewModel.Item));
 			}
@@ -256,13 +245,10 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 		_isBusy = true;
 		try
 		{
-			await ViewModel.DeleteAsync();
-			if (!ViewModel.CanDelete)
+			if (await ViewModel.DeleteAsync())
 			{
-				return;
+				NavigationManager.NavigateTo(StaticRoutes.TranslationList);
 			}
-
-			NavigationManager.NavigateTo(StaticRoutes.TranslationList);
 		}
 		catch (Exception ex)
 		{
@@ -273,13 +259,6 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 			_isBusy = false;
 		}
 	}
-
-	private static bool HasValidKey(
-		Translation translation)
-		=> !String.IsNullOrWhiteSpace(translation.LocaleKey) &&
-			!String.IsNullOrWhiteSpace(translation.TextKey) &&
-			!String.IsNullOrWhiteSpace(translation.FormalityKey) &&
-			!String.IsNullOrWhiteSpace(translation.PresentationKey);
 
 	private static string GetEditRoute(
 		Translation translation)
