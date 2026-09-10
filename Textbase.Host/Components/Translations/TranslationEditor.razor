@@ -265,9 +265,10 @@ else if (ViewModel.HasAccess && ViewModel.Item is not null)
 
 	private static string GetEditRoute(
 		Translation translation)
-		=> String.Format(StaticRoutes.TranslationEdit, String.Join('/',
+		=> String.Format(
+			StaticRoutes.TranslationEdit,
 			Uri.EscapeDataString(translation.LocaleKey),
 			Uri.EscapeDataString(translation.TextKey),
 			Uri.EscapeDataString(translation.FormalityKey),
-			Uri.EscapeDataString(translation.PresentationKey)));
+			Uri.EscapeDataString(translation.PresentationKey));
 }
