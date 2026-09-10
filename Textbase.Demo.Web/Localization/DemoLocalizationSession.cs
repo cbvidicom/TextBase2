@@ -17,14 +17,18 @@ public sealed class DemoLocalizationSession(
 	{
 		CM.RuntimeLocalizationSnapshotDto? snapshot = await store.GetAsync(cancellationToken);
 		if (snapshot is null)
+		{
 			snapshot = await provider.RefreshAsync(ClientApplicationGuid, cancellationToken);
+		}
 
 		string localeKey = snapshot.DefaultLocaleKey;
 		foreach (string browserLanguage in browserLanguages)
 		{
 			string? supportedLocale = snapshot.SupportedLocaleKeys.FirstOrDefault(L => String.Equals(L, browserLanguage, StringComparison.OrdinalIgnoreCase));
 			if (supportedLocale is null)
+			{
 				continue;
+			}
 
 			localeKey = supportedLocale;
 			break;
